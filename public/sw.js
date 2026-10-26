@@ -1,6 +1,6 @@
 /* Sunday Table: keeps a copy of the app on this phone so it opens instantly and works without a connection.
    Your recipes themselves live in the app's own storage (and your Google Sheet); this only keeps the app, fonts, photos and readers. */
-var BUILD = '2.8-f3337a4b';
+var BUILD = '2.10-f9931ad1';
 var SHELL = 'st-shell-' + BUILD;          // the app itself, replaced with each update
 var LIBS = 'st-libs-1';                   // fonts and the photo/PDF/Word readers (their links never change)
 var PHOTOS = 'st-photos-1';               // recipe photos

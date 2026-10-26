@@ -823,9 +823,63 @@ body.locked .updbar,body.cooking .updbar{bottom:calc(var(--bot) + 12px)}
 .ver.offline{display:flex;align-items:flex-start;justify-content:center;gap:6px}
 .ver.offline svg.i{width:1rem;height:1rem;flex:none;color:var(--ok);margin-top:2px}
 
+/* 2.9: a solid strip along the very top. iPhone (iOS 26+) blurs the top of home-screen apps unless one solid-colored bar sits there.
+   It's the status bar's own color, so it just looks like the status bar's edge. */
+.topedge{position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top, 0px) + 3px);background:var(--ch);z-index:200;pointer-events:none}
+body.cooking .scrim{z-index:80}
+body.cooking .sheet{z-index:81}
+
+/* 2.9: two recipes at once */
+.cook .twoplan{background:color-mix(in srgb,var(--ac) 10%,var(--p1));border:1px solid color-mix(in srgb,var(--ac) 25%,transparent);border-radius:var(--r1);padding:12px 14px;margin:0 0 14px;font-size:.95rem;line-height:1.4;color:var(--t1)}
+.cook .cwho{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--t1);font-size:1rem;margin:0 0 6px;max-width:100%}
+.cook .cwho .dot{width:12px;height:12px;border-radius:50%;background:var(--pig);flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--pig) 30%,transparent)}
+.cook .cwho .of{font-weight:400;color:var(--t2)}
+.cook .during{font-style:italic;color:var(--t2);margin:0 0 2px;font-size:1rem}
+.cook .addtwo{margin-top:18px;display:inline-flex;align-items:center;gap:6px}
+.cook .drawer .sec-h+ul,.cook .drawer .sec-h{margin-top:0}
+.cook .drawer .sec-h:not(:first-child){margin-top:22px}
+.addday.cookboth{color:var(--ac);font-weight:700}
+
+/* 2.9: sites you follow */
+.dsec .dmore{margin-left:auto;font-size:.9rem;font-family:var(--fbody,inherit)}
+.followcta p{margin:0 0 12px}
+.followline{display:flex;gap:8px}
+.followline .inp{flex:1;min-width:0}
+.picks,.follows{list-style:none;margin:6px 0 0;padding:0}
+.picks li,.follows li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b1)}
+.picks li:last-child,.follows li:last-child{border-bottom:0}
+.picks .pk,.follows .pk{flex:1;min-width:0;display:flex;flex-direction:column}
+.picks .pk b,.follows .pk b{font-weight:700;color:var(--t1)}
+.picks .pk span,.follows .pk span{color:var(--t2);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.posts{display:flex;flex-direction:column;gap:12px}
+.post{position:relative;display:flex;gap:12px;background:var(--p1);border:1px solid var(--b1);border-radius:var(--r1);padding:12px;padding-right:40px}
+.post .pimg{flex:none;width:84px;height:84px;border-radius:calc(var(--r1) - 4px);overflow:hidden;background:color-mix(in srgb,var(--ac) 18%,var(--p2));position:relative;display:flex;align-items:center;justify-content:center;font-family:var(--fdisp);font-size:2rem;color:var(--t2)}
+.post .pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.post .pbody{flex:1;min-width:0}
+.post .psite{font-size:.8rem;color:var(--t2);font-weight:700;letter-spacing:.01em}
+.post .pnew{display:inline-block;background:var(--ac);color:var(--bt);border-radius:999px;padding:0 7px;font-size:.72rem;margin-left:4px;vertical-align:1px}
+.post h3{margin:2px 0 4px;font-size:1.02rem;line-height:1.3;overflow-wrap:anywhere}
+.post h3 a{color:var(--t1);text-decoration:none}
+.post p{margin:0 0 8px;color:var(--t2);font-size:.88rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post .btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.post .phide{position:absolute;top:4px;right:4px}
+.post .btn .spin{margin-right:6px}
+.showmore{margin-top:10px}
+.dhint .spin{display:inline-block;vertical-align:-2px;margin-right:4px}
+@media (max-width:359px){.post .pimg{width:64px;height:64px}}
+.post a.btn{text-decoration:none}
+.cook .cwho+.big,.cook .during+.big{margin-top:6px}
+
+/* 2.9: what you made shows on the plan */
+.madetag{display:inline-flex;align-items:center;gap:3px;color:var(--ok);font-weight:700}
+.madetag svg.i{width:.95em;height:.95em;stroke-width:3}
+.prow.made .nm{color:var(--t1)}
+.cal .mk i.m{box-shadow:0 0 0 1.5px var(--bg),0 0 0 3px var(--ok)}
+
 </style>
 </head>
 <body>
+<div class="topedge" aria-hidden="true"></div>
 <div id="app" aria-busy="true">
   <header class="hdr">
     <h1 id="appname">Sunday Table</h1>
@@ -2122,7 +2176,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.8';
+var APP_VERSION = '2.10';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -2132,7 +2186,7 @@ var DEFAULT_SETTINGS = {
   weekStart: 'sun', weeklyEmail: false, shortcut: 'Add to Groceries',
   staples: ['salt', 'pepper', 'black pepper', 'water', 'oil', 'olive oil', 'spray oil', 'ice'],
   aisleMap: {}, collections: [], cookFor: '',
-  prepDay: '0', prepMeals: 5, keepDays: 4, spend: {}, hiddenIdeas: [], tryIdeas: [], recipeColors: {}
+  prepDay: '0', prepMeals: 5, keepDays: 4, spend: {}, hiddenIdeas: [], tryIdeas: [], recipeColors: {}, follows: [], hiddenPosts: []
 };
 var FREQ = [['weekly', 'Every week'], ['sometimes', 'Now and then'], ['rare', 'Once in a while']];
 function freqLabel(k) { for (var i = 0; i < FREQ.length; i++) if (FREQ[i][0] === k) return FREQ[i][1]; return ''; }
@@ -2734,6 +2788,7 @@ function roundRect(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcT
 
 /* ---------- inline icons ---------- */
 var IC = {
+  rss: '<path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.2"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
   x: '<path d="M18 6 6 18M6 6l12 12"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
@@ -3440,6 +3495,19 @@ function dayLabel(key, long) {
   var d = parseDay(key);
   return (long ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()] : DAYS[d.getDay()]) + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate();
 }
+/** What you logged as made on a day (newest last). */
+function madeFor(day) { return S.cooked.filter(function (c) { return c.date === day; }); }
+/** A day's plan and what you actually made: planned rows marked made, and made-but-not-planned rows of their own. */
+function dayMeals(day) {
+  var plan = planFor(day), made = madeFor(day).slice(), used = {};
+  var rows = plan.map(function (e) {
+    var hit = made.filter(function (c) { return c.rid === e.rid && !used[c.id]; })[0];
+    if (hit) used[hit.id] = 1;
+    return { e: e, made: hit || null };
+  });
+  made.forEach(function (c) { if (!used[c.id]) rows.push({ c: c }); });
+  return rows;
+}
 function planFor(day) { return S.plan.filter(function (e) { return e.date === day; }).sort(function (a, b) { return a.id.localeCompare(b.id); }); }
 function entryFactor(e, r) {
   if (!r) return 1;
@@ -3455,15 +3523,23 @@ function servingsLabel(e, r) {
 }
 
 function dayHtml(d) {
-  var t = today(), entries = planFor(d), past = d < t;
+  var t = today(), entries = planFor(d), past = d < t, rows = dayMeals(d);
   var h = '<section class="day' + (d === t ? ' today' : '') + (past ? ' past' : '') + '"><div class="dayh"><h2>' + esc(dayLabel(d, true)) + '</h2>' + (d === t ? '<span class="badge">Today</span>' : '') + '</div>';
-  entries.forEach(function (e) {
-    var r = byId(e.rid);
+  rows.forEach(function (x) {
+    if (x.c) {   // made, without being planned
+      var rc = byId(x.c.rid);
+      h += '<button class="prow made" data-act="cookedopen" data-id="' + esc(x.c.id) + '">' + (rc ? tileHtml(rc) : '<span class="tile" style="--pig:#6A4E3A"><span class="lt">' + esc((x.c.title || '?').charAt(0)) + '</span></span>') +
+        '<span class="info"><span class="nm">' + esc(rc ? rc.title : (x.c.title || 'Deleted recipe')) + '</span><span class="sub"><span class="madetag">' + icon('check') + 'Made</span>' + (x.c.note ? ' · ' + esc(x.c.note) : '') + '</span></span></button>';
+      return;
+    }
+    var e = x.e, r = byId(e.rid);
     var sl = servingsLabel(e, r);
-    h += '<button class="prow" data-act="planentry" data-id="' + esc(e.id) + '">' + (r ? tileHtml(r) : '<span class="tile" style="--pig:#6A4E3A"><span class="lt">?</span></span>') +
-      '<span class="info"><span class="nm">' + esc(r ? r.title : (e.title || 'Deleted recipe')) + '</span>' + (sl ? '<span class="sub">' + esc(sl) + '</span>' : '') + '</span></button>';
+    h += '<button class="prow' + (x.made ? ' made' : '') + '" data-act="planentry" data-id="' + esc(e.id) + '">' + (r ? tileHtml(r) : '<span class="tile" style="--pig:#6A4E3A"><span class="lt">?</span></span>') +
+      '<span class="info"><span class="nm">' + esc(r ? r.title : (e.title || 'Deleted recipe')) + '</span>' + (sl || x.made ? '<span class="sub">' + (x.made ? '<span class="madetag">' + icon('check') + 'Made</span>' + (sl ? ' · ' : '') : '') + esc(sl) + '</span>' : '') + '</span></button>';
   });
-  return h + '<button class="addday" data-act="planadd" data-day="' + d + '">' + icon('plus') + (entries.length ? 'Add another' : 'Add a recipe') + '</button></section>';
+  var withR = entries.filter(function (e) { return byId(e.rid) && byId(e.rid).steps; });
+  if (!past && withR.length >= 2 && withR[0].rid !== withR[1].rid) h += '<button class="addday cookboth" data-act="cookboth" data-id="' + esc(withR[0].rid) + '" data-id2="' + esc(withR[1].rid) + '">' + icon('flame') + 'Cook ' + esc(byId(withR[0].rid).title) + ' and ' + esc(byId(withR[1].rid).title) + ' together</button>';
+  return h + '<button class="addday" data-act="planadd" data-day="' + d + '">' + icon('plus') + (rows.length ? 'Add another' : 'Add a recipe') + '</button></section>';
 }
 function viewSeg() {
   return '<div class="seg viewseg planseg" role="tablist" aria-label="Week or month"><button role="tab" data-act="planview" data-v="week" aria-pressed="' + (UI.planView !== 'month') + '" aria-selected="' + (UI.planView !== 'month') + '">' + icon('list') + 'Week</button>' +
@@ -3484,10 +3560,10 @@ function monthDays(off) {
   return { first: first, days: out };
 }
 function calCell(d, opts) {
-  var k = dayKey(d), t = today(), es = planFor(k), past = k < t;
+  var k = dayKey(d), t = today(), rows = dayMeals(k), es = planFor(k), past = k < t, nMade = rows.filter(function (x) { return x.c || x.made; }).length;
   var cls = 'cd' + (k === t ? ' today' : '') + (past ? ' past' : '') + (opts.other && d.getMonth() !== opts.other ? ' other' : '') + (opts.sel === k ? ' sel' : '');
-  var label = DAY_NAMES[d.getDay()] + ', ' + MONTHS_L[d.getMonth()] + ' ' + d.getDate() + (es.length ? ', ' + es.length + ' planned' : '') + (k === t ? ', today' : '');
-  var marks = es.slice(0, 3).map(function (e) { var r = byId(e.rid); return '<i style="--pig:' + (r ? pigmentFor(r) : '#6A4E3A') + '"></i>'; }).join('') + (es.length > 3 ? '<em>+' + (es.length - 3) + '</em>' : '');
+  var label = DAY_NAMES[d.getDay()] + ', ' + MONTHS_L[d.getMonth()] + ' ' + d.getDate() + (es.length ? ', ' + es.length + ' planned' : '') + (nMade ? ', ' + nMade + ' made' : '') + (k === t ? ', today' : '');
+  var marks = rows.slice(0, 3).map(function (x) { var r = byId(x.c ? x.c.rid : x.e.rid); return '<i' + (x.c || x.made ? ' class="m"' : '') + ' style="--pig:' + (r ? pigmentFor(r) : '#6A4E3A') + '"></i>'; }).join('') + (rows.length > 3 ? '<em>+' + (rows.length - 3) + '</em>' : '');
   return '<button class="' + cls + '" data-act="' + opts.act + '" data-day="' + k + '"' + (opts.id ? ' data-id="' + esc(opts.id) + '"' : '') + (past && opts.noPast ? ' disabled' : '') +
     ' aria-label="' + esc(label) + '"' + (opts.sel === k ? ' aria-pressed="true"' : '') + '><span class="dn">' + d.getDate() + '</span><span class="mk">' + marks + '</span></button>';
 }
@@ -3552,7 +3628,9 @@ function openPlanPicker(day) {
 }
 function pickListHtml() {
   var q = norm(UI.pick.q).trim(), toks = q ? q.split(/\s+/) : [];
+  var skip = UI.pick.mode === 'cook2' && UI.cook ? UI.cook.id : '';
   var list = S.recipes.filter(function (r) {
+    if (r.id === skip) return false;
     var ix = searchIndex(r);
     return toks.every(function (t) { return ix.all.indexOf(t) >= 0; });
   }).sort(function (a, b) { return a.title.localeCompare(b.title); });
@@ -3746,7 +3824,7 @@ function openLeftovers(item, isNew) {
   UI.left = { it: clone(item), isNew: isNew };
   var foot = isNew ? '<button class="btn" data-act="leftskip">' + (item.rid && UI.left.isNew && !UI.leftManual ? 'Not now' : 'Cancel') + '</button><button class="btn primary" data-act="leftsave">Add to fridge</button>'
     : '<button class="btn danger" data-act="leftdel" data-id="' + esc(item.id) + '">Remove</button><button class="btn primary" data-act="leftsave">Save</button>';
-  openSheet('left', isNew ? 'Into the fridge?' : (item.name || 'Leftovers'), '<div id="leftbody">' + leftBody() + '</div>', foot, { onClose: function () { var back = UI.leftReturn; UI.leftReturn = ''; if (back === 'prep') setTimeout(openPrepSession, 280); } });
+  openSheet('left', isNew ? 'Into the fridge?' : (item.name || 'Leftovers'), '<div id="leftbody">' + leftBody() + '</div>', foot, { onClose: function () { var back = UI.leftReturn; UI.leftReturn = ''; if (back === 'prep') setTimeout(openPrepSession, 280); else if (UI.afterQueue && UI.afterQueue.length) setTimeout(nextAfterMade, 300); } });
 }
 function leftBody() {
   var L = UI.left, it = L.it, r = it.rid ? byId(it.rid) : null, n = +it.portions || 0;
@@ -4300,6 +4378,11 @@ function renderDiscover(pane) {
     var max = list.length ? list[0].w : 1;
     return list.map(function (x) { return '<li><span class="tl">' + esc(tagLabel(x.k)) + '</span><span class="tb"><i style="width:' + Math.max(8, Math.round(x.w / max * 100)) + '%"></i></span></li>'; }).join('');
   };
+  // new recipes from the blogs you follow
+  var F = feedsLoad();
+  if (!UI.discoverSeen) { UI.discoverSeen = true; F.seenBefore = F.seen || ''; F.seen = today(); feedsSave(); }
+  h += '<div id="followsec">' + followSectionHtml() + '</div>';
+  setTimeout(function () { refreshFeeds(false); }, 0);
   h += '<section class="card taste"><h2>Your taste</h2><p class="muted">From your ' + S.recipes.length + ' recipes, counting the ones you make often, favorite and rate highly more.</p>' +
     '<div class="tgrid">' + (tp.main.length ? '<div><h3>Main ingredients</h3><ul class="bars">' + bar(tp.main) + '</ul></div>' : '') +
     (tp.cuisine.length ? '<div><h3>Cuisines</h3><ul class="bars">' + bar(tp.cuisine) + '</ul></div>' : '') + '</div>' +
@@ -4367,6 +4450,205 @@ function renderDiscover(pane) {
   var hidden = (S.settings.hiddenIdeas || []).length;
   h += '<p class="muted" style="text-align:center;font-size:.85rem;margin:24px 0 8px">Ideas come from a built-in list matched to your taste' + (hidden ? '. ' + hidden + ' hidden. <button class="linkbtn" data-act="ideashow">Show them again</button>' : '.') + '</p>';
   pane.innerHTML = h;
+}
+
+/* ===================== following food blogs: their new recipes in Discover ===================== */
+// The sites you follow are kept in your settings (so every device follows the same ones). Your sheet's script reads
+// their "new posts" feeds (a phone can't read other websites directly); the posts are kept here for a few hours.
+var FEED_KEY = 'sundaytable.feeds', FEED_TTL = 3 * 3600 * 1000, FEED_SCRIPT = 6;
+var FEEDS = null, FEED_BUSY = false, FEED_ERR = '';
+
+/** Popular recipe blogs to start from; the ones closest to what you cook come first. */
+var SITE_PICKS = [
+  { n: 'Budget Bytes', u: 'https://www.budgetbytes.com', d: 'Cheap, reliable weeknight meals', t: ['american', 'mexican', 'chicken'] },
+  { n: 'RecipeTin Eats', u: 'https://www.recipetineats.com', d: 'Big flavor, every cuisine, foolproof', t: ['thai', 'chinese', 'italian', 'beef'] },
+  { n: 'Just One Cookbook', u: 'https://www.justonecookbook.com', d: 'Japanese home cooking', t: ['japanese'] },
+  { n: 'The Woks of Life', u: 'https://thewoksoflife.com', d: 'Chinese home cooking, from a family', t: ['chinese'] },
+  { n: 'Maangchi', u: 'https://www.maangchi.com', d: 'Korean home cooking', t: ['korean'] },
+  { n: 'Hungry Huy', u: 'https://www.hungryhuy.com', d: 'Vietnamese home cooking', t: ['vietnamese'] },
+  { n: 'Isabel Eats', u: 'https://www.isabeleats.com', d: 'Easy Mexican food', t: ['mexican'] },
+  { n: 'Pinch of Yum', u: 'https://pinchofyum.com', d: 'Cozy, simple comfort food', t: ['american', 'pasta'] },
+  { n: 'Half Baked Harvest', u: 'https://www.halfbakedharvest.com', d: 'Seasonal and a little fancy', t: ['italian', 'american'] },
+  { n: 'Smitten Kitchen', u: 'https://smittenkitchen.com', d: 'Fearless home cooking and baking', t: ['baking', 'american'] },
+  { n: 'Love and Lemons', u: 'https://www.loveandlemons.com', d: 'Bright and vegetable-forward', t: ['mediterranean', 'vegetables'] },
+  { n: 'Serious Eats', u: 'https://www.seriouseats.com', d: 'Tested techniques and the why behind them', t: [] }
+];
+function sitePicks() {
+  var tp = tasteProfile(), mine = (S.settings.follows || []).map(function (f) { return siteKey(f.url); });
+  var score = function (s) { var n = 0; s.t.forEach(function (t) { n += (tp.groups['Cuisine'][t] || 0) * 1.5 + (tp.groups['Main ingredient'][t] || 0) + (tp.groups['Meal'][t] || 0) * 0.5; }); return n; };
+  return SITE_PICKS.filter(function (s) { return mine.indexOf(siteKey(s.u)) < 0; })
+    .map(function (s, i) { return { s: s, v: score(s) - i * 0.01 }; }).sort(function (a, b) { return b.v - a.v; }).map(function (x) { return x.s; });
+}
+function siteKey(u) { return String(u || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/(feed|rss|atom)(\.xml)?\/?$/, '').replace(/\/+$/, ''); }
+
+/* ---------- the posts, kept on this phone for a few hours ---------- */
+function feedsLoad() {
+  if (FEEDS) return FEEDS;
+  try { FEEDS = JSON.parse(localStorage.getItem(FEED_KEY) || 'null'); } catch (e) { FEEDS = null; }
+  return (FEEDS = FEEDS && FEEDS.sites ? FEEDS : { at: 0, sites: {}, seen: 0 });
+}
+function feedsSave() { try { localStorage.setItem(FEED_KEY, JSON.stringify(FEEDS)); } catch (e) { } }
+/** Why posts can't be fetched right now, or '' if they can. */
+function feedBlocker() {
+  if (!connected()) return 'connect';
+  if ((S.scriptV || 0) < FEED_SCRIPT) return 'script';
+  return '';
+}
+/** Fetch the newest posts from every site you follow (when they're a few hours old, or force). */
+function refreshFeeds(force) {
+  var follows = S.settings.follows || [], F = feedsLoad();
+  if (!follows.length || FEED_BUSY || feedBlocker()) return Promise.resolve(false);
+  if (!force && Date.now() - F.at < FEED_TTL) return Promise.resolve(false);
+  FEED_BUSY = true; FEED_ERR = '';
+  if (UI.tab === 'discover') renderFollowSection();
+  return request({ action: 'feeds', sites: follows.map(function (f) { return f.feed || f.url; }) }, true).then(function (res) {
+    FEED_BUSY = false;
+    if (!res.ok) { FEED_ERR = res.code === 'net' ? 'offline' : 'error'; if (UI.tab === 'discover') renderFollowSection(); return false; }
+    var list = clone(S.settings.follows || []), changed = false;
+    (res.sites || []).forEach(function (s, i) {
+      var f = list[i]; if (!f) return;
+      F.sites[siteKey(f.url)] = { ok: s.ok, name: s.name || f.name, items: s.ok ? s.items : ((F.sites[siteKey(f.url)] || {}).items || []), error: s.ok ? '' : (s.error || 'Couldn\'t check'), at: Date.now() };
+      if (s.ok && ((s.feed && s.feed !== f.feed) || (s.name && !f.name))) { f.feed = s.feed || f.feed; f.name = f.name || s.name; changed = true; }
+    });
+    F.at = Date.now(); feedsSave();
+    if (changed) setSetting('follows', list);
+    if (UI.tab === 'discover') renderFollowSection();
+    return true;
+  });
+}
+
+/* ---------- following and unfollowing ---------- */
+function followSite(raw) {
+  var url = String(raw || '').trim();
+  var msg = function (t, err) { var m = $('#followmsg'); if (m) { m.textContent = t; m.className = 'msg' + (err ? ' err' : ''); } };
+  if (!url) { msg('Paste the link to a food blog or recipe site.', true); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
+  if (!/^https?:\/\/[^\s\/]+\.[^\s\/]+/i.test(url)) { msg('That doesn\'t look like a website link.', true); return; }
+  var follows = S.settings.follows || [];
+  if (follows.some(function (f) { return siteKey(f.url) === siteKey(url) || (f.feed && siteKey(f.feed) === siteKey(url)); })) { msg('You already follow that site.', false); return; }
+  var why = feedBlocker();
+  if (why) { msg(why === 'connect' ? 'Connect your Google Sheet first (Settings → Google Sheet): it fetches the posts.' : 'Your sheet\'s script needs updating to version 6 first. See Settings → Google Sheet.', true); return; }
+  var btn = $('[data-act="follow"]'); if (btn) { btn.disabled = true; btn.textContent = 'Looking…'; }
+  msg('Looking for new recipes on ' + url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '') + '…');
+  return request({ action: 'feeds', sites: [url] }, true).then(function (res) {
+    var b = $('[data-act="follow"]'); if (b) { b.disabled = false; b.textContent = 'Follow'; }
+    var s = res.ok && res.sites && res.sites[0];
+    if (!s || !s.ok) {
+      msg(!res.ok ? (res.code === 'net' ? 'No connection right now. Try again when you\'re online.' : (res.error || 'That didn\'t work.'))
+        : s && s.code === 'nofeed' ? 'Couldn\'t find a list of new posts on that site. Try the blog\'s home page, or a different site.'
+          : s && s.code === 'empty' ? 'That site doesn\'t list any posts.'
+            : 'That site couldn\'t be reached. It may block other services from reading it.', true);
+      return false;
+    }
+    var f = { url: url, feed: s.feed || '', name: s.name || url, home: s.home || url, added: today() };
+    var F = feedsLoad();
+    F.sites[siteKey(url)] = { ok: true, name: f.name, items: s.items || [], error: '', at: Date.now() };
+    feedsSave();
+    setSetting('follows', (S.settings.follows || []).concat([f]));
+    var inp = $('#followurl'); if (inp) inp.value = '';
+    toast('Following ' + f.name);
+    if (SHEET && SHEET.id === 'follows') $('#followsbody').innerHTML = followsBody();
+    if (UI.tab === 'discover') renderFollowSection();
+    return true;
+  });
+}
+function unfollowSite(key) {
+  var before = clone(S.settings.follows || []);
+  var f = before.filter(function (x) { return siteKey(x.url) === key; })[0]; if (!f) return;
+  setSetting('follows', before.filter(function (x) { return siteKey(x.url) !== key; }));
+  toast('Unfollowed ' + f.name, function () { setSetting('follows', before); if (SHEET && SHEET.id === 'follows') $('#followsbody').innerHTML = followsBody(); if (UI.tab === 'discover') renderFollowSection(); });
+  if (SHEET && SHEET.id === 'follows') $('#followsbody').innerHTML = followsBody();
+  if (UI.tab === 'discover') renderFollowSection();
+}
+
+/* ---------- the posts ---------- */
+// posts that clearly aren't recipes
+var NOT_RECIPE = /\b(haul|giveaway|gift guide|podcast|newsletter|sale|shop (my|our)|what i ate|announcement|q ?& ?a|faq|year in review|link love|sponsored|travel guide)\b/i;
+function feedPosts() {
+  var F = feedsLoad(), hidden = S.settings.hiddenPosts || [], out = [], seenLink = {};
+  (S.settings.follows || []).forEach(function (f) {
+    var s = F.sites[siteKey(f.url)]; if (!s) return;
+    (s.items || []).forEach(function (it) {
+      var k = linkKey(it.link);
+      if (!it.title || !k || seenLink[k] || hidden.indexOf(k) >= 0 || NOT_RECIPE.test(it.title)) return;
+      if (it.date && daysAgo(it.date) > 60) return;
+      seenLink[k] = 1;
+      out.push({ it: it, site: f.name || s.name, key: siteKey(f.url) });
+    });
+  });
+  out.sort(function (a, b) { return (b.it.date || '') < (a.it.date || '') ? -1 : (b.it.date || '') > (a.it.date || '') ? 1 : 0; });
+  return out;
+}
+function postAge(d) { if (!d) return ''; var n = daysAgo(d); return n <= 0 ? 'today' : n === 1 ? 'yesterday' : n < 7 ? n + ' days ago' : niceDate(d); }
+function postCard(p) {
+  var it = p.it, have = findBySource(it.link), F = feedsLoad(), isNew = it.date && F.seenBefore && it.date > F.seenBefore;
+  var busy = UI.postBusy && UI.postBusy === linkKey(it.link);
+  return '<article class="post">' +
+    '<a class="pimg" href="' + esc(it.link) + '" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">' + (it.image ? '<img src="' + esc(it.image) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '<span>' + esc((p.site || '?').charAt(0)) + '</span></a>' +
+    '<div class="pbody"><div class="psite">' + esc(p.site) + (it.date ? ' · ' + esc(postAge(it.date)) : '') + (isNew ? ' <span class="pnew">New</span>' : '') + '</div>' +
+    '<h3><a href="' + esc(it.link) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a></h3>' +
+    (it.summary ? '<p>' + esc(it.summary) + '</p>' : '') +
+    '<div class="btnrow">' + (have ? '<button class="btn sm" data-act="open" data-id="' + esc(have.id) + '">' + icon('check') + 'In your recipes</button>'
+      : '<button class="btn sm primary" data-act="postadd" data-u="' + esc(it.link) + '" data-site="' + esc(p.site) + '"' + (busy ? ' disabled' : '') + '>' + (busy ? '<span class="spin" aria-hidden="true"></span>Adding…' : icon('plus') + 'Add to my recipes') + '</button>') +
+    '<a class="btn sm" href="' + esc(it.link) + '" target="_blank" rel="noopener">' + icon('ext') + 'Read</a></div></div>' +
+    '<button class="iconbtn phide" data-act="posthide" data-u="' + esc(it.link) + '" aria-label="Hide ' + esc(it.title) + '" title="Not for me">' + icon('x') + '</button></article>';
+}
+function addPost(url, site) {
+  if (UI.postBusy) return;
+  var dup = findBySource(url); if (dup) { openRecipe(dup.id); return; }
+  UI.postBusy = linkKey(url); renderFollowSection();
+  importLink(url).then(function (res) {
+    UI.postBusy = '';
+    if (!res.ok) { renderFollowSection(); toast(res.error || 'That one couldn\'t be added. Tap Read to open it.'); return; }
+    var rec = res.recipe; if (!rec.source) rec.source = url;
+    addImported(rec, { from: site, fallback: 'Recipe from ' + site }, null);
+    renderFollowSection();
+  });
+}
+
+/** Discover's "From sites you follow". */
+function followSectionHtml() {
+  var follows = S.settings.follows || [], why = feedBlocker();
+  var h = '<h2 class="dsec">' + icon('rss') + 'From sites you follow' + (follows.length ? '<button class="linkbtn dmore" data-act="follows">Manage</button>' : '') + '</h2>';
+  if (!follows.length) {
+    return h + '<section class="card followcta"><p>Follow your favorite food blogs and their new recipes show up here. Add one with a tap.</p>' + followForm() + picksHtml(4) + '</section>';
+  }
+  var posts = feedPosts(), F = feedsLoad(), more = UI.postsAll ? posts.length : 6;
+  if (why === 'connect') h += '<p class="dhint">Connect your Google Sheet (Settings → Google Sheet) to check for new posts.</p>';
+  else if (why === 'script') h += '<p class="dhint">Update your sheet\'s script to version 6 to check for new posts (Settings → Google Sheet).</p>';
+  else if (FEED_BUSY) h += '<p class="dhint"><span class="spin" aria-hidden="true"></span> Checking ' + follows.length + ' site' + (follows.length > 1 ? 's' : '') + ' for new recipes…</p>';
+  else if (FEED_ERR === 'offline') h += '<p class="dhint">You\'re offline. These are from the last check.</p>';
+  var bad = follows.filter(function (f) { var s = F.sites[siteKey(f.url)]; return s && !s.ok; });
+  if (!posts.length) h += FEED_BUSY ? '' : '<p class="dhint">No new recipes from ' + (follows.length === 1 ? esc(follows[0].name) : 'your sites') + ' in the last couple of months.</p>';
+  else h += '<div class="posts">' + posts.slice(0, more).map(postCard).join('') + '</div>' + (posts.length > more ? '<button class="btn sm showmore" data-act="postsmore">Show ' + (posts.length - more) + ' more</button>' : '');
+  if (bad.length) h += '<p class="dhint">Couldn\'t check ' + esc(bad.map(function (f) { return f.name; }).join(', ')) + ' this time.</p>';
+  return h;
+}
+function followForm() {
+  return '<div class="line followline"><input class="inp" id="followurl" type="url" inputmode="url" placeholder="Paste a blog\'s link" autocomplete="off" aria-label="A food blog\'s link"><button class="btn primary" data-act="follow">Follow</button></div><p class="msg" id="followmsg" aria-live="polite"></p>';
+}
+function picksHtml(n) {
+  var picks = sitePicks().slice(0, n || 12);
+  if (!picks.length) return '';
+  return '<p class="tgl">Popular picks, closest to what you cook first</p><ul class="picks">' + picks.map(function (s) {
+    return '<li><span class="pk"><b>' + esc(s.n) + '</b><span>' + esc(s.d) + '</span></span><button class="btn sm" data-act="followpick" data-u="' + esc(s.u) + '" aria-label="Follow ' + esc(s.n) + '">' + icon('plus') + 'Follow</button></li>';
+  }).join('') + '</ul>';
+}
+function renderFollowSection() {
+  var el = $('#followsec'); if (!el) return;
+  el.innerHTML = followSectionHtml();
+}
+/** The sheet to see, add and remove the sites you follow. */
+function openFollows() { openSheet('follows', 'Sites you follow', '<div id="followsbody">' + followsBody() + '</div>', '', { full: true }); }
+function followsBody() {
+  var follows = S.settings.follows || [], F = feedsLoad();
+  var h = followForm();
+  if (follows.length) h += '<ul class="follows">' + follows.map(function (f) {
+    var s = F.sites[siteKey(f.url)], n = s && s.items ? s.items.length : 0;
+    return '<li><span class="pk"><b>' + esc(f.name) + '</b><span>' + esc(f.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')) + (s && !s.ok ? ' · couldn\'t check last time' : '') + '</span></span>' +
+      '<button class="btn sm" data-act="unfollow" data-k="' + esc(siteKey(f.url)) + '">Unfollow</button></li>';
+  }).join('') + '</ul>';
+  return h + picksHtml(12);
 }
 
 /* ===================== sharing a recipe ===================== */
@@ -5849,55 +6131,136 @@ function iconLink() {
 
 /* ===================== cook mode ===================== */
 var WAKE = null;
-function openCook(id) {
+/** A recipe's steps for cook mode, each remembering its section and recipe. */
+function cookSteps(r) {
+  var sec = '', out = [];
+  stepRows(r.steps).forEach(function (s) { if (s.h) sec = s.h; else out.push({ s: s, sec: sec, rid: r.id }); });
+  return out;
+}
+/** Cook one recipe, or two at once (id2): their steps woven together so both are ready about the same time. */
+function openCook(id, id2) {
   var r = byId(id); if (!r) return;
-  var steps = stepRows(r.steps).filter(function (s) { return !s.h; });
-  // remember which section each step is in
-  var sec = '', withSec = [];
-  stepRows(r.steps).forEach(function (s) { if (s.h) sec = s.h; else withSec.push({ s: s, sec: sec }); });
-  UI.cook = { id: id, i: 0, steps: withSec, ings: false };
-  var el = document.createElement('div');
-  el.className = 'cook'; el.id = 'cook';
-  el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Cook mode: ' + r.title);
-  document.body.appendChild(el);
+  var two = id2 && id2 !== id && byId(id2) ? byId(id2) : null;
+  var plan = two ? cookPlan(r, two) : null;
+  UI.cook = { id: id, ids: two ? [id, two.id] : [id], i: 0, steps: plan ? plan.steps : cookSteps(r), ings: false, plan: plan };
+  var el = $('#cook');
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'cook'; el.id = 'cook';
+    el.setAttribute('role', 'dialog');
+    document.body.appendChild(el);
+  }
+  el.setAttribute('aria-label', 'Cook mode: ' + (two ? r.title + ' and ' + two.title : r.title));
   document.body.classList.add('locked', 'cooking');
   renderCook();
   if (S.settings.wake) keepAwake();
-  if (!steps.length) { UI.cook.ings = true; renderCook(); }
+  if (!UI.cook.steps.length) { UI.cook.ings = true; renderCook(); }
 }
+
+/* ---------- two recipes at once ---------- */
+// steps you start and then leave alone ("bake 25 minutes", "simmer 20 minutes"): the time to do the other recipe
+var PASSIVE_RE = /\b(bake|bakes|baking|roast|roasting|simmer|simmering|rest|resting|chill|chilling|refrigerate|marinate|marinating|rise|proof|soak|soaking|cool|cooling|freeze|slow[- ]cook|pressure[- ]cook|let\b[^.]{0,30}\b(sit|stand|rest|cool|rise|marinate|simmer|cook))/i;
+var WAIT_VERB = { bake: 'bakes', baking: 'bakes', bakes: 'bakes', roast: 'roasts', roasting: 'roasts', simmer: 'simmers', simmering: 'simmers', rest: 'rests', resting: 'rests', chill: 'chills', chilling: 'chills', refrigerate: 'chills',
+  marinate: 'marinates', marinating: 'marinates', rise: 'rises', proof: 'rises', soak: 'soaks', soaking: 'soaks', cool: 'cools', cooling: 'cools', freeze: 'freezes' };
+/** About how long a step takes, and whether it's hands-off. */
+function stepTime(text) {
+  var mins = 0;
+  timerPieces(text).forEach(function (p) { if (p.sec) mins = Math.max(mins, p.sec / 60); });
+  var m = String(text).match(PASSIVE_RE);
+  var passive = !!m && mins >= 8;
+  if (!mins) mins = Math.min(8, Math.max(2, Math.round(String(text).length / 45)));   // a few minutes of chopping and stirring
+  return { mins: mins, passive: passive, verb: m ? (WAIT_VERB[m[1].toLowerCase()] || (m[3] ? m[3].toLowerCase() + 's' : 'cooks')) : '' };
+}
+/**
+ * Weave two recipes into one list of steps. The longer one starts first; the other joins so they finish together,
+ * and its steps fill the hands-off waits ("while the chicken bakes…").
+ */
+function cookPlan(a, b) {
+  var tracks = [a, b].map(function (r) {
+    var st = cookSteps(r).map(function (x) {
+      var t = stepTime(x.s.text + ' ' + x.s.subs.join(' '));
+      x.mins = t.mins; x.passive = t.passive; x.verb = t.verb;
+      return x;
+    });
+    var total = st.reduce(function (n, x) { return n + x.mins; }, 0);
+    return { r: r, steps: st, k: 0, ready: 0, total: total, left: total, wait: '' };
+  });
+  var lead = tracks[0].total >= tracks[1].total ? tracks[0] : tracks[1], other = lead === tracks[0] ? tracks[1] : tracks[0];
+  lead.startAt = 0;
+  other.startAt = Math.max(0, lead.total - other.total);
+  var t = 0, out = [], guard = 0, last = null;
+  while (tracks.some(function (x) { return x.k < x.steps.length; }) && guard++ < 500) {
+    var open = tracks.filter(function (x) { return x.k < x.steps.length; });
+    var can = open.filter(function (x) { return x.ready <= t && x.startAt <= t; });
+    if (!can.length) {
+      // nothing to do this minute: skip ahead to when the next step can start
+      t = Math.min.apply(null, open.map(function (x) { return Math.max(x.ready, x.startAt); }));
+      continue;
+    }
+    can.sort(function (p, q) { return q.left - p.left; });
+    var tr = can[0];
+    // stay with the same recipe while it can carry on, unless the other one has fallen well behind (no back-and-forth every step)
+    if (last && can.indexOf(last) >= 0) { var alt = can.filter(function (x) { return x !== last; })[0]; if (!alt || alt.left <= last.left + 5) tr = last; }
+    last = tr;
+    var st = tr.steps[tr.k++], ot = tr === tracks[0] ? tracks[1] : tracks[0];
+    st.at = Math.round(t);
+    st.during = ot.k < ot.steps.length || ot.ready > t ? (ot.ready > t && ot.wait ? ot.wait : '') : '';
+    if (st.passive) { tr.ready = t + st.mins; tr.wait = 'While ' + tr.r.title + ' ' + (st.verb || 'cooks'); t += 1; }
+    else { t += st.mins; tr.ready = t; tr.wait = ''; }
+    tr.left -= st.mins;
+    out.push(st);
+  }
+  var end = Math.max(t, tracks[0].ready, tracks[1].ready);
+  return { steps: out, total: Math.round(end), apart: Math.round(tracks[0].total + tracks[1].total), names: [a.title, b.title] };
+}
+function minsText(m) { m = Math.max(1, Math.round(m)); return m >= 60 ? Math.floor(m / 60) + ' hr' + (m % 60 ? ' ' + (m % 60) + ' min' : '') : m + ' min'; }
 
 function renderCook() {
   var el = $('#cook'); if (!el || !UI.cook) return;
-  var c = UI.cook, r = byId(c.id); if (!r) { closeCook(); return; }
+  var c = UI.cook, n = c.steps.length, cur = c.steps[c.i], two = c.ids.length > 1;
+  var r = byId(cur ? cur.rid : c.id) || byId(c.id); if (!r) { closeCook(); return; }
   themeEl(el, r);
-  var n = c.steps.length, cur = c.steps[c.i];
-  var ings = ingredientRows(r.ingredients, scaleFor(r), S.settings.units === 'metric');
+  var metric = S.settings.units === 'metric';
+  var rowsFor = function (rr) { return ingredientRows(rr.ingredients, scaleFor(rr), metric); };
+  var ings = rowsFor(r);
+  var title = two ? c.ids.map(function (id) { var x = byId(id); return x ? x.title : ''; }).join(' + ') : r.title;
   var h = '<div class="ctop"><button class="iconbtn" data-act="cookclose" aria-label="Leave cook mode">' + icon('x') + '</button>' +
-    '<span class="t">' + esc(r.title) + '</span>' +
+    '<span class="t">' + esc(title) + '</span>' +
     '<button class="btn sm" data-act="cooking" style="background:transparent;color:inherit;border-color:rgba(255,255,255,.35)">' + icon('ings') + (c.ings ? 'Steps' : 'Ingredients') + '</button></div>' +
     '<div class="prog"><i style="width:' + (n ? ((c.i + 1) / n * 100) : 0) + '%"></i></div>';
   h += '<div class="cbody" id="cbody"><div class="cin">';
-  h += '<div class="cookserv"><span class="stepper" role="group" aria-label="Servings"><button data-act="cooksv" data-d="-1" aria-label="Fewer">−</button><span class="v">' + esc(servingsText(r, scaleFor(r))) + '</span><button data-act="cooksv" data-d="1" aria-label="More">+</button></span>' +
+  if (two && c.i === 0 && c.plan) {
+    var saved = c.plan.apart - c.plan.total;
+    h += '<div class="twoplan"><b>Cooking two at once.</b> Both should be ready in about ' + esc(minsText(c.plan.total)) +
+      (saved >= 5 ? ', about ' + esc(minsText(saved)) + ' sooner than one after the other' : '') + '. Each step says which recipe it\'s for.</div>';
+  }
+  h += '<div class="cookserv"><span class="stepper" role="group" aria-label="Servings for ' + esc(r.title) + '"><button data-act="cooksv" data-d="-1" aria-label="Fewer">−</button><span class="v">' + esc(servingsText(r, scaleFor(r))) + '</span><button data-act="cooksv" data-d="1" aria-label="More">+</button></span>' +
     (scaleFor(r) !== 1 ? '<span class="muted">Amounts adjusted</span>' : '') + '</div>';
   if (n) {
-    // amounts go where each ingredient is first used, so earlier steps count
+    // amounts go where each ingredient is first used, so earlier steps of the same recipe count
     var used = [], shown = [];
-    c.steps.slice(0, c.i).forEach(function (x) { [x.s.text].concat(x.s.subs).forEach(function (t) { stepWithAmounts(t, ings, used); }); });
+    c.steps.slice(0, c.i).forEach(function (x) { if (x.rid !== r.id) return; [x.s.text].concat(x.s.subs).forEach(function (t) { stepWithAmounts(t, ings, used); }); });
+    if (two) {
+      var mine = c.steps.filter(function (x) { return x.rid === r.id; }), k = mine.indexOf(cur) + 1;
+      h += '<div class="cwho" style="--pig:' + pigmentFor(r) + '"><span class="dot"></span>' + esc(r.title) + ' <span class="of">· step ' + k + ' of ' + mine.length + '</span></div>';
+      if (cur.during) h += '<div class="during">' + esc(cur.during) + ':</div>';
+    }
     if (cur.sec) h += '<div class="sect">' + esc(cur.sec) + '</div>';
-    h += '<div class="num">Step ' + (c.i + 1) + ' of ' + n + '</div><div class="big">' + stepAmtHtml(cur.s.text, r, ings, used, shown) +
+    h += (two ? '' : '<div class="num">Step ' + (c.i + 1) + ' of ' + n + '</div>') + '<div class="big">' + stepAmtHtml(cur.s.text, r, ings, used, shown) +
       (cur.s.subs.length ? '<ul>' + cur.s.subs.map(function (x) { return '<li>' + stepAmtHtml(x, r, ings, used, shown) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
     var now = stepUses(cur.s.text + ' ' + cur.s.subs.join(' '), ings).filter(function (x) { return shown.indexOf(x) < 0; });
     if (now.length) h += '<div class="uses"><span class="ul">For this step</span>' + usesChips(now) + '</div>';
     var nxt = c.steps[c.i + 1];
     if (nxt) {
-      var later = stepUses(nxt.s.text + ' ' + nxt.s.subs.join(' '), ings);
-      var metric = S.settings.units === 'metric';
-      h += '<div class="upnext"><div class="ul">Up next' + (nxt.sec && nxt.sec !== cur.sec ? ': ' + esc(nxt.sec) : '') + '</div>' +
-        '<p>' + esc(prettyFractions(scaleText(metric ? fToC(nxt.s.text) : nxt.s.text, scaleFor(r), metric))) + '</p>' +
+      var nr = byId(nxt.rid) || r, nIngs = nr === r ? ings : rowsFor(nr);
+      var later = stepUses(nxt.s.text + ' ' + nxt.s.subs.join(' '), nIngs);
+      h += '<div class="upnext"><div class="ul">Up next' + (two && nr !== r ? ': ' + esc(nr.title) : (nxt.sec && nxt.sec !== cur.sec ? ': ' + esc(nxt.sec) : '')) + '</div>' +
+        '<p>' + esc(prettyFractions(scaleText(metric ? fToC(nxt.s.text) : nxt.s.text, scaleFor(nr), metric))) + '</p>' +
         (later.length ? '<div class="uses"><span class="ul">Get ready</span>' + usesChips(later) + '</div>' : '') + '</div>';
     } else {
       h += '<div class="upnext"><div class="ul">Up next</div><p>Nothing. This is the last step.</p></div>';
     }
+    if (!two && c.i === 0 && S.recipes.length > 1) h += '<button class="linkbtn addtwo" data-act="cooktwo">' + icon('plus') + 'Cook another recipe at the same time</button>';
   } else {
     h += '<p class="big">This recipe has no steps yet.</p>';
   }
@@ -5905,13 +6268,36 @@ function renderCook() {
   if (!WAKE && S.settings.wake && !('wakeLock' in navigator)) h += '<div class="wakenote">This phone can\'t keep the screen on from here. Tap the screen now and then.</div>';
   var last = c.i >= n - 1;
   h += '<div class="cnav"><button class="btn" data-act="cookprev"' + (c.i === 0 ? ' disabled' : '') + '>Back</button>' +
-    (last ? '<button class="btn primary" data-act="cookdone">' + icon('check') + 'Done, log it</button>' : '<button class="btn primary" data-act="cooknext">Next step</button>') + '</div>';
-  h += '<div class="drawer' + (c.ings ? ' in' : '') + '" id="cookings"><div class="sec-h"><h2>Ingredients</h2>' +
-    (r.servings || scaleFor(r) !== 1 ? '<span class="muted">' + esc(servingsText(r, scaleFor(r))) + '</span>' : '') + '</div>' +
-    ingListHtml(r, ings, UI.checked[r.id] || {}) + '<div class="btnrow"><button class="btn" data-act="cooking">Back to the steps</button></div></div>';
+    (last ? '<button class="btn primary" data-act="cookdone">' + icon('check') + (two ? 'Done, log both' : 'Done, log it') + '</button>' : '<button class="btn primary" data-act="cooknext">Next step</button>') + '</div>';
+  h += '<div class="drawer' + (c.ings ? ' in' : '') + '" id="cookings">' + c.ids.map(function (id) {
+    var x = byId(id); if (!x) return '';
+    return '<div class="sec-h"><h2>' + (two ? esc(x.title) : 'Ingredients') + '</h2>' +
+      (x.servings || scaleFor(x) !== 1 ? '<span class="muted">' + esc(servingsText(x, scaleFor(x))) + '</span>' : '') + '</div>' +
+      ingListHtml(x, x === r ? ings : rowsFor(x), UI.checked[x.id] || {});
+  }).join('') + '<div class="btnrow"><button class="btn" data-act="cooking">Back to the steps</button></div></div>';
   el.innerHTML = h;
   if (c.dir) { var ci = $('.cin', el); if (ci) ci.classList.add(c.dir > 0 ? 'from-next' : 'from-prev'); c.dir = 0; }
   enableCookSwipe();
+}
+
+/** Pick a second recipe to cook alongside the one that's open. */
+function openCookTwoPicker() {
+  UI.pick = { day: '', q: '', mode: 'cook2' };
+  var r = byId(UI.cook.id);
+  var el = openSheet('pick', 'Cook with ' + (r ? r.title : 'this'), '<p class="muted" style="margin:0 0 10px">Pick the other recipe. Their steps are woven together so both are ready at about the same time.</p>' +
+    '<div class="search pickbox" style="margin-top:0"><div class="box">' + icon('search') +
+    '<input id="pickq" type="search" inputmode="search" enterkeyhint="search" placeholder="Search your recipes" autocomplete="off" autocorrect="off" aria-label="Search recipes"></div></div><ul class="rlist" id="picklist">' + pickListHtml() + '</ul>', '', { full: true });
+}
+/** Log every recipe that was cooked; ask about leftovers for each in turn. */
+function logCooked(ids) {
+  var list = ids.map(byId).filter(Boolean);
+  list.forEach(function (r) { logMade(r); });
+  if (list.length > 1) toast('Logged ' + list.map(function (r) { return r.title; }).join(' and ') + ' for today');
+  UI.afterQueue = list.slice();
+  nextAfterMade();
+}
+function nextAfterMade() {
+  while (UI.afterQueue && UI.afterQueue.length) { var r = UI.afterQueue.shift(); if (afterMade(r)) return; }
 }
 
 function cookGo(d) {
@@ -6143,7 +6529,16 @@ var ACTIONS = {
     if (SHEET) closeSheet(true);
     openCook(id);
   },
-  cooksv: function (t) { var r = byId(UI.cook.id); UI.scale[r.id] = stepScale(r, scaleFor(r), +t.getAttribute('data-d')); renderCook(); },
+  cooksv: function (t) { var c = UI.cook, cur = c.steps[c.i], r = byId(cur ? cur.rid : c.id) || byId(c.id); UI.scale[r.id] = stepScale(r, scaleFor(r), +t.getAttribute('data-d')); renderCook(); },
+  cooktwo: function () { openCookTwoPicker(); },
+  follow: function () { var i = $('#followurl'); followSite(i ? i.value : ''); },
+  followpick: function (t) { followSite(t.getAttribute('data-u')); },
+  unfollow: function (t) { unfollowSite(t.getAttribute('data-k')); },
+  follows: function () { openFollows(); },
+  postadd: function (t) { addPost(t.getAttribute('data-u'), t.getAttribute('data-site')); },
+  posthide: function (t) { var k = linkKey(t.getAttribute('data-u')); setSetting('hiddenPosts', (S.settings.hiddenPosts || []).concat([k]).slice(-300)); renderFollowSection(); },
+  postsmore: function () { UI.postsAll = true; renderFollowSection(); },
+  cookboth: function (t) { if (!once('cook')) return; if (SHEET) closeSheet(true); openCook(t.getAttribute('data-id'), t.getAttribute('data-id2')); },
   revsv: function (t) {
     var rv = UI.review, src = rv.sources[0], r = src.recipe;
     src.factor = stepScale(r, src.factor, +t.getAttribute('data-d'));
@@ -6162,7 +6557,7 @@ var ACTIONS = {
   cookprev: function () { cookGo(-1); },
   cooknext: function () { cookGo(1); },
   cooking: function () { UI.cook.ings = !UI.cook.ings; renderCook(); },
-  cookdone: function () { var id = UI.cook.id; closeCook(); ACTIONS.made(null, id, byId(id)); },
+  cookdone: function () { var ids = UI.cook.ids.slice(); closeCook(); if (!once('made' + ids.join(), 1500)) return; logCooked(ids); },
   filters: function () { openFilters(); },
   fset: function (t) { var k = t.getAttribute('data-f'); UI.filters[k] = !UI.filters[k]; refreshFilters(); },
   ftag: function (t) { toggleTag(t.getAttribute('data-tag')); refreshFilters(); },
@@ -6332,8 +6727,13 @@ var ACTIONS = {
   planday: function (t, id) { closeSheet(); addToPlan(id, t.getAttribute('data-day')); },
   week: function (t) { var d = +t.getAttribute('data-d'); UI.week = d === 0 ? 0 : UI.week + d; render(); },
   planadd: function (t) { openPlanPicker(t.getAttribute('data-day')); },
-  pickrecipe: function (t, id) { if (!once('pick', 500)) return; var day = UI.pick.day; closeSheet(); addToPlan(id, day); },
+  pickrecipe: function (t, id) {
+    if (!once('pick', 500)) return;
+    if (UI.pick.mode === 'cook2') { var first = UI.cook && UI.cook.id; closeSheet(true); if (first) openCook(first, id); return; }
+    var day = UI.pick.day; closeSheet(); addToPlan(id, day);
+  },
   planentry: function (t, id) { openPlanEntry(id); },
+  cookedopen: function (t, id) { openCooked(id); },
   pesv: function (t) {
     var e = UI.planEdit, r = byId(e.rid), d = +t.getAttribute('data-d');
     if (!r) return;
@@ -6689,6 +7089,7 @@ document.addEventListener('submit', function (e) {
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && (e.target.id === 'q' || e.target.id === 'pickq' || e.target.id === 'have')) e.target.blur();
   if (e.key === 'Enter' && e.target.id === 'f-link') { e.preventDefault(); doImport(); }
+  if (e.key === 'Enter' && e.target.id === 'followurl') { e.preventDefault(); ACTIONS.follow(); }
   if (e.key === 'Enter' && e.target.id === 'bulk-tag') ACTIONS['bulk-tag-save']();
   if (e.key === 'Enter' && e.target.id === 'newcol') ACTIONS.savecol($('[data-act="savecol"]'));
   if ((e.key === 'Enter' || e.key === ',') && e.target.id === 'f-newtag') { e.preventDefault(); ACTIONS.tagnew(); }
