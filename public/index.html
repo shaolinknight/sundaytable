@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Sunday Table">
 <meta name="theme-color" content="#2E1F17">
 <meta name="format-detection" content="telephone=no">
@@ -823,11 +823,7 @@ body.locked .updbar,body.cooking .updbar{bottom:calc(var(--bot) + 12px)}
 .ver.offline{display:flex;align-items:flex-start;justify-content:center;gap:6px}
 .ver.offline svg.i{width:1rem;height:1rem;flex:none;color:var(--ok);margin-top:2px}
 
-/* 2.9: a solid strip along the very top. iPhone (iOS 26+) blurs the top of home-screen apps unless one solid-colored bar sits there.
-   It's the status bar's own color, so it just looks like the status bar's edge. */
-.topedge{position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top, 0px), 3px);background:var(--topedge,var(--ch));z-index:200;pointer-events:none;transition:background-color .2s}
-body.locked:not(.cooking) .topedge{filter:brightness(.6)}
-.readd ol{padding-left:1.2rem;margin:8px 0 14px}
+body.locked:not(.cooking) .readd ol{padding-left:1.2rem;margin:8px 0 14px}
 .readd li{margin:0 0 10px;line-height:1.4}
 .readd .copyrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
 .readd code{font-size:.8rem;background:var(--p2);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
@@ -904,7 +900,6 @@ body.cooking .sheet{z-index:81}
 </style>
 </head>
 <body>
-<div class="topedge" aria-hidden="true"></div>
 <div id="app" aria-busy="true">
   <header class="hdr">
     <h1 id="appname">Sunday Table</h1>
@@ -2201,7 +2196,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.13';
+var APP_VERSION = '2.14';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -2761,7 +2756,7 @@ function applyAppearance() {
     l.href = 'https://fonts.googleapis.com/css2?' + f.css + '&display=swap';
     document.head.appendChild(l);
   }
-  var meta = $('meta[name="theme-color"]'); if (meta) meta.setAttribute('content', c.ch);
+  STATUS_BASE = c.ch; setStatusColor(TOPEDGE_C || c.ch);
   document.title = st.appName || 'Sunday Table';
   var at = $('meta[name="apple-mobile-web-app-title"]'); if (at) at.setAttribute('content', st.appName || 'Sunday Table');
   var link = $('link[rel="apple-touch-icon"]');
@@ -2854,6 +2849,9 @@ var IC = {
   dollar: '<path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>'
 };
+/* the solid status bar (behind the clock) is painted in this color by iPhone: the header's, or the open recipe's */
+var STATUS_BASE = '', TOPEDGE_C = '';
+function setStatusColor(c) { var meta = $('meta[name="theme-color"]'); if (meta && c && meta.getAttribute('content') !== c) meta.setAttribute('content', c); }
 function icon(name, cls) { return '<svg class="i' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (IC[name] || '') + '</svg>'; }
 
 function tileHtml(r, cls) {
@@ -3188,7 +3186,7 @@ function bannerHtml() {
       '<button class="btn sm primary act" data-act="copyseed">Copy to sheet</button></div>';
   }
   if (needsReadd()) {
-    return '<div class="banner"><div class="wrap"><b>One more step for the new top bar.</b>Re-add Sunday Table to your Home Screen once so its color reaches the top of the screen.</div>' +
+    return '<div class="banner"><div class="wrap"><b>One step left to remove the blur at the top.</b>Re-add Sunday Table to your Home Screen once.</div>' +
       '<button class="btn sm primary act" data-act="readd">Show me</button></div>';
   }
   if (UI.syncState === 'err') {
@@ -3197,7 +3195,7 @@ function bannerHtml() {
   return '';
 }
 
-/** Still on the home screen from before 2.12 (an opaque status bar)? iPhone only reads that setting when the app is added. */
+/** An icon added with the old see-through status bar (that's what iPhone blurs)? iPhone only reads that setting when the app is added. */
 function needsReadd() {
   if (UI.readdOff) return false;
   try { if (localStorage.getItem('sundaytable.readd') === 'done') return false; } catch (e) { }
@@ -3206,11 +3204,11 @@ function needsReadd() {
     var p = document.createElement('div'); p.style.cssText = 'position:fixed;top:0;height:env(safe-area-inset-top,0px);visibility:hidden';
     document.body.appendChild(p); UI.topInset = p.getBoundingClientRect().height; p.remove();
   }
-  return UI.topInset < 1;
+  return UI.topInset > 0;      // the page runs under the clock: the icon was added with the see-through status bar
 }
 function openReadd() {
   var app = location.origin + location.pathname + (location.search || '');
-  var body = '<div class="readd"><p>iPhone only picks up the new top bar when the app is added to the Home Screen, so do this once:</p><ol>' +
+  var body = '<div class="readd"><p>iPhone only picks up the solid top bar (no blur) when the app is added to the Home Screen, so do this once:</p><ol>' +
     '<li>Check the header says <b>Saved</b>, so everything is in your sheet.</li>' +
     '<li>Copy your sheet link (you\'ll need it in step 5):<div class="copyrow"><button class="btn sm" data-act="copytext" data-t="' + esc(S.conn && S.conn.url || '') + '">Copy sheet link</button></div></li>' +
     '<li>Press and hold the Sunday Table icon on your Home Screen and remove it.</li>' +
@@ -3344,8 +3342,8 @@ function themeEl(el, r) {
   el.style.setProperty('--themet', '#FFF8EE');
   if (top) topEdge(darken(pigmentFor(r), 0.68));
 }
-/** The color behind the clock and battery: the header's, or the open recipe's. */
-function topEdge(c) { var s = document.documentElement.style; if (c) s.setProperty('--topedge', c); else s.removeProperty('--topedge'); }
+/** The color behind the clock and battery (iPhone's solid status bar): the header's, or the open recipe's. */
+function topEdge(c) { TOPEDGE_C = c || ''; setStatusColor(TOPEDGE_C || STATUS_BASE); }
 function forgetTicks(id) { if (id) { delete UI.checked[id]; delete UI.stepDone[id]; } }
 function openRecipe(id) {
   if (!byId(id)) return;
