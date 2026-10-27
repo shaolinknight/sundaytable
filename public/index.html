@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Sunday Table">
 <meta name="theme-color" content="#2E1F17">
 <meta name="format-detection" content="telephone=no">
@@ -825,7 +825,12 @@ body.locked .updbar,body.cooking .updbar{bottom:calc(var(--bot) + 12px)}
 
 /* 2.9: a solid strip along the very top. iPhone (iOS 26+) blurs the top of home-screen apps unless one solid-colored bar sits there.
    It's the status bar's own color, so it just looks like the status bar's edge. */
-.topedge{position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top, 0px) + 3px);background:var(--ch);z-index:200;pointer-events:none}
+.topedge{position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top, 0px), 3px);background:var(--topedge,var(--ch));z-index:200;pointer-events:none;transition:background-color .2s}
+body.locked:not(.cooking) .topedge{filter:brightness(.6)}
+.readd ol{padding-left:1.2rem;margin:8px 0 14px}
+.readd li{margin:0 0 10px;line-height:1.4}
+.readd .copyrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.readd code{font-size:.8rem;background:var(--p2);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
 body.cooking .scrim{z-index:80}
 body.cooking .sheet{z-index:81}
 
@@ -875,6 +880,26 @@ body.cooking .sheet{z-index:81}
 .madetag svg.i{width:.95em;height:.95em;stroke-width:3}
 .prow.made .nm{color:var(--t1)}
 .cal .mk i.m{box-shadow:0 0 0 1.5px var(--bg),0 0 0 3px var(--ok)}
+
+/* 2.11: compact blog posts */
+.posts{gap:8px}
+.post{gap:10px;padding:10px 34px 10px 10px;align-items:flex-start}
+.post .pimg{width:68px;height:68px;font-size:1.6rem}
+.post .psite{font-size:.75rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post h3{font-size:.95rem;line-height:1.25;margin:2px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post p{font-size:.82rem;line-height:1.3;margin:0 0 6px;-webkit-line-clamp:1}
+.post .pacts{display:flex;gap:6px;flex-wrap:wrap}
+.post .pacts .btn.sm{min-height:32px;padding:0 10px;font-size:.82rem;gap:5px}
+.post .pacts .btn.sm svg.i{width:.95rem;height:.95rem}
+.post .pacts .btn.ghost{border-color:transparent;padding:0 6px}
+.post .phide{top:2px;right:2px;width:34px;height:34px}
+#followsec .dhint:last-child{margin-bottom:0}
+@media (max-width:359px){.post .pimg{width:56px;height:56px}}
+.post .pimg{text-decoration:none}
+@media (max-width:359px){.post .pacts .w{display:none}.post .pacts{flex-wrap:nowrap}}
+
+/* 2.13: swipe from the left edge to go back from a recipe */
+.detailpane.edging{box-shadow:-14px 0 28px -10px rgba(0,0,0,.35)}
 
 </style>
 </head>
@@ -2176,7 +2201,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.10';
+var APP_VERSION = '2.13';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -3162,12 +3187,37 @@ function bannerHtml() {
     return '<div class="banner"><div class="wrap"><b>Your sheet "' + esc(S.sheetName) + '" is empty.</b>Copy the ' + S.recipes.length + ' recipes on this device into it?</div>' +
       '<button class="btn sm primary act" data-act="copyseed">Copy to sheet</button></div>';
   }
+  if (needsReadd()) {
+    return '<div class="banner"><div class="wrap"><b>One more step for the new top bar.</b>Re-add Sunday Table to your Home Screen once so its color reaches the top of the screen.</div>' +
+      '<button class="btn sm primary act" data-act="readd">Show me</button></div>';
+  }
   if (UI.syncState === 'err') {
     return '<div class="banner"><div class="wrap"><b>Changes aren\'t reaching your sheet.</b>' + esc(UI.syncMsg) + '</div><button class="btn sm act" data-act="settings" data-open="sheet">Fix</button></div>';
   }
   return '';
 }
 
+/** Still on the home screen from before 2.12 (an opaque status bar)? iPhone only reads that setting when the app is added. */
+function needsReadd() {
+  if (UI.readdOff) return false;
+  try { if (localStorage.getItem('sundaytable.readd') === 'done') return false; } catch (e) { }
+  if (!(navigator.standalone === true) || !/iPhone/.test(navigator.userAgent) || Math.max(screen.width, screen.height) < 812) return false;
+  if (UI.topInset === undefined) {
+    var p = document.createElement('div'); p.style.cssText = 'position:fixed;top:0;height:env(safe-area-inset-top,0px);visibility:hidden';
+    document.body.appendChild(p); UI.topInset = p.getBoundingClientRect().height; p.remove();
+  }
+  return UI.topInset < 1;
+}
+function openReadd() {
+  var app = location.origin + location.pathname + (location.search || '');
+  var body = '<div class="readd"><p>iPhone only picks up the new top bar when the app is added to the Home Screen, so do this once:</p><ol>' +
+    '<li>Check the header says <b>Saved</b>, so everything is in your sheet.</li>' +
+    '<li>Copy your sheet link (you\'ll need it in step 5):<div class="copyrow"><button class="btn sm" data-act="copytext" data-t="' + esc(S.conn && S.conn.url || '') + '">Copy sheet link</button></div></li>' +
+    '<li>Press and hold the Sunday Table icon on your Home Screen and remove it.</li>' +
+    '<li>Open <code>' + esc(app) + '</code> in Safari, tap Share → <b>Add to Home Screen</b> → Add.<div class="copyrow"><button class="btn sm" data-act="copytext" data-t="' + esc(app) + '">Copy app link</button></div></li>' +
+    '<li>Open the new icon, then Settings → Google Sheet: paste the sheet link, type your passphrase, Connect. Your recipes, plan and look come back.</li></ol></div>';
+  openSheet('readd', 'Re-add to Home Screen', body, '<button class="btn" data-act="readdoff">Not now</button><button class="btn primary" data-act="sheet-close">Got it</button>');
+}
 function renderList() {
   var pane = $('#listpane');
   var list = visibleRecipes(), fc = activeFilterCount();
@@ -3288,10 +3338,14 @@ function tickHint(id) {
 /** a recipe's color carries onto its page: the bar at the top takes a darker shade of it */
 function themeEl(el, r) {
   if (!el) return;
-  if (!r) { el.style.removeProperty('--themed'); el.style.removeProperty('--themet'); return; }
+  var top = el.id === 'cook' || (el.id === 'detailpane' && !isWide() && !UI.cook);
+  if (!r) { el.style.removeProperty('--themed'); el.style.removeProperty('--themet'); if (top) topEdge(''); return; }
   el.style.setProperty('--themed', darken(pigmentFor(r), 0.68));
   el.style.setProperty('--themet', '#FFF8EE');
+  if (top) topEdge(darken(pigmentFor(r), 0.68));
 }
+/** The color behind the clock and battery: the header's, or the open recipe's. */
+function topEdge(c) { var s = document.documentElement.style; if (c) s.setProperty('--topedge', c); else s.removeProperty('--topedge'); }
 function forgetTicks(id) { if (id) { delete UI.checked[id]; delete UI.stepDone[id]; } }
 function openRecipe(id) {
   if (!byId(id)) return;
@@ -3313,6 +3367,7 @@ function closeDetail() {
   forgetTicks(UI.openId);
   UI.openId = '';
   document.body.classList.remove('show-detail');
+  if (!UI.cook) topEdge('');
   if (isWide()) renderDetail();
 }
 
@@ -4381,12 +4436,14 @@ function renderDiscover(pane) {
   // new recipes from the blogs you follow
   var F = feedsLoad();
   if (!UI.discoverSeen) { UI.discoverSeen = true; F.seenBefore = F.seen || ''; F.seen = today(); feedsSave(); }
-  h += '<div id="followsec">' + followSectionHtml() + '</div>';
-  setTimeout(function () { refreshFeeds(false); }, 0);
   h += '<section class="card taste"><h2>Your taste</h2><p class="muted">From your ' + S.recipes.length + ' recipes, counting the ones you make often, favorite and rate highly more.</p>' +
     '<div class="tgrid">' + (tp.main.length ? '<div><h3>Main ingredients</h3><ul class="bars">' + bar(tp.main) + '</ul></div>' : '') +
     (tp.cuisine.length ? '<div><h3>Cuisines</h3><ul class="bars">' + bar(tp.cuisine) + '</ul></div>' : '') + '</div>' +
     (tp.flavors.length ? '<p class="flav"><b>Flavors you reach for:</b> ' + esc(tp.flavors.slice(0, 7).join(', ')) + '</p>' : '') + '</section>';
+
+  // new recipes from the blogs you follow, under your taste
+  h += '<div id="followsec">' + followSectionHtml() + '</div>';
+  setTimeout(function () { refreshFeeds(false); }, 0);
 
   // saved ideas
   var tryList = (S.settings.tryIdeas || []).map(function (n) { return IDEAS.filter(function (i) { return i.n === n; })[0]; }).filter(Boolean);
@@ -4588,9 +4645,9 @@ function postCard(p) {
     '<div class="pbody"><div class="psite">' + esc(p.site) + (it.date ? ' · ' + esc(postAge(it.date)) : '') + (isNew ? ' <span class="pnew">New</span>' : '') + '</div>' +
     '<h3><a href="' + esc(it.link) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a></h3>' +
     (it.summary ? '<p>' + esc(it.summary) + '</p>' : '') +
-    '<div class="btnrow">' + (have ? '<button class="btn sm" data-act="open" data-id="' + esc(have.id) + '">' + icon('check') + 'In your recipes</button>'
-      : '<button class="btn sm primary" data-act="postadd" data-u="' + esc(it.link) + '" data-site="' + esc(p.site) + '"' + (busy ? ' disabled' : '') + '>' + (busy ? '<span class="spin" aria-hidden="true"></span>Adding…' : icon('plus') + 'Add to my recipes') + '</button>') +
-    '<a class="btn sm" href="' + esc(it.link) + '" target="_blank" rel="noopener">' + icon('ext') + 'Read</a></div></div>' +
+    '<div class="pacts">' + (have ? '<button class="btn sm" data-act="open" data-id="' + esc(have.id) + '">' + icon('check') + 'In your recipes</button>'
+      : '<button class="btn sm primary" data-act="postadd" data-u="' + esc(it.link) + '" data-site="' + esc(p.site) + '"' + (busy ? ' disabled' : '') + '>' + (busy ? '<span class="spin" aria-hidden="true"></span>Adding…' : icon('plus') + 'Add<span class="w"> to recipes</span>') + '</button>') +
+    '<a class="btn sm ghost" href="' + esc(it.link) + '" target="_blank" rel="noopener">' + icon('ext') + 'Read</a></div></div>' +
     '<button class="iconbtn phide" data-act="posthide" data-u="' + esc(it.link) + '" aria-label="Hide ' + esc(it.title) + '" title="Not for me">' + icon('x') + '</button></article>';
 }
 function addPost(url, site) {
@@ -4613,7 +4670,7 @@ function followSectionHtml() {
   if (!follows.length) {
     return h + '<section class="card followcta"><p>Follow your favorite food blogs and their new recipes show up here. Add one with a tap.</p>' + followForm() + picksHtml(4) + '</section>';
   }
-  var posts = feedPosts(), F = feedsLoad(), more = UI.postsAll ? posts.length : 6;
+  var posts = feedPosts(), F = feedsLoad(), more = UI.postsAll ? posts.length : 8;
   if (why === 'connect') h += '<p class="dhint">Connect your Google Sheet (Settings → Google Sheet) to check for new posts.</p>';
   else if (why === 'script') h += '<p class="dhint">Update your sheet\'s script to version 6 to check for new posts (Settings → Google Sheet).</p>';
   else if (FEED_BUSY) h += '<p class="dhint"><span class="spin" aria-hidden="true"></span> Checking ' + follows.length + ' site' + (follows.length > 1 ? 's' : '') + ' for new recipes…</p>';
@@ -5920,6 +5977,49 @@ function enableDetailPull() {
   });
 }
 
+/* the recipe page: swipe in from the left edge to go back, from anywhere on the page (like Piggy) */
+function enableEdgeBack() {
+  var pane = $('#detailpane'), w = null, EDGE = 30;
+  var reduced = function () { return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; };
+  var ok = function () { return document.body.classList.contains('show-detail') && !isWide() && !UI.cook && !SHEET; };
+  pane.addEventListener('touchstart', function (e) {
+    w = null;
+    if (e.touches.length !== 1 || !ok() || e.touches[0].clientX > EDGE) return;
+    w = { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, t: Date.now(), on: false, pts: [] };
+  }, { passive: true });
+  pane.addEventListener('touchmove', function (e) {
+    if (!w) return;
+    var dx = e.touches[0].clientX - w.x, dy = e.touches[0].clientY - w.y;
+    w.pts.push({ x: e.touches[0].clientX, t: Date.now() }); if (w.pts.length > 12) w.pts.shift();
+    if (!w.on) {
+      if (Math.abs(dy) > 12 && Math.abs(dy) > dx) { w = null; return; }      // scrolling up or down: leave it alone
+      if (dx > 10) { w.on = true; pane.classList.add('dragging', 'edging'); if (isTextField(document.activeElement)) document.activeElement.blur(); }
+    }
+    if (w.on) { e.preventDefault(); w.dx = Math.max(0, dx - 10); pane.style.transform = 'translateX(' + w.dx + 'px)'; }
+  }, { passive: false });
+  var end = function () {
+    var g = w; w = null;
+    if (!g || !g.on) return;
+    pane.classList.remove('dragging');
+    // how fast the finger was moving at the end (the last tenth of a second), not on average
+    var now = Date.now(), last = g.pts[g.pts.length - 1], from = g.pts.filter(function (q) { return now - q.t <= 120; })[0] || g.pts[0];
+    var speed = last && from && last !== from ? (last.x - from.x) / Math.max(1, last.t - from.t) : 0;
+    var fast = g.dx > 40 && speed > 0.45;
+    if (g.dx > Math.min(110, window.innerWidth * 0.3) || fast) {
+      if (typeof haptic === 'function') haptic();
+      var done = function () { pane.style.transition = 'none'; closeDetail(); pane.style.transform = ''; pane.classList.remove('edging'); pane.offsetHeight; pane.style.transition = ''; };
+      if (reduced()) return done();
+      pane.style.transition = 'transform .18s ease-out'; pane.style.transform = 'translateX(100%)';
+      setTimeout(done, 180);
+    } else {
+      pane.style.transition = reduced() ? 'none' : 'transform .2s cubic-bezier(.2,.8,.2,1)'; pane.style.transform = 'translateX(0)';
+      setTimeout(function () { pane.style.transition = ''; pane.style.transform = ''; pane.classList.remove('edging'); }, 210);
+    }
+  };
+  pane.addEventListener('touchend', end);
+  pane.addEventListener('touchcancel', end);
+}
+
 /* ===================== settings ===================== */
 function openSettings(openKey) {
   UI.open = {};                       // always start at the top with everything closed
@@ -6311,6 +6411,7 @@ function closeCook() {
   var el = $('#cook'); if (el) el.remove();
   UI.cook = null;
   document.body.classList.remove('cooking');
+  topEdge('');
   if (UI.openId) renderDetail();          // servings may have changed while cooking
   if (!SHEET) document.body.classList.remove('locked');
   releaseAwake();
@@ -6531,6 +6632,14 @@ var ACTIONS = {
   },
   cooksv: function (t) { var c = UI.cook, cur = c.steps[c.i], r = byId(cur ? cur.rid : c.id) || byId(c.id); UI.scale[r.id] = stepScale(r, scaleFor(r), +t.getAttribute('data-d')); renderCook(); },
   cooktwo: function () { openCookTwoPicker(); },
+  readd: function () { openReadd(); },
+  readdoff: function () { UI.readdOff = true; closeSheet(); render(); },
+  copytext: function (t) {
+    var v = t.getAttribute('data-t') || '';
+    var ok = function () { var was = t.textContent; t.textContent = 'Copied'; setTimeout(function () { t.textContent = was; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () { toast(v); });
+    else toast(v);
+  },
   follow: function () { var i = $('#followurl'); followSite(i ? i.value : ''); },
   followpick: function (t) { followSite(t.getAttribute('data-u')); },
   unfollow: function (t) { unfollowSite(t.getAttribute('data-k')); },
@@ -7174,6 +7283,7 @@ function start() {
     if (wq.addEventListener) wq.addEventListener('change', onWide); else if (wq.addListener) wq.addListener(onWide);
   }
   enableDetailPull();
+  enableEdgeBack();
   $('#detailpane').addEventListener('scroll', function () {
     var b = $('#dbar'); if (b) b.classList.toggle('scrolled', this.scrollTop > 150);
   }, { passive: true });
