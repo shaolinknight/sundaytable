@@ -897,6 +897,21 @@ body.cooking .sheet{z-index:81}
 /* 2.13: swipe from the left edge to go back from a recipe */
 .detailpane.edging{box-shadow:-14px 0 28px -10px rgba(0,0,0,.35)}
 
+/* 2.15: editing shows you where you are */
+#f-ing,#f-steps{min-height:216px}
+textarea.grow{transition:height .12s ease;overflow-y:auto}
+.sec-h .secedit{display:inline-flex;align-items:center;gap:4px;font-size:.9rem;margin-left:8px;padding:6px 4px}
+.sec-h .secedit svg.i{width:1rem;height:1rem}
+.sec-h .stepper{margin-left:auto}
+.stephint{font-size:.85rem;margin:-4px 0 8px}
+#sec-ing,#sec-steps,#sec-notes,#sec-keeps,#sec-tags,#sec-source{scroll-margin-top:76px}
+.justedited{animation:justedited 1.8s ease-out}
+@keyframes justedited{0%,30%{box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 55%,transparent),var(--shadow,0 0 0 transparent)}100%{box-shadow:0 0 0 3px transparent,var(--shadow,0 0 0 transparent)}}
+li.justedited,.prow.justedited{animation:justrow 1.8s ease-out}
+@keyframes justrow{0%,30%{background:color-mix(in srgb,var(--ac) 16%,transparent)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.justedited,li.justedited,.prow.justedited{animation:none;outline:3px solid color-mix(in srgb,var(--ac) 45%,transparent);outline-offset:2px}}
+#sec-ing .sec-h,#sec-steps .sec-h{justify-content:flex-start}
+
 </style>
 </head>
 <body>
@@ -2196,7 +2211,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.14';
+var APP_VERSION = '2.15';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -3416,7 +3431,8 @@ function renderDetail() {
   var ings = ingredientRows(r.ingredients, f, metric);
   var checked = UI.checked[r.id] || {};
   var scaleLabel = servingsText(r, f);
-  h += '<div class="cols"><section class="ingcol"><div class="sec-h"><h2>Ingredients</h2>' +
+  var secEdit = function (k) { return shared ? '' : '<button class="linkbtn secedit" data-act="edit" data-id="' + esc(r.id) + '" data-focus="' + k + '" aria-label="Edit ' + (k === 'ing' ? 'ingredients' : 'steps') + '">' + icon('edit') + 'Edit</button>'; };
+  h += '<div class="cols"><section class="ingcol" id="sec-ing"><div class="sec-h"><h2>Ingredients</h2>' + secEdit('ing') +
     (r.servings || ings.some(function (x) { return x.amt; }) ? '<span class="stepper" role="group" aria-label="Amount"><button data-act="scale" data-d="-1" aria-label="Less">−</button><span class="v" aria-live="polite">' + esc(scaleLabel) + '</span><button data-act="scale" data-d="1" aria-label="More">+</button></span>' : '') + '</div>';
   if (f !== 1) h += '<p class="muted" style="margin:-2px 0 8px;font-size:.88rem">Amounts here, in the steps, in Cook mode and on your list follow this. The recipe as written ' + esc(servingsText(r, 1).toLowerCase()) + '. <button class="linkbtn" data-act="scale" data-d="0">Back to original</button></p>';
   h += '<div class="card">' + (ings.length ? ingListHtml(r, ings, checked) : '<p class="muted" style="margin:0">No ingredients yet.</p>') + '</div>' +
@@ -3424,8 +3440,8 @@ function renderDetail() {
 
   // steps
   var steps = stepRows(r.steps), done = UI.stepDone[r.id] || {};
-  h += '<section><div class="sec-h"><h2>Steps</h2>' + (steps.length ? '<span class="muted" style="font-size:.85rem">Tap a step to mark it done</span>' : '') + '</div><div class="card">';
-  if (!steps.length) h += '<p class="muted" style="margin:0">No steps yet. <button class="linkbtn" data-act="edit" data-id="' + esc(r.id) + '">Add them</button></p>';
+  h += '<section id="sec-steps"><div class="sec-h"><h2>Steps</h2>' + secEdit('steps') + '</div>' + (steps.length ? '<p class="muted stephint">Tap a step to mark it done</p>' : '') + '<div class="card">';
+  if (!steps.length) h += '<p class="muted" style="margin:0">No steps yet. <button class="linkbtn" data-act="edit" data-id="' + esc(r.id) + '" data-focus="steps">Add them</button></p>';
   else {
     h += '<ol class="steps">';
     steps.forEach(function (s) {
@@ -3439,7 +3455,7 @@ function renderDetail() {
 
   // notes, rating, history, source
   h += nutritionBlock(r, shared);
-  if (r.notes || !shared) h += '<div class="block"><h3>Notes</h3>' + (r.notes ? '<div class="card"><p class="notes">' + esc(prettyFractions(r.notes)) + '</p></div>' : '<p class="muted">No notes. <button class="linkbtn" data-act="edit" data-id="' + esc(r.id) + '" data-focus="notes">Add a note</button></p>') + '</div>';
+  if (r.notes || !shared) h += '<div class="block" id="sec-notes"><h3>Notes</h3>' + (r.notes ? '<div class="card"><p class="notes">' + esc(prettyFractions(r.notes)) + '</p></div>' : '<p class="muted">No notes. <button class="linkbtn" data-act="edit" data-id="' + esc(r.id) + '" data-focus="notes">Add a note</button></p>') + '</div>';
   if (!shared) h += freqBlock(r);
   h += '<div class="block ratingblock"><h3>Your rating</h3><div class="stars" role="group" aria-label="Rating">';
   for (var i = 1; i <= 5; i++) h += '<button class="' + (i <= r.rating ? 'on' : '') + '" data-act="rate" data-id="' + esc(r.id) + '" data-v="' + i + '" aria-label="' + i + ' star' + (i > 1 ? 's' : '') + '" aria-pressed="' + (i <= r.rating) + '">' + icon('star') + '</button>';
@@ -3454,10 +3470,10 @@ function renderDetail() {
   h += '<div class="block colblock"><h3>Collections</h3><div class="chiprow">' + cl.map(function (c) {
     return '<button class="chip" data-act="togglecol" data-id="' + esc(r.id) + '" data-col="' + esc(c) + '" aria-pressed="' + (r.cols.indexOf(c) >= 0) + '">' + esc(c) + '</button>';
   }).join('') + '<button class="chip ghostchip" data-act="newcol" data-id="' + esc(r.id) + '">+ New collection</button></div></div>';
-  if (r.tags.length && !shared) h += '<div class="block"><h3>Tags</h3><div class="tags">' + r.tags.map(function (x) { return '<button class="tagchip" data-act="tagfilter" data-tag="' + esc(x.toLowerCase()) + '">' + esc(x) + '</button>'; }).join('') + '</div></div>';
+  if (r.tags.length && !shared) h += '<div class="block" id="sec-tags"><h3>Tags</h3><div class="tags">' + r.tags.map(function (x) { return '<button class="tagchip" data-act="tagfilter" data-tag="' + esc(x.toLowerCase()) + '">' + esc(x) + '</button>'; }).join('') + '</div></div>';
   if (r.source && !(shared && /docs\.google\.com/.test(r.source))) {
     var isDoc = /docs\.google\.com/.test(r.source), isUrl = /^https?:\/\//.test(r.source);
-    h += '<div class="block"><h3>Source</h3>' + (isUrl ? '<a class="btn sm" href="' + esc(r.source) + '" target="_blank" rel="noopener">' + icon('ext') + (isDoc ? 'Open the original Google Doc' : 'Open the original page') + '</a>' : '<p class="wrap">' + esc(r.source) + '</p>') + '</div>';
+    h += '<div class="block" id="sec-source"><h3>Source</h3>' + (isUrl ? '<a class="btn sm" href="' + esc(r.source) + '" target="_blank" rel="noopener">' + icon('ext') + (isDoc ? 'Open the original Google Doc' : 'Open the original page') + '</a>' : '<p class="wrap">' + esc(r.source) + '</p>') + '</div>';
   }
   if (!shared) h += '<p class="muted" style="font-size:.82rem;margin-top:28px">Added ' + esc(niceDate(r.added) || r.added) + '</p></div>';
   pane.innerHTML = h;
@@ -3508,7 +3524,7 @@ function nutritionBlock(r, shared) {
 
 function freqBlock(r) {
   var sug = r.freq ? null : suggestFreq(r);
-  var h = '<div class="block freqblock"><h3>Meal prep</h3><p class="flabel" style="margin-top:0">How often you make it</p><div class="seg" role="group" aria-label="How often you make it">' +
+  var h = '<div class="block freqblock" id="sec-keeps"><h3>Meal prep</h3><p class="flabel" style="margin-top:0">How often you make it</p><div class="seg" role="group" aria-label="How often you make it">' +
     FREQ.map(function (f) { return '<button data-act="setfreq" data-id="' + esc(r.id) + '" data-v="' + f[0] + '" aria-pressed="' + (r.freq === f[0]) + '"' + (sug && sug.k === f[0] ? ' class="sugg"' : '') + '>' + f[1] + '</button>'; }).join('') + '</div>';
   if (sug) h += '<p class="hint">' + esc(sug.why) + ' <b>' + esc(freqLabel(sug.k)) + '</b> fits. <button class="linkbtn" data-act="setfreq" data-id="' + esc(r.id) + '" data-v="' + sug.k + '">Use that</button></p>';
   else if (r.freq === 'weekly') h += '<p class="hint">"Add my regulars" on the Plan tab puts it on your prep day.</p>';
@@ -3530,6 +3546,39 @@ function stepTextHtml(text, r) {
     return '<button class="tmr" data-act="timer" data-sec="' + p.sec + '" data-label="' + esc(r.title + ': ' + t) + '">' + icon('clock') + esc(t) + '</button>';
   }).join('');
 }
+
+/* ---------- after saving, show what you changed ---------- */
+function reduceMotion() { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+/** Scroll something into view (centered if it fits, otherwise its top near the top) and give it a brief glow. */
+function reveal(el, opts) {
+  if (!el) return;
+  opts = opts || {};
+  var vh = window.visualViewport ? visualViewport.height : window.innerHeight;
+  var tall = el.getBoundingClientRect().height > vh * 0.6;
+  try { el.scrollIntoView({ block: tall ? 'start' : 'center', behavior: reduceMotion() ? 'auto' : 'smooth' }); } catch (e) { el.scrollIntoView(); }
+  if (opts.flash === false) return;
+  var box = el.querySelector(':scope > .card') || el;
+  box.classList.remove('justedited'); void box.offsetWidth; box.classList.add('justedited');
+  setTimeout(function () { box.classList.remove('justedited'); }, 1900);
+}
+/** The recipe page section for what you changed: 'top', 'ing', 'steps', 'notes', 'keeps', 'tags', 'source'. */
+function revealSection(sec) {
+  var pane = $('#detailpane'); if (!pane) return;
+  if (!sec || sec === 'top') { pane.scrollTo({ top: 0, behavior: reduceMotion() ? 'auto' : 'smooth' }); var hero = $('.hero, .dhead, .dbody > :first-child', pane); if (hero && sec === 'top') { hero.classList.add('justedited'); setTimeout(function () { hero.classList.remove('justedited'); }, 1900); } return; }
+  reveal($('#sec-' + sec, pane));
+}
+/** A row you just edited in a list (pantry, shopping, plan, fridge, history): scroll to it and glow. */
+function revealItem(id) {
+  if (!id) return;
+  var scope = [$('#listpane'), $('#detailpane')], el = null;
+  scope.forEach(function (sc) {
+    if (el || !sc) return;
+    $$('[data-id="' + String(id).replace(/"/g, '') + '"]', sc).some(function (x) { if (x.offsetParent !== null) { el = x; return true; } return false; });
+  });
+  if (!el) return;
+  reveal(el.closest('li, .prow, .fitem, .day') || el);
+}
+function afterRender(fn) { requestAnimationFrame(function () { setTimeout(fn, 60); }); }
 
 /* ===================== plan the week ===================== */
 function weekDays(offset) {
@@ -5028,20 +5077,28 @@ function openEditor(id, draft, focusField) {
     '<div class="field"><span class="flabel" id="taglbl">Tags</span><input class="sr" id="f-tags" value="' + esc(v.tags.join(', ')) + '" tabindex="-1" aria-hidden="true">' +
     '<div class="tagedit" id="tagedit" aria-labelledby="taglbl">' + tagEditHtml(v.tags, v) + '</div></div>' +
     '<div class="field"><span class="flabel">Color</span><div class="colorpick" id="colorpick" role="group" aria-label="Recipe color">' + colorPickHtml(v) + '</div></div>' +
-    '<div class="field"><label for="f-ing">Ingredients</label><textarea class="inp" id="f-ing" rows="8" placeholder="One per line, like:\n2 cups flour\n1 tsp salt\n\nSauce:\n2 tbsp soy sauce">' + esc(v.ingredients) + '</textarea>' +
+    '<div class="field"><label for="f-ing">Ingredients</label><textarea class="inp grow" id="f-ing" rows="10" placeholder="One per line, like:\n2 cups flour\n1 tsp salt\n\nSauce:\n2 tbsp soy sauce">' + esc(v.ingredients) + '</textarea>' +
     '<p class="hint">One per line, amount first. A short line ending in ":" starts a section, like "Sauce:".</p></div>' +
-    '<div class="field"><label for="f-steps">Steps</label><textarea class="inp" id="f-steps" rows="8" placeholder="One step per line">' + esc(v.steps) + '</textarea>' +
+    '<div class="field"><label for="f-steps">Steps</label><textarea class="inp grow" id="f-steps" rows="10" placeholder="One step per line">' + esc(v.steps) + '</textarea>' +
     '<p class="hint">One step per line. Start a line with "- " to add a tip under the step above. Times like "10 min" become tap-to-start timers.</p></div>' +
-    '<div class="field"><label for="f-notes">Notes</label><textarea class="inp" id="f-notes" rows="3" style="min-height:90px" placeholder="Less salt next time…">' + esc(v.notes) + '</textarea></div>' +
+    '<div class="field"><label for="f-notes">Notes</label><textarea class="inp grow" id="f-notes" rows="4" style="min-height:110px" placeholder="Less salt next time…">' + esc(v.notes) + '</textarea></div>' +
     '<div class="field"><label for="f-source">Source link</label><input class="inp" id="f-source" type="url" inputmode="url" value="' + esc(v.source) + '" autocomplete="off"></div>';
   if (!isNew) body += '<div class="btnrow" style="margin-top:20px"><button class="btn danger" data-act="delrecipe" data-id="' + esc(v.id) + '" data-confirm="1">Delete recipe</button></div>';
   var foot = (isNew ? '<button class="btn" data-act="saveform" data-more="1">Save &amp; new</button>' : '') +
     '<button class="btn primary" data-act="saveform">Save</button>';
   var el = openSheet('edit', isNew ? 'New recipe' : 'Edit recipe', body, foot, { dirty: formDirty, autosave: isNew ? formAutosave : null, full: true });
   FORM.start = JSON.stringify(readForm());
+  FORM.focus = focusField || '';
+  $$('textarea.grow', el).forEach(sizeBox);
   // iOS only shows the keyboard when focus happens inside the tap
   var first = focusField ? $('#f-' + focusField, el) : (isNew ? $('#f-link', el) : null);
-  if (first) first.focus();
+  if (first) {
+    try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
+    if (focusField) {
+      if (first.tagName === 'TEXTAREA') { var n = first.value.length; try { first.setSelectionRange(n, n); } catch (e) { } }
+      showField(first);
+    }
+  }
   return el;
 }
 
@@ -5200,12 +5257,51 @@ function submitForm(more) {
   if (!once('saveform', 600)) return;
   var v = readForm();
   if (!v.title) { var t = $('#f-title'); t.focus(); t.style.borderColor = 'var(--bad)'; toast('Give the recipe a title first'); return; }
-  var wasNew = FORM.isNew, already = FORM.saved;
+  var wasNew = FORM.isNew, already = FORM.saved, sec = changedSection(FORM.start, v, FORM.focus);
   var r = commitForm(wasNew && !already ? 'Added ' + v.title : 'Saved');
   closeSheet(false, true);
   if (more) { render(); openEditor(null, null, 'title'); return; }
   render();
-  if (wasNew || !UI.openId) openRecipe(r.id);
+  if (wasNew || !UI.openId) { openRecipe(r.id); return; }
+  if (UI.openId === r.id) afterRender(function () { revealSection(sec); });
+}
+
+/** Which part of the recipe page to show after saving: the first thing you changed, in page order (or what you opened the editor for). */
+function changedSection(startJson, now, focus) {
+  var was = {}; try { was = JSON.parse(startJson || '{}'); } catch (e) { }
+  var diff = function (k) { return JSON.stringify(was[k]) !== JSON.stringify(now[k]); };
+  var order = [['top', ['title', 'servings', 'unit', 'prep', 'cook', 'color', '_photoData', 'photo']], ['ing', ['ingredients']], ['steps', ['steps']], ['notes', ['notes']],
+    ['keeps', ['freq', 'keeps', 'freezes']], ['tags', ['tags']], ['source', ['source']]];
+  var changed = order.filter(function (o) { return o[1].some(diff); }).map(function (o) { return o[0]; });
+  var want = { ing: 'ing', steps: 'steps', notes: 'notes', keeps: 'keeps', title: 'top' }[focus];
+  if (want && changed.indexOf(want) >= 0) return want;
+  return changed[0] || want || '';
+}
+/** A text box tall enough for what's in it (two lines spare), but never taller than the screen you can see. */
+function sizeBox(t) {
+  if (!t || !t.classList.contains('grow')) return;
+  var vh = window.visualViewport ? visualViewport.height : window.innerHeight;
+  var max = Math.max(200, Math.round(vh * (document.body.classList.contains('kb') ? 0.62 : 0.6)));
+  t.style.height = 'auto';
+  var lh = parseFloat(getComputedStyle(t).lineHeight) || 23;
+  t.style.height = Math.min(max, Math.max(t.scrollHeight + lh * 2, parseFloat(getComputedStyle(t).minHeight) || 0)) + 'px';
+}
+/** Scroll the editor so a box and its label are fully in view (again once the keyboard has opened). */
+function showField(inp) {
+  var sb = inp && inp.closest('.sh-b'); if (!sb) return;
+  var fieldEl = inp.closest('.field') || inp;
+  var go = function () {
+    sizeBox(inp);
+    var top = fieldEl.getBoundingClientRect().top - sb.getBoundingClientRect().top + sb.scrollTop - 8;
+    sb.scrollTo({ top: Math.max(0, top), behavior: reduceMotion() ? 'auto' : 'smooth' });
+  };
+  go();
+  if (window.visualViewport) {
+    var once1 = function () { visualViewport.removeEventListener('resize', once1); setTimeout(go, 80); };
+    visualViewport.addEventListener('resize', once1);
+    setTimeout(function () { visualViewport.removeEventListener('resize', once1); }, 1200);
+  }
+  setTimeout(go, 450);
 }
 
 /** Shrink a phone photo before saving (big photos upload slowly and fill storage). */
@@ -6753,7 +6849,7 @@ var ACTIONS = {
     var c = S.cooked.filter(function (x) { return x.id === id; })[0]; if (!c) return;
     var n = clone(c); n.date = $('#c-date').value || c.date; n.note = $('#c-note').value.trim();
     var undo = clone(c);
-    queue({ op: 'cook', entry: n }); closeSheet(); render();
+    queue({ op: 'cook', entry: n }); closeSheet(); render(); afterRender(function () { revealItem(n.id); });
     toast('Saved', function () { queue({ op: 'cook', entry: undo }); render(); });
   },
   uncook: function (t, id) {
@@ -6881,7 +6977,7 @@ var ACTIONS = {
     var isNew = UI.left.isNew;
     closeSheet();
     tableQueue('fridge', [clone(it)], [], isNew ? 'Added ' + it.name + ' to the fridge' : 'Saved');
-    render();
+    render(); afterRender(function () { revealItem(it.id); });
   },
   leftskip: function () { closeSheet(); },
   leftdel: function (t, id) { UI.leftReturn = ''; closeSheet(); tableQueue('fridge', [], [id], 'Removed from the fridge'); render(); },
@@ -6936,7 +7032,7 @@ var ACTIONS = {
     var p = byIdIn(S.pantry, id); if (!p) return;
     var n = clone(p); n.name = $('#pe-name').value.trim() || p.name; n.status = UI.pedit.status; n.useBy = $('#pe-useby').value || ''; n.section = $('#pe-sec').value;
     if (n.section !== p.section) { var m = clone(S.settings.aisleMap || {}); m[itemKey(n.name)] = n.section; setSetting('aisleMap', m); }
-    closeSheet(); tableQueue('pantry', [n], [], 'Saved'); render();
+    closeSheet(); tableQueue('pantry', [n], [], 'Saved'); render(); afterRender(function () { revealItem(n.id); });
   },
   pdel: function (t, id) { closeSheet(); tableQueue('pantry', [], [id], 'Removed from your pantry'); render(); },
   restock: function () {
@@ -6972,7 +7068,7 @@ var ACTIONS = {
   pedate: function (t) { UI.planEdit.date = t.getAttribute('data-day'); $('#pe-body').innerHTML = planEntryBody(); },
   saveplan: function () {
     var e = UI.planEdit, before = clone(byIdIn(S.plan, e.id));
-    queue({ op: 'plan', entry: clone(e) }); closeSheet(); render();
+    queue({ op: 'plan', entry: clone(e) }); closeSheet(); render(); afterRender(function () { revealItem(e.id); });
     toast('Saved', function () { queue({ op: 'plan', entry: before }); render(); });
   },
   unplan: function (t, id) {
@@ -7027,7 +7123,7 @@ var ACTIONS = {
       tableQueue('prices', [{ id: ex ? ex.id : newId('$_'), name: n.name, price: pr, amount: n.amount, date: today() }], []);
     }
     if (n.section !== it.section) { var m = clone(S.settings.aisleMap || {}); m[itemKey(n.name)] = n.section; setSetting('aisleMap', m); }
-    closeSheet(); shopQueue([n], [], 'Saved'); render();
+    closeSheet(); shopQueue([n], [], 'Saved'); render(); afterRender(function () { revealItem(n.id); });
   },
   shopdel: function (t, id) { closeSheet(); shopQueue([], [id], 'Removed'); render(); },
   clearchecked: function () {
@@ -7135,6 +7231,7 @@ function alreadyHave(r) {
 var NAME_T = null;
 document.addEventListener('input', function (e) {
   var t = e.target;
+  if (t.classList && t.classList.contains('grow')) sizeBox(t);
   if (t.id === 'q') {
     UI.q = t.value; syncClearBtn();
     clearTimeout(t._t);
@@ -7327,6 +7424,10 @@ function offlineLineHtml() {
   if (!('serviceWorker' in navigator)) return 'This browser can\'t keep a copy for offline use.';
   return offlineReady() ? icon('check') + 'Saved on this ' + (isWide() ? 'iPad' : 'phone') + ': opens instantly and works without a connection.' : 'Getting ready to work offline…';
 }
+document.addEventListener('focusin', function (e) {
+  var t = e.target;
+  if (t && t.matches && t.matches('#sheet-edit textarea.grow') && !t._shown) { t._shown = true; showField(t); setTimeout(function () { t._shown = false; }, 1500); }
+});
 start();
 
 </script>
