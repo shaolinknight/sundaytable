@@ -802,7 +802,7 @@ body.kb .toast{bottom:auto;top:calc(var(--vvtop,0px) + var(--vvh,100%) - 76px)}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
 @keyframes pressok{0%{transform:scale(1)}35%{transform:scale(.95)}100%{transform:scale(1)}}
 .listpane.pane-in{animation:panein .24s cubic-bezier(.2,.8,.2,1)}
-@keyframes panein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes panein{from{opacity:0}to{opacity:1}}
 .cook{animation:cookin .3s cubic-bezier(.2,.8,.2,1)}
 @keyframes cookin{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 .cook .cin.from-next{animation:stepnext .26s cubic-bezier(.2,.8,.2,1)}
@@ -911,6 +911,33 @@ li.justedited,.prow.justedited{animation:justrow 1.8s ease-out}
 @keyframes justrow{0%,30%{background:color-mix(in srgb,var(--ac) 16%,transparent)}100%{background:transparent}}
 @media (prefers-reduced-motion:reduce){.justedited,li.justedited,.prow.justedited{animation:none;outline:3px solid color-mix(in srgb,var(--ac) 45%,transparent);outline-offset:2px}}
 #sec-ing .sec-h,#sec-steps .sec-h{justify-content:flex-start}
+
+/* 2.16: one sheet for every meal on the plan, a one-tap "made it" check, a picker that opens at the top */
+.pwrap{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--b1)}
+.pwrap .prow{border-bottom:0;flex:1;min-width:0}
+.madechk{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--t3);transition:background-color .18s,color .18s,transform .18s}
+.madechk svg.i{width:22px;height:22px;padding:3px;border-radius:50%;border:2px solid currentColor;stroke-width:3;box-sizing:content-box;transition:inherit}
+.madechk svg.i{stroke:transparent}
+.madechk[aria-pressed="true"]{color:var(--ok)}
+.madechk[aria-pressed="true"] svg.i{background:var(--ok);border-color:var(--ok);stroke:#fff}
+.madechk:active{transform:scale(.9)}
+.madetoggle{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:var(--r1);border:1.5px solid var(--b1);background:var(--p1);transition:background-color .2s,border-color .2s}
+.madetoggle .mk{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--t3);display:grid;place-items:center;transition:inherit}
+.madetoggle .mk svg.i{width:18px;height:18px;stroke:transparent;stroke-width:3}
+.madetoggle .tx{flex:1;min-width:0}
+.madetoggle b{display:block}
+.madetoggle .tx span{display:block;color:var(--t3);font-size:.85rem}
+.madetoggle[aria-pressed="true"]{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--p1))}
+.madetoggle[aria-pressed="true"] .mk{background:var(--ok);border-color:var(--ok)}
+.madetoggle[aria-pressed="true"] .mk svg.i{stroke:#fff}
+/* iPhone draws date boxes wider than their column unless told not to */
+input[type=date].inp{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;text-align:left;line-height:1.3}
+input[type=date].inp::-webkit-date-and-time-value{text-align:left}
+#sheet-meal .sh-b{overflow-x:hidden}
+#sheet-meal .pegrid{margin-top:14px}
+@media (max-width:420px){#sheet-meal .pegrid{flex-direction:column}}
+/* the search bar stays at the top of a recipe picker */
+#sheet-pick .sh-b .search{position:sticky;top:-4px;z-index:2;margin-top:0;padding:8px 0 10px;background:var(--bg)}
 
 </style>
 </head>
@@ -2211,7 +2238,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.15';
+var APP_VERSION = '2.16';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -3149,6 +3176,7 @@ function testEmail() {
 /* ===================== rendering: main screens ===================== */
 function render() {
   CACHE = {};
+  var keep = holdPlace();
   renderHeader();
   renderTabs();
   if (UI.tab === 'history') renderHistory();
@@ -3159,6 +3187,64 @@ function render() {
   var fab = $('#fab'); if (fab) fab.hidden = UI.tab !== 'recipes' || UI.selecting;
   renderDetail();
   renderSelBar();
+  keep();
+}
+
+/* ---------- keep your place when the page redraws ----------
+   iPhone Safari doesn't hold the scroll position steady when a list above you changes, so the
+   page jumps. Before a redraw, note the first thing you can see; afterwards, put it back where it was. */
+var LAST_VIEW = '';
+function listScroller() {
+  var lp = $('#listpane');
+  if (lp && lp.scrollHeight > lp.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(lp).overflowY)) return lp;
+  return null;   // the window
+}
+function anchorKey(el) {
+  var k = el.getAttribute('data-id') || el.getAttribute('data-day') || el.id || '';
+  return k ? el.tagName + '|' + (el.getAttribute('data-act') || '') + '|' + k : '';
+}
+function findAnchor(root, topLine) {
+  var els = $$('[data-id],[data-day],h2[id],section[id],.day[id]', root);
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i]; if (el.offsetParent === null) continue;
+    var r = el.getBoundingClientRect();
+    if (r.bottom > topLine + 4 && r.height > 0) { var k = anchorKey(el); if (k) return { k: k, top: r.top }; }
+  }
+  return null;
+}
+function findByKey(root, k) {
+  var parts = k.split('|'), els = $$(parts[0], root);
+  for (var i = 0; i < els.length; i++) if (anchorKey(els[i]) === k && els[i].offsetParent !== null) return els[i];
+  return null;
+}
+function holdPlace() {
+  var view = UI.tab + '|' + (UI.planView || '') + '|' + (UI.week || 0) + '|' + (UI.monthOff || 0);
+  var same = view === LAST_VIEW; LAST_VIEW = view;
+  var spots = [];
+  try {
+    var lp = $('#listpane');
+    if (same && lp && !document.body.classList.contains('show-detail')) {
+      var sc = listScroller(), y = sc ? sc.scrollTop : window.scrollY;
+      if (y > 4) {
+        var hdr = $('.hdr'), hb = sc ? sc.getBoundingClientRect().top : (hdr ? Math.max(0, hdr.getBoundingClientRect().bottom) : 0);
+        var a = findAnchor(lp, hb); if (a) spots.push({ root: lp, sc: sc, a: a });
+      }
+    }
+    var dp = $('#detailpane'), oid = UI.openId;
+    if (dp && oid && dp.scrollTop > 4 && dp.getAttribute('data-shown') === oid) {
+      var top = dp.getBoundingClientRect().top + (($('#dbar', dp) || {}).offsetHeight || 0);
+      var b = findAnchor(dp, top); if (b) spots.push({ root: dp, sc: dp, a: b });
+    }
+  } catch (e) { spots = []; }
+  return function () {
+    var dp = $('#detailpane'); if (dp) dp.setAttribute('data-shown', UI.openId || '');
+    spots.forEach(function (s) {
+      var el = findByKey(s.root, s.a.k); if (!el) return;
+      var d = el.getBoundingClientRect().top - s.a.top;
+      if (Math.abs(d) < 1) return;
+      if (s.sc) s.sc.scrollTop += d; else window.scrollBy(0, d);
+    });
+  };
 }
 
 function renderHeader() {
@@ -3624,20 +3710,25 @@ function servingsLabel(e, r) {
   return e.servings && +e.servings !== 1 ? '×' + fmtNum(+e.servings) + ' batch' : '';
 }
 
+function madeCheck(planId, cookedId, on, title) {
+  return '<button class="madechk" data-act="mealcheck" data-id="' + esc(planId) + '" data-c="' + esc(cookedId) + '" aria-pressed="' + on + '" aria-label="' + esc((on ? 'Made ' : 'Mark as made: ') + title) + '">' + icon('check') + '</button>';
+}
 function dayHtml(d) {
   var t = today(), entries = planFor(d), past = d < t, rows = dayMeals(d);
   var h = '<section class="day' + (d === t ? ' today' : '') + (past ? ' past' : '') + '"><div class="dayh"><h2>' + esc(dayLabel(d, true)) + '</h2>' + (d === t ? '<span class="badge">Today</span>' : '') + '</div>';
   rows.forEach(function (x) {
     if (x.c) {   // made, without being planned
       var rc = byId(x.c.rid);
-      h += '<button class="prow made" data-act="cookedopen" data-id="' + esc(x.c.id) + '">' + (rc ? tileHtml(rc) : '<span class="tile" style="--pig:#6A4E3A"><span class="lt">' + esc((x.c.title || '?').charAt(0)) + '</span></span>') +
-        '<span class="info"><span class="nm">' + esc(rc ? rc.title : (x.c.title || 'Deleted recipe')) + '</span><span class="sub"><span class="madetag">' + icon('check') + 'Made</span>' + (x.c.note ? ' · ' + esc(x.c.note) : '') + '</span></span></button>';
+      h += '<div class="pwrap"><button class="prow made" data-act="cookedopen" data-id="' + esc(x.c.id) + '">' + (rc ? tileHtml(rc) : '<span class="tile" style="--pig:#6A4E3A"><span class="lt">' + esc((x.c.title || '?').charAt(0)) + '</span></span>') +
+        '<span class="info"><span class="nm">' + esc(rc ? rc.title : (x.c.title || 'Deleted recipe')) + '</span><span class="sub"><span class="madetag">' + icon('check') + 'Made</span>' + (x.c.note ? ' · ' + esc(x.c.note) : '') + '</span></span></button>' +
+        madeCheck('', x.c.id, true, rc ? rc.title : (x.c.title || '')) + '</div>';
       return;
     }
     var e = x.e, r = byId(e.rid);
     var sl = servingsLabel(e, r);
-    h += '<button class="prow' + (x.made ? ' made' : '') + '" data-act="planentry" data-id="' + esc(e.id) + '">' + (r ? tileHtml(r) : '<span class="tile" style="--pig:#6A4E3A"><span class="lt">?</span></span>') +
-      '<span class="info"><span class="nm">' + esc(r ? r.title : (e.title || 'Deleted recipe')) + '</span>' + (sl || x.made ? '<span class="sub">' + (x.made ? '<span class="madetag">' + icon('check') + 'Made</span>' + (sl ? ' · ' : '') : '') + esc(sl) + '</span>' : '') + '</span></button>';
+    h += '<div class="pwrap"><button class="prow' + (x.made ? ' made' : '') + '" data-act="planentry" data-id="' + esc(e.id) + '">' + (r ? tileHtml(r) : '<span class="tile" style="--pig:#6A4E3A"><span class="lt">?</span></span>') +
+      '<span class="info"><span class="nm">' + esc(r ? r.title : (e.title || 'Deleted recipe')) + '</span>' + (sl || x.made ? '<span class="sub">' + (x.made ? '<span class="madetag">' + icon('check') + 'Made</span>' + (sl ? ' · ' : '') : '') + esc(sl) + '</span>' : '') + '</span></button>' +
+      (d <= t ? madeCheck(e.id, x.made ? x.made.id : '', !!x.made, r ? r.title : (e.title || '')) : '') + '</div>';
   });
   var withR = entries.filter(function (e) { return byId(e.rid) && byId(e.rid).steps; });
   if (!past && withR.length >= 2 && withR[0].rid !== withR[1].rid) h += '<button class="addday cookboth" data-act="cookboth" data-id="' + esc(withR[0].rid) + '" data-id2="' + esc(withR[1].rid) + '">' + icon('flame') + 'Cook ' + esc(byId(withR[0].rid).title) + ' and ' + esc(byId(withR[1].rid).title) + ' together</button>';
@@ -3726,7 +3817,16 @@ function openPlanPicker(day) {
   UI.pick = { day: day, q: '' };
   var el = openSheet('pick', 'Add to ' + dayLabel(day, true), '<div class="search pickbox" style="margin-top:0"><div class="box">' + icon('search') +
     '<input id="pickq" type="search" inputmode="search" enterkeyhint="search" placeholder="Search your recipes" autocomplete="off" autocorrect="off" aria-label="Search recipes"></div></div><ul class="rlist" id="picklist">' + pickListHtml() + '</ul>', '', { full: true });
-  $('#pickq', el).focus();
+  pickerTop(el);
+}
+/** Open a recipe picker at the top of the list, with its search bar in view (and again once the keyboard is up). */
+function pickerTop(el) {
+  var sb = $('.sh-b', el), q = $('#pickq', el);
+  if (sb) sb.scrollTop = 0;
+  if (q) { try { q.focus({ preventScroll: true }); } catch (e) { q.focus(); } }
+  var again = function () { if (sb && SHEET && SHEET.el === el) sb.scrollTop = 0; };
+  if (window.visualViewport) { var f = function () { visualViewport.removeEventListener('resize', f); setTimeout(again, 60); }; visualViewport.addEventListener('resize', f); setTimeout(function () { visualViewport.removeEventListener('resize', f); }, 1200); }
+  setTimeout(again, 350);
 }
 function pickListHtml() {
   var q = norm(UI.pick.q).trim(), toks = q ? q.split(/\s+/) : [];
@@ -3767,37 +3867,99 @@ function openPlanIt(rid) {
   openSheet('planit', 'Plan ' + r.title, h);
 }
 
-/* ---------- one planned meal ---------- */
-function openPlanEntry(id) {
-  var e = byIdIn(S.plan, id); if (!e) return;
-  var r = byId(e.rid);
-  UI.planEdit = clone(e);
-  var body = '<div id="pe-body">' + planEntryBody() + '</div>';
-  openSheet('planentry', r ? r.title : (e.title || 'Planned meal'), body,
-    '<button class="btn danger" data-act="unplan" data-id="' + esc(e.id) + '">Remove</button><button class="btn primary" data-act="saveplan">Save</button>');
+/* ---------- a meal on the plan: planned, made, or both (one sheet for all of them) ---------- */
+function openPlanEntry(id) { openMeal({ plan: id }); }
+function openMeal(o) {
+  var e = o.plan ? byIdIn(S.plan, o.plan) : null;
+  var c = o.cooked ? S.cooked.filter(function (x) { return x.id === o.cooked; })[0] : null;
+  if (!e && !c) return;
+  var rid = e ? e.rid : c.rid, date = e ? e.date : c.date;
+  if (e && !c) c = S.cooked.filter(function (x) { return x.rid === rid && x.date === date; })[0] || null;
+  if (c && !e) e = S.plan.filter(function (x) { return x.rid === rid && x.date === date; })[0] || null;
+  var r = byId(rid);
+  UI.planEdit = e ? clone(e) : null;
+  UI.meal = { rid: rid, title: r ? r.title : ((e && e.title) || (c && c.title) || 'Meal'), cooked: c ? clone(c) : null, made: !!c, note: c ? c.note || '' : '', date: date };
+  var foot = (e ? '<button class="btn danger" data-act="unplan" data-id="' + esc(e.id) + '" aria-label="Remove from the plan">Remove</button>'
+    : '<button class="btn danger" data-act="uncook" data-id="' + esc(c.id) + '" data-confirm="1">Remove</button>') +
+    '<button class="btn primary" data-act="savemeal">Save</button>';
+  openSheet('meal', UI.meal.title, '<div id="pe-body">' + mealBody() + '</div>', foot);
 }
-function planEntryBody() {
-  var e = UI.planEdit, r = byId(e.rid), h = '';
-  if (r) {
+/** Keep what's typed in the sheet before it's redrawn. */
+function mealRead() {
+  var m = UI.meal; if (!m) return;
+  var d = $('#meal-date'), n = $('#c-note');
+  if (d && d.value) m.date = d.value;
+  if (n) m.note = n.value;
+}
+function mealBody() {
+  var m = UI.meal, e = UI.planEdit, r = byId(m.rid), h = '', t = today();
+  var future = m.date > t;
+  // made it?
+  h += '<button class="madetoggle" data-act="mealmade" aria-pressed="' + m.made + '">' +
+    '<span class="mk">' + icon('check') + '</span><span class="tx"><b>' + (m.made ? 'Made it' : 'Not made yet') + '</b><span>' +
+    (m.made ? 'It\'s in your history. Tap to undo.' : future ? 'Tap when you\'ve made it (it\'ll count as today).' : 'Tap when you\'ve made it to add it to your history.') + '</span></span></button>';
+  h += '<div class="field" style="margin-top:14px"><label for="meal-date">Day</label><input class="inp" id="meal-date" type="date" value="' + esc(m.date) + '"' + (m.made && !e ? ' max="' + t + '"' : '') + '></div>';
+  if (m.made) h += '<div class="field"><label for="c-note">Note</label><textarea class="inp" id="c-note" rows="2" style="min-height:70px" placeholder="How did it go?">' + esc(m.note) + '</textarea></div>';
+  if (e && r) {
     var label = servingsText(r, entryFactor(e, r));
     if (isBatchable(r)) {
-      var ppl = +e.servings || r.servings, m = entryMeals(e);
+      var ppl = +e.servings || r.servings, mm = entryMeals(e);
       label = fmtNum(ppl) + (ppl === 1 ? ' person' : ' people');
       h += '<div class="pegrid"><div><p class="flabel">People per meal</p><span class="stepper" role="group"><button data-act="pesv" data-d="-1" aria-label="Fewer people">−</button><span class="v">' + esc(label) + '</span><button data-act="pesv" data-d="1" aria-label="More people">+</button></span></div>' +
-        '<div><p class="flabel">Meals it covers</p><span class="stepper" role="group"><button data-act="pemeals" data-d="-1" aria-label="Fewer meals">−</button><span class="v">' + m + (m === 1 ? ' meal' : ' meals') + '</span><button data-act="pemeals" data-d="1" aria-label="More meals">+</button></span></div></div>' +
-        '<p class="hint">' + (m > 1 ? 'A prep batch: cooking ' + esc(servingsText(r, entryFactor(e, r)).toLowerCase()) + '. Your list and Cook mode use that amount.' : 'Cooking more than one meal\'s worth? Raise "Meals it covers" to make it a prep batch.') + '</p>';
+        '<div><p class="flabel">Meals it covers</p><span class="stepper" role="group"><button data-act="pemeals" data-d="-1" aria-label="Fewer meals">−</button><span class="v">' + mm + (mm === 1 ? ' meal' : ' meals') + '</span><button data-act="pemeals" data-d="1" aria-label="More meals">+</button></span></div></div>' +
+        '<p class="hint">' + (mm > 1 ? 'A prep batch: cooking ' + esc(servingsText(r, entryFactor(e, r)).toLowerCase()) + '. Your list and Cook mode use that amount.' : 'Cooking more than one meal\'s worth? Raise "Meals it covers" to make it a prep batch.') + '</p>';
     } else {
       h += '<p class="flabel">How much</p><span class="stepper" role="group"><button data-act="pesv" data-d="-1" aria-label="Less">−</button><span class="v">' + esc(label) + '</span><button data-act="pesv" data-d="1" aria-label="More">+</button></span>';
     }
   }
-  h += '<p class="flabel" style="margin-top:16px">Day</p><div class="seg">';
-  weekDays(UI.week).concat(weekDays(UI.week + 1)).forEach(function (d, i) {
-    if (i >= 7 && d < e.date) return;
-    h += '<button data-act="pedate" data-day="' + d + '" aria-pressed="' + (d === e.date) + '">' + esc(dayLabel(d)) + '</button>';
-  });
-  h += '</div>';
-  if (r) h += '<div class="btnrow" style="margin-top:16px"><button class="btn sm" data-act="open" data-id="' + esc(r.id) + '">Open recipe</button><button class="btn sm" data-act="cook" data-id="' + esc(r.id) + '" data-f="' + entryFactor(e, r) + '">' + icon('flame') + 'Cook mode</button></div>';
+  if (r) h += '<div class="btnrow" style="margin-top:16px"><button class="btn sm" data-act="open" data-id="' + esc(r.id) + '">Open recipe</button><button class="btn sm" data-act="cook" data-id="' + esc(r.id) + '"' + (e ? ' data-f="' + entryFactor(e, r) + '"' : '') + '>' + icon('flame') + 'Cook mode</button></div>';
   return h;
+}
+function planEntryBody() { return mealBody(); }
+/** Save the meal sheet: the plan entry, and whether (and when) you made it. One Undo puts it all back. */
+function saveMeal() {
+  mealRead();
+  var m = UI.meal, e = UI.planEdit, t = today(), undo = [], ops = [], revealId = '';
+  var madeDate = m.date > t ? t : m.date;
+  if (e) {
+    var before = byIdIn(S.plan, e.id);
+    var n = clone(e); n.date = m.made && m.date > t ? t : m.date;
+    if (!before || JSON.stringify(before) !== JSON.stringify(n)) { ops.push({ op: 'plan', entry: n }); undo.push(before ? { op: 'plan', entry: clone(before) } : { op: 'unplan', id: n.id }); }
+    revealId = n.id;
+  }
+  var r = byId(m.rid);
+  if (m.made && !m.cooked) {
+    var c = { id: newId('c_'), rid: m.rid, date: madeDate, title: m.title, note: (m.note || '').trim(), servings: e && r && r.servings && isPeople(r) ? Math.round(r.servings * entryFactor(e, r) * 100) / 100 : '' };
+    ops.push({ op: 'cook', entry: c }); undo.push({ op: 'uncook', id: c.id });
+    revealId = revealId || c.id;
+  } else if (m.made && m.cooked) {
+    var nc = clone(m.cooked); nc.date = madeDate; nc.note = (m.note || '').trim();
+    if (JSON.stringify(nc) !== JSON.stringify(m.cooked)) { ops.push({ op: 'cook', entry: nc }); undo.push({ op: 'cook', entry: clone(m.cooked) }); }
+    revealId = revealId || nc.id;
+  } else if (!m.made && m.cooked) {
+    ops.push({ op: 'uncook', id: m.cooked.id }); undo.push({ op: 'cook', entry: clone(m.cooked) });
+  }
+  closeSheet();
+  ops.forEach(queue); render();
+  if (ops.length) toast(m.made && !m.cooked ? 'Logged ' + m.title : 'Saved', function () { undo.reverse().forEach(queue); render(); });
+  afterRender(function () { revealItem(revealId); });
+  if (m.made && !m.cooked && r && madeDate === t) setTimeout(function () { afterMade(r, e); }, 380);
+}
+/** The check on a plan row: made it (adds it to your history for that day), or not. */
+function toggleMadeRow(planId, cookedId) {
+  var t = today();
+  if (cookedId) {
+    var c = S.cooked.filter(function (x) { return x.id === cookedId; })[0]; if (!c) return;
+    queue({ op: 'uncook', id: c.id }); render();
+    toast('Not made: ' + (c.title || 'meal'), function () { queue({ op: 'cook', entry: c }); render(); });
+    return;
+  }
+  var e = byIdIn(S.plan, planId); if (!e) return;
+  var r = byId(e.rid);
+  var entry = { id: newId('c_'), rid: e.rid, date: e.date > t ? t : e.date, title: r ? r.title : (e.title || ''), note: '', servings: r && r.servings && isPeople(r) ? Math.round(r.servings * entryFactor(e, r) * 100) / 100 : '' };
+  queue({ op: 'cook', entry: entry }); render();
+  toast('Made ' + entry.title + ', added to your history', function () { queue({ op: 'uncook', id: entry.id }); render(); });
+  if (r && e.date === t) afterMade(r, e);
 }
 
 function planShopSources(days) {
@@ -5093,11 +5255,10 @@ function openEditor(id, draft, focusField) {
   // iOS only shows the keyboard when focus happens inside the tap
   var first = focusField ? $('#f-' + focusField, el) : (isNew ? $('#f-link', el) : null);
   if (first) {
+    if (focusField) showField(first, 'top');                         // in place before the sheet arrives
     try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
-    if (focusField) {
-      if (first.tagName === 'TEXTAREA') { var n = first.value.length; try { first.setSelectionRange(n, n); } catch (e) { } }
-      showField(first);
-    }
+    if (focusField && first.tagName === 'TEXTAREA') { var n = first.value.length; try { first.setSelectionRange(n, n); } catch (e) { } first.scrollTop = first.scrollHeight; }
+    first._shown = true; setTimeout(function () { first._shown = false; }, 600);
   }
   return el;
 }
@@ -5278,30 +5439,62 @@ function changedSection(startJson, now, focus) {
   return changed[0] || want || '';
 }
 /** A text box tall enough for what's in it (two lines spare), but never taller than the screen you can see. */
+/** Size a recipe box to fit what's in it plus two spare lines, but never taller than the space you can see
+    (above the keyboard and the Save bar), so the line you're typing on can't end up hidden. */
 function sizeBox(t) {
   if (!t || !t.classList.contains('grow')) return;
+  var sb = t.closest('.sh-b'), st = sb ? sb.scrollTop : 0;
   var vh = window.visualViewport ? visualViewport.height : window.innerHeight;
-  var max = Math.max(200, Math.round(vh * (document.body.classList.contains('kb') ? 0.62 : 0.6)));
+  var fld = t.closest('.field'), extra = fld ? Math.max(0, fld.getBoundingClientRect().height - t.getBoundingClientRect().height) : 30;
+  var room = sb && sb.clientHeight > 120 ? sb.clientHeight - Math.min(extra, 120) - 20 : Math.round(vh * 0.6);   // the label and anything under the box fit too
+  var max = Math.max(160, room);
+  var cs = getComputedStyle(t), lh = parseFloat(cs.lineHeight) || 23, minH = parseFloat(cs.minHeight) || 0;
+  var was = t.style.height;
   t.style.height = 'auto';
-  var lh = parseFloat(getComputedStyle(t).lineHeight) || 23;
-  t.style.height = Math.min(max, Math.max(t.scrollHeight + lh * 2, parseFloat(getComputedStyle(t).minHeight) || 0)) + 'px';
+  var want = Math.round(Math.min(max, Math.max(t.scrollHeight + lh * 2, minH))) + 'px';
+  t.style.height = want === was ? was : want;
+  if (sb) sb.scrollTop = st;          // measuring must never move the page
 }
-/** Scroll the editor so a box and its label are fully in view (again once the keyboard has opened). */
-function showField(inp) {
+/** Keep the box you're typing in on screen: nudge the editor just enough, never a jump. */
+function keepTyping(t) {
+  var sb = t && t.closest('.sh-b'); if (!sb) return;
+  var box = sb.getBoundingClientRect(), r = t.getBoundingClientRect();
+  if (r.bottom > box.bottom - 6) sb.scrollTop += Math.min(r.bottom - box.bottom + 6, Math.max(0, r.top - box.top - 4));
+  else if (r.top < box.top && r.bottom < box.top + 60) sb.scrollTop -= box.top - r.top + 4;
+}
+/** Bring a box into view.
+    how = 'top': from an Edit button. The box and its label go to the top of the editor straight away
+    (before the sheet has even finished sliding up), so nothing moves once you start typing.
+    how = 'min' (a tap on a box): only scroll if part of it is hidden, and only by as much as needed. */
+function showField(inp, how) {
   var sb = inp && inp.closest('.sh-b'); if (!sb) return;
   var fieldEl = inp.closest('.field') || inp;
-  var go = function () {
-    sizeBox(inp);
+  var toTop = function () {
     var top = fieldEl.getBoundingClientRect().top - sb.getBoundingClientRect().top + sb.scrollTop - 8;
-    sb.scrollTo({ top: Math.max(0, top), behavior: reduceMotion() ? 'auto' : 'smooth' });
+    sb.scrollTop = Math.max(0, top);
   };
-  go();
-  if (window.visualViewport) {
-    var once1 = function () { visualViewport.removeEventListener('resize', once1); setTimeout(go, 80); };
-    visualViewport.addEventListener('resize', once1);
-    setTimeout(function () { visualViewport.removeEventListener('resize', once1); }, 1200);
+  sizeBox(inp);
+  if (how === 'top') {
+    toTop();
+    if (inp.tagName === 'TEXTAREA') inp.scrollTop = inp.scrollHeight;    // show the end, where the caret is
   }
-  setTimeout(go, 450);
+  // once the keyboard has finished opening: fit the box to the space left, then the smallest nudge
+  var done = false, timer = 0;
+  var settle = function () {
+    if (done) return; done = true;
+    if (window.visualViewport) visualViewport.removeEventListener('resize', onR);
+    if (document.activeElement !== inp) return;
+    sizeBox(inp);
+    var box = sb.getBoundingClientRect(), r = fieldEl.getBoundingClientRect();
+    if (r.top < box.top || r.bottom > box.bottom) {
+      var d = r.bottom > box.bottom ? Math.min(r.bottom - box.bottom + 8, r.top - box.top - 8) : r.top - box.top - 8;
+      if (Math.abs(d) > 2) sb.scrollTo({ top: Math.max(0, sb.scrollTop + d), behavior: reduceMotion() ? 'auto' : 'smooth' });
+    }
+  };
+  var onR = function () { clearTimeout(timer); timer = setTimeout(settle, 140); };
+  if (window.visualViewport) visualViewport.addEventListener('resize', onR);
+  timer = setTimeout(settle, 320);    // no keyboard on the way (iPad keyboard, or already open): don't wait
+  setTimeout(settle, 900);
 }
 
 /** Shrink a phone photo before saving (big photos upload slowly and fill storage). */
@@ -5320,16 +5513,7 @@ function shrinkPhoto(file, cb) {
 }
 
 /* ===================== small sheets ===================== */
-function openCooked(id) {
-  var c = S.cooked.filter(function (x) { return x.id === id; })[0];
-  if (!c) return;
-  var r = byId(c.rid);
-  var body = '<div class="field"><label for="c-date">Date</label><input class="inp" id="c-date" type="date" value="' + esc(c.date) + '" max="' + today() + '"></div>' +
-    '<div class="field"><label for="c-note">Note</label><textarea class="inp" id="c-note" rows="3" style="min-height:90px" placeholder="How did it go?">' + esc(c.note) + '</textarea></div>' +
-    '<div class="btnrow">' + (r ? '<button class="btn sm" data-act="open" data-id="' + esc(r.id) + '">Open recipe</button>' : '') +
-    '<button class="btn sm danger" data-act="uncook" data-id="' + esc(c.id) + '" data-confirm="1">Remove from history</button></div>';
-  openSheet('cooked', r ? r.title : (c.title || 'Cooked'), body, '<button class="btn" data-act="sheet-close">Cancel</button><button class="btn primary" data-act="savecooked" data-id="' + esc(c.id) + '">Save</button>');
-}
+function openCooked(id) { openMeal({ cooked: id }); }
 
 function openTagPrompt() {
   var body = '<div class="field"><label for="bulk-tag">Tag to add</label><input class="inp" id="bulk-tag" autocomplete="off" placeholder="e.g. weeknight"></div><div class="chiprow">' +
@@ -6481,6 +6665,7 @@ function openCookTwoPicker() {
   var el = openSheet('pick', 'Cook with ' + (r ? r.title : 'this'), '<p class="muted" style="margin:0 0 10px">Pick the other recipe. Their steps are woven together so both are ready at about the same time.</p>' +
     '<div class="search pickbox" style="margin-top:0"><div class="box">' + icon('search') +
     '<input id="pickq" type="search" inputmode="search" enterkeyhint="search" placeholder="Search your recipes" autocomplete="off" autocorrect="off" aria-label="Search recipes"></div></div><ul class="rlist" id="picklist">' + pickListHtml() + '</ul>', '', { full: true });
+  pickerTop(el);
 }
 /** Log every recipe that was cooked; ask about leftovers for each in turn. */
 function logCooked(ids) {
@@ -6942,9 +7127,9 @@ var ACTIONS = {
     if (!r) return;
     if (isBatchable(r)) e.servings = Math.max(1, Math.round((+e.servings || r.servings) + d));
     else { var nf = stepScale(r, entryFactor(e, r), d); e.servings = r.servings ? Math.round(r.servings * nf * 100) / 100 : nf; }
-    $('#pe-body').innerHTML = planEntryBody();
+    mealRead(); $('#pe-body').innerHTML = mealBody();
   },
-  pemeals: function (t) { var e = UI.planEdit; e.meals = Math.max(1, Math.min(21, entryMeals(e) + +t.getAttribute('data-d'))); $('#pe-body').innerHTML = planEntryBody(); },
+  pemeals: function (t) { var e = UI.planEdit; e.meals = Math.max(1, Math.min(21, entryMeals(e) + +t.getAttribute('data-d'))); mealRead(); $('#pe-body').innerHTML = mealBody(); },
   regulars: function () { if (once('regulars', 1200)) addRegulars(); },
   repeatweek: function () { if (once('repeatweek', 1200)) repeatLastWeek(); },
   prepsession: function () { openPrepSession(); },
@@ -7065,7 +7250,10 @@ var ACTIONS = {
     toast('Hid ' + n, function () { setSetting('hiddenIdeas', before); render(); });
   },
   ideashow: function () { setSetting('hiddenIdeas', []); render(); },
-  pedate: function (t) { UI.planEdit.date = t.getAttribute('data-day'); $('#pe-body').innerHTML = planEntryBody(); },
+  pedate: function (t) { mealRead(); UI.meal.date = t.getAttribute('data-day'); $('#pe-body').innerHTML = mealBody(); },
+  mealmade: function () { mealRead(); UI.meal.made = !UI.meal.made; $('#pe-body').innerHTML = mealBody(); },
+  savemeal: function () { if (once('savemeal', 600)) saveMeal(); },
+  mealcheck: function (t) { if (once('mealcheck', 500)) toggleMadeRow(t.getAttribute('data-id'), t.getAttribute('data-c')); },
   saveplan: function () {
     var e = UI.planEdit, before = clone(byIdIn(S.plan, e.id));
     queue({ op: 'plan', entry: clone(e) }); closeSheet(); render(); afterRender(function () { revealItem(e.id); });
@@ -7231,7 +7419,7 @@ function alreadyHave(r) {
 var NAME_T = null;
 document.addEventListener('input', function (e) {
   var t = e.target;
-  if (t.classList && t.classList.contains('grow')) sizeBox(t);
+  if (t.classList && t.classList.contains('grow')) { sizeBox(t); keepTyping(t); }
   if (t.id === 'q') {
     UI.q = t.value; syncClearBtn();
     clearTimeout(t._t);
@@ -7426,8 +7614,16 @@ function offlineLineHtml() {
 }
 document.addEventListener('focusin', function (e) {
   var t = e.target;
-  if (t && t.matches && t.matches('#sheet-edit textarea.grow') && !t._shown) { t._shown = true; showField(t); setTimeout(function () { t._shown = false; }, 1500); }
+  if (t && t.matches && t.matches('#sheet-edit textarea.grow') && !t._shown) { t._shown = true; showField(t, 'min'); setTimeout(function () { t._shown = false; }, 600); }
 });
+// when the keyboard opens, closes or changes height, refit the box you're typing in
+if (window.visualViewport) {
+  var vvT = 0;
+  visualViewport.addEventListener('resize', function () {
+    clearTimeout(vvT);
+    vvT = setTimeout(function () { var a = document.activeElement; if (a && a.classList && a.classList.contains('grow')) { sizeBox(a); keepTyping(a); } }, 160);
+  });
+}
 start();
 
 </script>
