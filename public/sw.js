@@ -1,6 +1,6 @@
 /* Sunday Table: keeps a copy of the app on this phone so it opens instantly and works without a connection.
    Your recipes themselves live in the app's own storage (and your Google Sheet); this only keeps the app, fonts, photos and readers. */
-var BUILD = '2.16-33cae92f';
+var BUILD = '2.17-0781d861';
 var SHELL = 'st-shell-' + BUILD;          // the app itself, replaced with each update
 var LIBS = 'st-libs-1';                   // fonts and the photo/PDF/Word readers (their links never change)
 var PHOTOS = 'st-photos-1';               // recipe photos
@@ -53,6 +53,14 @@ self.addEventListener('fetch', function (e) {
         if (hit) return hit;
         return fetch(req).then(function (res) { if (res.ok && req.mode === 'navigate') c.put('./', res.clone()); return res; });
       });
+    }));
+    return;
+  }
+
+  // the computer install's name and icons: fresh when online, the saved copy when not
+  if (same && /\/(manifest\.webmanifest|icon-[\w-]+\.png)$/.test(new URL(u).pathname)) {
+    e.respondWith(caches.open(SHELL).then(function (c) {
+      return fetch(req).then(function (res) { if (res.ok) c.put(req, res.clone()); return res; }, function () { return c.match(req); });
     }));
     return;
   }
