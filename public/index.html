@@ -1019,6 +1019,99 @@ html.desk .cols .ingcol{position:static}
   html.desk .cols .ingcol{position:sticky;top:0}
 }
 
+/* ===================== 2.18: motion ===================== */
+:root{--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.3,1.25,.55,1);--sheet-in:cubic-bezier(.28,1.12,.5,1)}
+
+/* 1. going into a recipe pushes the list back a little, like Settings or Notes (and the swipe back follows your finger) */
+@media (max-width:759px){
+  .detailpane{transition:transform .36s var(--ease),visibility 0s .36s;box-shadow:-14px 0 34px -16px rgba(0,0,0,.4)}
+  body.show-detail .detailpane{transition:transform .36s var(--ease),visibility 0s}
+  #listpane,.hdr{transition:transform .36s var(--ease)}
+  body.show-detail #listpane,body.show-detail .hdr{transform:translateX(-24%)}
+  body::after{content:"";position:fixed;inset:0;z-index:29;background:#000;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .36s var(--ease),visibility 0s .36s}
+  body.show-detail::after{opacity:.16;visibility:visible;transition:opacity .36s var(--ease),visibility 0s}
+  body.backdrag #listpane,body.backdrag .hdr{transition:none;transform:translateX(calc(-24% * (1 - var(--bp,0))))}
+  body.backdrag::after{transition:none;opacity:calc(.16 * (1 - var(--bp,0)))}
+  body.backdrag.settle #listpane,body.backdrag.settle .hdr{transition:transform .22s ease-out}
+  body.backdrag.settle::after{transition:opacity .22s ease-out}
+  body.shared::after{display:none}
+}
+
+/* 2. sheets: settle in with a little spring; the page behind eases back (iPhone) */
+.sheet{transition:transform .26s cubic-bezier(.4,0,.9,.6)}
+.sheet.in{transition:transform .46s var(--sheet-in)}
+.sheet.full.in{transition:transform .3s var(--ease)}
+.scrim{transition:opacity .3s var(--ease)}
+@media (min-width:760px){
+  .sheet{transform:translate(-50%,-47%) scale(.97);transition:transform .2s ease-in,opacity .18s ease-in}
+  .sheet.in{transform:translate(-50%,-50%);transition:transform .38s var(--spring),opacity .2s ease-out}
+}
+html.sb body{transition:background-color .4s var(--ease)}
+html.sb-in body{background:#0c0806}
+html.sb .main{background:var(--bg);min-height:100vh}
+html.sb .sbt{transition:transform .42s var(--ease),border-radius .42s var(--ease)!important;will-change:transform}
+html.sb-in .sbt{transform:translateY(calc((env(safe-area-inset-top) + 8px) * (1 - var(--sbp,0)))) scale(calc(.93 + .07 * var(--sbp,0)))!important}
+html.sb-in .hdr.sbt{border-radius:14px 14px 0 0}
+html.sb-in #detailpane.sbt{border-radius:calc(14px * (1 - var(--sbp,0)));overflow:hidden}
+html.sbdrag .sbt,html.sbnow .sbt,html.sbnow body{transition:none!important}
+
+/* 3. a recipe's tile growing into its photo */
+.hero.flyer{position:fixed;margin:0;z-index:35;aspect-ratio:auto;max-height:none;pointer-events:none;box-shadow:0 18px 40px -18px rgba(0,0,0,.45);will-change:left,top,width,height}
+.hero.flyer img{transform:none!important}
+.hero img,.hero .big{will-change:transform}
+
+/* 5. lists: rows slide into place; one being removed fades off */
+.flipghost{position:fixed;z-index:15;pointer-events:none;overflow:hidden;list-style:none}
+.flipghost>*{margin:0!important;width:100%}
+.srow .sx{background-image:linear-gradient(currentColor,currentColor);background-repeat:no-repeat;background-position:0 58%;background-size:0 1.5px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.srow.on .nm{text-decoration:none}
+.srow.on .sx{background-size:100% 1.5px}
+.sck.pop .sx{animation:strike .32s .06s var(--ease) backwards}
+@keyframes strike{from{background-size:0 1.5px}to{background-size:100% 1.5px}}
+
+/* 6. check marks draw themselves, with a little bounce */
+.pop .ck svg.i path,.madechk.pop svg.i path,.madetoggle.pop .mk svg.i path,.btn.pop svg.i path{stroke-dasharray:24;animation:drawck .34s .04s var(--ease) backwards}
+@keyframes drawck{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+.madechk.pop svg.i,.madetoggle.pop .mk{animation:pop .4s var(--spring)}
+
+/* 7. numbers roll over */
+.stepper .v{overflow:hidden;position:relative}
+.v.roll .rn{display:inline-block}
+.v.roll::before{content:attr(data-old);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.v.roll.up::before{animation:rollOutUp .26s var(--ease) forwards}
+.v.roll.up .rn{animation:rollInUp .26s var(--ease)}
+.v.roll.down::before{animation:rollOutDown .26s var(--ease) forwards}
+.v.roll.down .rn{animation:rollInDown .26s var(--ease)}
+@keyframes rollOutUp{to{transform:translateY(-90%);opacity:0}}
+@keyframes rollInUp{from{transform:translateY(90%);opacity:0}}
+@keyframes rollOutDown{to{transform:translateY(90%);opacity:0}}
+@keyframes rollInDown{from{transform:translateY(-90%);opacity:0}}
+
+/* 9. photos fade in as they arrive; a soft shimmer while a recipe is being read */
+.tile img,.hero img,.post .pimg img,.photo-pick img{opacity:0;transition:opacity .35s ease}
+.tile img.ld,.hero img.ld,.post .pimg img.ld,.photo-pick img.ld{opacity:1}
+.importbox.busy>summary{background-image:linear-gradient(100deg,transparent 30%,color-mix(in srgb,var(--ac) 12%,transparent) 50%,transparent 70%);background-size:220% 100%;animation:shimmer 1.4s linear infinite}
+@keyframes shimmer{from{background-position:120% 0}to{background-position:-100% 0}}
+
+/* 11. timers: a ring that counts down */
+.timer .ring{width:22px;height:22px;flex:none;border-radius:50%;background:conic-gradient(var(--cht) calc(var(--p,1) * 1turn),rgba(255,255,255,.18) 0);-webkit-mask:radial-gradient(circle,transparent 6.5px,#000 7px);mask:radial-gradient(circle,transparent 6.5px,#000 7px);margin-left:-6px}
+.timer.done .ring{background:var(--bt);animation:pop .7s var(--spring) infinite alternate}
+.timer{animation:timerin .4s var(--spring)}
+@keyframes timerin{from{transform:translateY(12px) scale(.9);opacity:0}}
+
+/* 12. messages settle in with a soft bounce, and can be swiped away */
+.toast.in{transition:transform .46s var(--spring),opacity .2s,visibility 0s}
+.toast{touch-action:none}
+
+/* everything above stays still with Reduce Motion */
+@media (prefers-reduced-motion:reduce){
+  #listpane,.hdr,html.sb-in .sbt{transform:none!important}
+  body::after{display:none}
+  html.sb-in body{background:var(--bg)}
+  .tile img,.hero img,.post .pimg img,.photo-pick img{opacity:1}
+  .srow.on .sx{background-size:100% 1.5px}
+}
+
 </style>
 </head>
 <body>
@@ -2318,7 +2411,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.17';
+var APP_VERSION = '2.18';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -3259,6 +3352,7 @@ function testEmail() {
 /* ===================== rendering: main screens ===================== */
 function render() {
   CACHE = {};
+  var flip = flipFirst(viewKey() === LAST_VIEW);
   var keep = holdPlace();
   renderHeader();
   renderTabs();
@@ -3272,6 +3366,8 @@ function render() {
   renderDetail();
   renderSelBar();
   keep();
+  flipPlay(flip);
+  settleImgs();
 }
 
 /* ---------- keep your place when the page redraws ----------
@@ -3301,8 +3397,9 @@ function findByKey(root, k) {
   for (var i = 0; i < els.length; i++) if (anchorKey(els[i]) === k && els[i].offsetParent !== null) return els[i];
   return null;
 }
+function viewKey() { return UI.tab + '|' + (UI.planView || '') + '|' + (UI.week || 0) + '|' + (UI.monthOff || 0); }
 function holdPlace() {
-  var view = UI.tab + '|' + (UI.planView || '') + '|' + (UI.week || 0) + '|' + (UI.monthOff || 0);
+  var view = viewKey();
   var same = view === LAST_VIEW; LAST_VIEW = view;
   var spots = [];
   try {
@@ -3537,16 +3634,19 @@ function openRecipe(id) {
   UI.openId = id;
   S.lastOpen = id; save();
   if (!isWide()) {
+    sheetBack(false, true);                          // the page must be back in place before the recipe slides over it
     document.body.classList.add('show-detail');
     $('#detailpane').scrollTop = 0;
   } else if (was !== id) {
     $('#detailpane').scrollTop = 0;
   }
   renderDetail();
+  settleImgs($('#detailpane'));
   if (isWide()) $$('.rrow').forEach(function (b) { b.classList.toggle('current', b.getAttribute('data-id') === id); });
 }
 
-function closeDetail() {
+function closeDetail(fly) {
+  if (fly && UI.openId && document.body.classList.contains('show-detail')) flyClose(UI.openId);
   forgetTicks(UI.openId);
   UI.openId = '';
   document.body.classList.remove('show-detail');
@@ -3748,7 +3848,10 @@ function revealItem(id) {
   if (!el) return;
   reveal(el.closest('li, .prow, .fitem, .day') || el);
 }
-function afterRender(fn) { requestAnimationFrame(function () { setTimeout(fn, 60); }); }
+function afterRender(fn) {
+  // if the page is still easing forward from behind a sheet, wait until it's in place
+  requestAnimationFrame(function () { setTimeout(fn, document.documentElement.classList.contains('sb') ? 430 : 60); });
+}
 
 /* ===================== plan the week ===================== */
 function weekDays(offset) {
@@ -4278,7 +4381,7 @@ function renderShop(pane, side) {
 }
 function shopRow(it) {
   return '<li class="srow' + (it.checked ? ' on' : '') + '"><button class="sck" data-act="shopck" data-id="' + esc(it.id) + '" aria-pressed="' + !!it.checked + '">' +
-    '<span class="ck">' + (it.checked ? icon('check') : '') + '</span><span class="tx"><span class="nm">' + esc(it.name) + (it.amount ? ' <span class="amt">(' + esc(it.amount) + ')</span>' : '') + '</span>' +
+    '<span class="ck">' + (it.checked ? icon('check') : '') + '</span><span class="tx"><span class="nm"><span class="sx">' + esc(it.name) + (it.amount ? ' <span class="amt">(' + esc(it.amount) + ')</span>' : '') + '</span></span>' +
     (it.from ? '<span class="from">' + esc(it.from) + '</span>' : '') + '</span></button>' +
     '<button class="iconbtn sedit" data-act="shopedit" data-id="' + esc(it.id) + '" aria-label="Change ' + esc(it.name) + '">' + icon('edit') + '</button></li>';
 }
@@ -5199,6 +5302,7 @@ function openSheet(id, title, bodyHtml, footHtml, opts) {
   el.offsetHeight;                     // let the browser lay it out before animating
   scrim.classList.add('in'); el.classList.add('in');
   enableSwipe(el);
+  sheetBack(true); settleImgs(el);
   return el;
 }
 
@@ -5213,6 +5317,7 @@ function closeSheet(instant, skipCheck) {
 function finishClose(s, instant) {
   if (s.onClose) s.onClose();
   document.body.classList.remove('locked');
+  sheetBack(false);
   if (instant) { s.el.remove(); s.scrim.remove(); return; }
   s.el.classList.remove('in'); s.scrim.classList.remove('in');
   setTimeout(function () { s.el.remove(); s.scrim.remove(); }, 260);
@@ -5224,15 +5329,25 @@ function enableSwipe(el) {
   if (body) pullToClose(body, {
     scroller: function () { return body; },
     target: function () { return el; },
-    translate: function (dy) { return 'translateY(' + dy + 'px)'; },
+    translate: function (dy) { sheetBackDrag(dy / Math.max(200, el.offsetHeight)); return 'translateY(' + dy + 'px)'; },
+    cancel: function () { sheetBackDrag(null); },
     close: function () { el.style.transform = ''; closeSheet(); }
   });
-  var y0 = 0, dy = 0, on = false;
-  function start(e) { if (isWide()) return; on = true; y0 = e.touches[0].clientY; dy = 0; el.style.transition = 'none'; }
-  function move(e) { if (!on) return; dy = Math.max(0, e.touches[0].clientY - y0); el.style.transform = 'translateY(' + dy + 'px)'; e.preventDefault(); }
+  var y0 = 0, dy = 0, on = false, pts = [];
+  function start(e) { if (isWide()) return; on = true; y0 = e.touches[0].clientY; dy = 0; pts = []; el.style.transition = 'none'; }
+  function move(e) {
+    if (!on) return;
+    var y = e.touches[0].clientY; dy = y - y0;
+    if (dy < 0) dy = -Math.pow(-dy, 0.7);              // a little give upward, like a real sheet
+    pts.push({ y: y, t: Date.now() }); if (pts.length > 10) pts.shift();
+    el.style.transform = 'translateY(' + dy + 'px)'; sheetBackDrag(Math.max(0, dy) / Math.max(200, el.offsetHeight)); e.preventDefault();
+  }
   function end() {
     if (!on) return; on = false; el.style.transition = ''; el.style.transform = '';
-    if (dy > 90) closeSheet();
+    // a quick flick closes it too, not just a long drag
+    var now = Date.now(), last = pts[pts.length - 1], from = pts.filter(function (q) { return now - q.t <= 120; })[0] || pts[0];
+    var speed = last && from && last !== from ? (last.y - from.y) / Math.max(1, last.t - from.t) : 0;
+    if (dy > 90 || (dy > 24 && speed > 0.5)) closeSheet(); else sheetBackDrag(null);
   }
   [$('.grab', el), $('.sh-h', el)].forEach(function (h) {
     if (!h) return;
@@ -6319,7 +6434,7 @@ function pullToClose(el, opts) {
     var t = opts.target();
     t.classList.remove('dragging');
     if (drag && dy > 90) opts.close(dy);
-    else t.style.transform = '';
+    else { t.style.transform = ''; if (drag && opts.cancel) opts.cancel(); }
     drag = false;
   });
 }
@@ -6357,7 +6472,10 @@ function enableEdgeBack() {
       if (Math.abs(dy) > 12 && Math.abs(dy) > dx) { w = null; return; }      // scrolling up or down: leave it alone
       if (dx > 10) { w.on = true; pane.classList.add('dragging', 'edging'); if (isTextField(document.activeElement)) document.activeElement.blur(); }
     }
-    if (w.on) { e.preventDefault(); w.dx = Math.max(0, dx - 10); pane.style.transform = 'translateX(' + w.dx + 'px)'; }
+    if (w.on) {
+      e.preventDefault(); w.dx = Math.max(0, dx - 10); pane.style.transform = 'translateX(' + w.dx + 'px)';
+      document.body.classList.add('backdrag'); document.body.style.setProperty('--bp', (w.dx / window.innerWidth).toFixed(3));
+    }
   }, { passive: false });
   var end = function () {
     var g = w; w = null;
@@ -6369,13 +6487,20 @@ function enableEdgeBack() {
     var fast = g.dx > 40 && speed > 0.45;
     if (g.dx > Math.min(110, window.innerWidth * 0.3) || fast) {
       if (typeof haptic === 'function') haptic();
-      var done = function () { pane.style.transition = 'none'; closeDetail(); pane.style.transform = ''; pane.classList.remove('edging'); pane.offsetHeight; pane.style.transition = ''; };
+      var bs = document.body;
+      var done = function () {
+        pane.style.transition = 'none'; closeDetail(); pane.style.transform = ''; pane.classList.remove('edging'); pane.offsetHeight; pane.style.transition = '';
+        bs.classList.remove('backdrag', 'settle'); bs.style.removeProperty('--bp');
+      };
       if (reduced()) return done();
-      pane.style.transition = 'transform .18s ease-out'; pane.style.transform = 'translateX(100%)';
-      setTimeout(done, 180);
+      bs.classList.add('settle'); bs.style.setProperty('--bp', '1');
+      pane.style.transition = 'transform .2s ease-out'; pane.style.transform = 'translateX(100%)';
+      setTimeout(done, 200);
     } else {
-      pane.style.transition = reduced() ? 'none' : 'transform .2s cubic-bezier(.2,.8,.2,1)'; pane.style.transform = 'translateX(0)';
-      setTimeout(function () { pane.style.transition = ''; pane.style.transform = ''; pane.classList.remove('edging'); }, 210);
+      var bc = document.body;
+      bc.classList.add('settle'); bc.style.setProperty('--bp', '0');
+      pane.style.transition = reduced() ? 'none' : 'transform .24s cubic-bezier(.2,.8,.2,1)'; pane.style.transform = 'translateX(0)';
+      setTimeout(function () { pane.style.transition = ''; pane.style.transform = ''; pane.classList.remove('edging'); bc.classList.remove('backdrag', 'settle'); bc.style.removeProperty('--bp'); }, 250);
     }
   };
   pane.addEventListener('touchend', end);
@@ -6781,14 +6906,41 @@ function closeCook() {
   releaseAwake();
 }
 
+/** Swipe between steps: the step follows your finger, and lets go to the next or previous one. */
 function enableCookSwipe() {
   var b = $('#cbody'); if (!b) return;
-  var x0 = 0, y0 = 0;
-  b.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
-  b.addEventListener('touchend', function (e) {
-    var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) cookGo(dx < 0 ? 1 : -1);
-  });
+  var x0 = 0, y0 = 0, dx = 0, on = false, side = false, pts = [];
+  var card = function () { return $('.cin', b); };
+  b.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; on = true; side = false; pts = []; }, { passive: true });
+  b.addEventListener('touchmove', function (e) {
+    if (!on) return;
+    var x = e.touches[0].clientX, d = x - x0, dy = e.touches[0].clientY - y0;
+    if (!side) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(d)) { on = false; return; }      // scrolling the step
+      if (Math.abs(d) < 10) return;
+      side = true;
+    }
+    var c = UI.cook; if (!c) return;
+    var edge = (d > 0 && c.i === 0) || (d < 0 && c.i >= c.steps.length - 1);
+    dx = edge ? d * 0.25 : d;                                     // nowhere to go: it only gives a little
+    pts.push({ x: x, t: Date.now() }); if (pts.length > 10) pts.shift();
+    var k = card(); if (k && !calm()) { k.style.transition = 'none'; k.style.transform = 'translateX(' + dx + 'px)'; k.style.opacity = String(1 - Math.min(0.5, Math.abs(dx) / 600)); }
+  }, { passive: true });
+  var end = function () {
+    if (!on) return; on = false;
+    var k = card(), c = UI.cook;
+    if (!side || !c) { if (k) { k.style.transform = ''; k.style.opacity = ''; } return; }
+    var now = Date.now(), last = pts[pts.length - 1], from = pts.filter(function (q) { return now - q.t <= 120; })[0] || pts[0];
+    var speed = last && from && last !== from ? (last.x - from.x) / Math.max(1, last.t - from.t) : 0;
+    var d = dx < 0 ? 1 : -1, ni = c.i + d;
+    var go = ni >= 0 && ni < c.steps.length && (Math.abs(dx) > 70 || (Math.abs(dx) > 24 && Math.abs(speed) > 0.45));
+    if (!go) { if (k) { k.style.transition = 'transform .28s ' + SPRING + ', opacity .2s'; k.style.transform = ''; k.style.opacity = ''; } return; }
+    if (k && !calm()) {
+      k.style.transition = 'transform .14s ease-in, opacity .14s'; k.style.transform = 'translateX(' + (d > 0 ? -1 : 1) * Math.round(window.innerWidth * 0.35) + 'px)'; k.style.opacity = '0';
+      setTimeout(function () { cookGo(d); }, 130);
+    } else cookGo(d);
+  };
+  b.addEventListener('touchend', end); b.addEventListener('touchcancel', end);
 }
 
 function keepAwake() {
@@ -6833,7 +6985,8 @@ function renderTimers() {
   var now = Date.now();
   el.innerHTML = UI.timers.map(function (t) {
     var left = Math.max(0, Math.round((t.end - now) / 1000));
-    return '<div class="timer' + (t.done ? ' done' : '') + '" role="timer"><span class="lb">' + esc(t.label) + '</span><span class="tm">' + (t.done ? 'Done' : fmtClock(left)) + '</span>' +
+    var p = t.done ? 0 : Math.max(0, Math.min(1, left / Math.max(1, t.dur || left)));
+    return '<div class="timer' + (t.done ? ' done' : '') + '" role="timer"><span class="ring" aria-hidden="true" style="--p:' + p.toFixed(3) + '"></span><span class="lb">' + esc(t.label) + '</span><span class="tm">' + (t.done ? 'Done' : fmtClock(left)) + '</span>' +
       '<button data-act="timerx" data-id="' + t.id + '" aria-label="' + (t.done ? 'Dismiss timer' : 'Cancel timer') + '">' + icon(t.done ? 'check' : 'x') + '</button></div>';
   }).join('');
 }
@@ -6872,6 +7025,235 @@ function stepAmtHtml(text, r, rows, used, shown) {
 }
 function usesChips(rows) {
   return rows.map(function (x) { return '<span class="use">' + (x.amt ? '<b>' + esc(x.amt) + '</b> ' : '') + esc(cleanName(x.rest) || x.rest) + '</span>'; }).join('');
+}
+
+/* ===================== motion (2.18) =====================
+   One way of moving everywhere: quick, soft, spring-like, and nothing at all with Reduce Motion on.
+   Covers the recipe tile growing into its photo, the page easing back behind a sheet, lists that slide
+   instead of jump, numbers that roll, photos that fade in, and the photo drifting as you scroll. */
+var EASE = 'cubic-bezier(.2,.8,.2,1)', SPRING = 'cubic-bezier(.3,1.25,.55,1)';
+function calm() { return reduceMotion(); }
+function anim(el, frames, opts) { if (!el || !el.animate || calm()) return null; try { return el.animate(frames, opts); } catch (e) { return null; } }
+
+/* ---------- the page eases back behind a sheet (iPhone) ---------- */
+var SB_T = null;
+function sheetBack(on, instant) {
+  var root = document.documentElement;
+  clearTimeout(SB_T);
+  if (on) {
+    if (isWide() || UI.cook || !SHEET || SHEET.el.classList.contains('full') || calm()) { if (root.classList.contains('sb')) sheetBack(false, true); return; }
+    if (root.classList.contains('sb')) { root.classList.add('sb-in'); return; }      // one sheet straight after another: stay back
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var targets = document.body.classList.contains('show-detail') ? [$('#detailpane')] : [$('.main'), $('.hdr'), $('.tabbar'), $('#fab')];
+    $$('.sbt').forEach(function (e) { if (targets.indexOf(e) < 0) { e.classList.remove('sbt'); e.style.transformOrigin = ''; } });
+    targets.forEach(function (el) {
+      if (!el || el.hidden) return;
+      var r = restingRect(el, el);                   // where it sits once any slide in progress has finished
+      el.style.transformOrigin = Math.round(vw / 2 - r.left) + 'px ' + Math.round(vh / 2 - r.top) + 'px';
+      el.classList.add('sbt');
+    });
+    root.style.setProperty('--sbp', '0');
+    root.classList.add('sb'); root.offsetHeight;
+    root.classList.add('sb-in');
+    return;
+  }
+  if (!root.classList.contains('sb')) return;
+  root.classList.remove('sb-in', 'sbdrag'); root.style.setProperty('--sbp', '0');
+  var clear = function () { root.classList.remove('sb'); $$('.sbt').forEach(function (e) { e.classList.remove('sbt'); e.style.transformOrigin = ''; }); };
+  if (instant) { root.classList.add('sbnow'); clear(); root.offsetHeight; root.classList.remove('sbnow'); }
+  else SB_T = setTimeout(clear, 420);
+}
+/** While a sheet is dragged down, the page comes forward with it. p: 0 (sheet open) to 1 (gone). */
+function sheetBackDrag(p) {
+  var root = document.documentElement; if (!root.classList.contains('sb-in')) return;
+  if (p === null) { root.classList.remove('sbdrag'); root.style.setProperty('--sbp', '0'); return; }
+  root.classList.add('sbdrag'); root.style.setProperty('--sbp', String(Math.max(0, Math.min(1, p))));
+}
+
+/* ---------- a recipe's tile grows into its photo, and shrinks back ---------- */
+function restingRect(el, moving) {
+  var r = el.getBoundingClientRect(), dx = 0, dy = 0;
+  if (moving) { try { var m = new DOMMatrixReadOnly(getComputedStyle(moving).transform); dx = m.m41; dy = m.m42; } catch (e) { } }
+  return { left: r.left - dx, top: r.top - dy, width: r.width, height: r.height, bottom: r.bottom - dy };
+}
+function flyer(fromEl, a, b, done) {
+  var f = document.createElement('div');
+  f.className = 'hero flyer' + (fromEl.classList.contains('noimg') ? ' noimg' : '');
+  f.setAttribute('aria-hidden', 'true');
+  f.style.cssText = fromEl.getAttribute('style') || '';
+  f.style.visibility = 'visible';
+  f.innerHTML = fromEl.innerHTML;
+  f.style.left = b.left + 'px'; f.style.top = b.top + 'px'; f.style.width = b.width + 'px'; f.style.height = b.height + 'px';
+  document.body.appendChild(f);
+  var big = $('.big', f), sx = a.width / b.width;
+  var ra = a.radius, rb = b.radius;
+  var k = f.animate([
+    { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px', borderRadius: ra },
+    { left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px', borderRadius: rb }
+  ], { duration: 400, easing: 'cubic-bezier(.3,.9,.25,1)' });
+  if (big) big.animate([{ transform: 'scale(' + Math.max(0.2, Math.min(4, a.big || sx)) + ')' }, { transform: 'scale(' + (b.big || 1) + ')' }], { duration: 400, easing: 'cubic-bezier(.3,.9,.25,1)' });
+  var fin = function () { f.remove(); done && done(); };
+  k.onfinish = fin; k.oncancel = fin;
+  setTimeout(function () { if (f.parentNode) fin(); }, 700);
+}
+/** Opening a recipe from its row: the tile flies up into the photo at the top. */
+function flyOpen(tile) {
+  if (calm() || !tile || !tile.isConnected) return;
+  var hero = $('#detailpane .hero'); if (!hero) return;
+  var pane = $('#detailpane');
+  var a = tile.getBoundingClientRect();
+  if (a.bottom < 0 || a.top > window.innerHeight) return;
+  var b = restingRect(hero, isWide() ? null : pane);
+  if (b.bottom < 0 || b.top > window.innerHeight) return;
+  var tr = getComputedStyle(tile).borderRadius, hr = getComputedStyle(hero).borderRadius;
+  var tl = $('.lt', tile), hb = $('.big', hero);
+  var bigScale = tl && hb ? parseFloat(getComputedStyle(tl).fontSize) / parseFloat(getComputedStyle(hb).fontSize) : 0;
+  hero.style.visibility = 'hidden'; tile.style.visibility = 'hidden';
+  flyer(hero, { left: a.left, top: a.top, width: a.width, height: a.height, radius: tr, big: bigScale }, { left: b.left, top: b.top, width: b.width, height: b.height, radius: hr }, function () {
+    hero.style.visibility = ''; tile.style.visibility = '';
+  });
+  if (isWide()) {
+    var rest = $$('#detailpane .dbody > *').filter(function (e) { return e !== hero; }).slice(0, 8);
+    rest.forEach(function (e, i) { anim(e, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: 90 + i * 22, easing: EASE, fill: 'backwards' }); });
+  }
+}
+/** Going back from a recipe (iPhone): the photo shrinks back into its tile in the list. */
+function flyClose(id) {
+  if (calm() || isWide()) return;
+  var hero = $('#detailpane .hero'), lp = $('#listpane');
+  var row = $('#listpane .rrow[data-id="' + String(id).replace(/"/g, '') + '"] .tile');
+  if (!hero || !row || !lp) return;
+  var a = hero.getBoundingClientRect();
+  if (a.bottom < 40 || a.top > window.innerHeight) return;
+  var b = restingRect(row, lp);
+  if (b.top + b.height < 0 || b.top > window.innerHeight) return;
+  var tl = $('.lt', row), hb = $('.big', hero);
+  var bigScale = tl && hb ? parseFloat(getComputedStyle(tl).fontSize) / parseFloat(getComputedStyle(hb).fontSize) : 0;
+  row.style.visibility = 'hidden'; hero.style.visibility = 'hidden';
+  flyer(hero, { left: a.left, top: a.top, width: a.width, height: a.height, radius: getComputedStyle(hero).borderRadius, big: 1 },
+    { left: b.left, top: b.top, width: b.width, height: b.height, radius: getComputedStyle(row).borderRadius, big: bigScale || (b.width / a.width) }, function () {
+      row.style.visibility = ''; hero.style.visibility = '';
+    });
+}
+
+/* ---------- lists slide into place instead of jumping ---------- */
+var FLIP_ROWS = 'li, .pwrap, .prow, .fitem, .hrow';
+function flipKey(row) {
+  var k = row.matches('[data-id]') ? row : row.querySelector('[data-id]');
+  if (!k) return '';
+  var id = k.getAttribute('data-id') || k.getAttribute('data-c');
+  return id ? (k.getAttribute('data-act') || '') + '|' + id : '';
+}
+function flipRows() {
+  var out = {}, seen = [], vh = window.innerHeight, n = 0;
+  $$('#listpane [data-id], #detailpane .sidepane [data-id]').some(function (el) {
+    if (el.closest('.rlist, .rrow, .ings, .steps, .pdrop')) return false;
+    var row = el.closest('.pwrap, li') || el.closest(FLIP_ROWS) || el;
+    if (seen.indexOf(row) >= 0) return false;
+    seen.push(row);
+    var key = flipKey(row); if (!key || out[key]) return false;
+    var r = row.getBoundingClientRect();
+    if (!r.height || r.bottom < -80 || r.top > vh + 80) return false;
+    out[key] = { el: row, r: r };
+    return ++n > 120;
+  });
+  return out;
+}
+function flipFirst(sameView) { if (!sameView || calm()) return null; return flipRows(); }
+function flipPlay(before) {
+  if (!before) return;
+  var after = flipRows(), added = [], gone = [];
+  Object.keys(after).forEach(function (k) {
+    var a = after[k], b = before[k];
+    if (!b) { added.push(a); return; }
+    var dx = b.r.left - a.r.left, dy = b.r.top - a.r.top;
+    if (Math.abs(dy) > 1 || Math.abs(dx) > 1) anim(a.el, [{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 320, easing: EASE });
+  });
+  Object.keys(before).forEach(function (k) { if (!after[k] && !before[k].el.isConnected) gone.push(before[k]); });
+  if (added.length && added.length <= 4) added.forEach(function (a) {
+    anim(a.el, [{ opacity: 0, transform: 'translateY(-8px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: EASE });
+  });
+  if (gone.length && gone.length <= 4) gone.forEach(function (g) {
+    var gh = document.createElement('div');
+    gh.className = 'flipghost'; gh.setAttribute('aria-hidden', 'true');
+    gh.style.cssText = 'left:' + g.r.left + 'px;top:' + g.r.top + 'px;width:' + g.r.width + 'px;height:' + g.r.height + 'px';
+    var cl = g.el.cloneNode(true);
+    [cl].concat(Array.prototype.slice.call(cl.querySelectorAll('*'))).forEach(function (n) {
+      n.removeAttribute('id'); Array.prototype.slice.call(n.attributes).forEach(function (a) { if (a.name.indexOf('data-') === 0 || a.name === 'aria-live') n.removeAttribute(a.name); });
+    });
+    gh.setAttribute('inert', ''); gh.appendChild(cl);
+    document.body.appendChild(gh);
+    var k = gh.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(-14px) scale(.97)' }], { duration: 220, easing: 'ease-in' });
+    k.onfinish = function () { gh.remove(); };
+    setTimeout(function () { gh.remove(); }, 500);
+  });
+}
+
+/* ---------- numbers roll over instead of snapping ---------- */
+function rollNumber(v, oldText, dir) {
+  if (!v || calm()) return;
+  var now = v.textContent; if (now === oldText) return;
+  v.setAttribute('data-old', oldText);
+  v.classList.remove('roll', 'up', 'down'); void v.offsetWidth;
+  v.classList.add('roll', dir < 0 ? 'down' : 'up');
+  v.innerHTML = '<span class="rn">' + esc(now) + '</span>';
+  setTimeout(function () { if (v.isConnected && v.classList.contains('roll')) { v.classList.remove('roll', 'up', 'down'); v.removeAttribute('data-old'); } }, 300);
+}
+
+/* ---------- the tab you picked gives a little bounce ---------- */
+function bumpTab(tab) {
+  var b = $('#tab-' + tab), s = b && $('svg', b);
+  anim(s, [{ transform: 'scale(1)' }, { transform: 'scale(.8)', offset: .3 }, { transform: 'scale(1.14)', offset: .65 }, { transform: 'scale(1)' }], { duration: 380, easing: 'ease-out' });
+}
+
+/* ---------- photos fade in as they arrive (ones already loaded just show) ---------- */
+var FADE_IMG = '.tile img, .hero img, .post .pimg img, .photo-pick img', SEEN_IMG = {};
+function settleImgs(root) {
+  $$(FADE_IMG + ':not(.ld)', root || document).forEach(function (i) {
+    if (!(i.complete && i.naturalWidth) && !SEEN_IMG[i.src]) return;
+    i.style.transition = 'none'; i.classList.add('ld'); void i.offsetWidth; i.style.transition = '';   // already here: just show it, no fade
+  });
+}
+document.addEventListener('load', function (e) {
+  var t = e.target; if (t && t.tagName === 'IMG') { SEEN_IMG[t.src] = 1; if (t.matches && t.matches(FADE_IMG)) t.classList.add('ld'); }
+}, true);
+document.addEventListener('error', function (e) {
+  var t = e.target; if (t && t.tagName === 'IMG') t.classList.add('ld');
+}, true);
+
+/* ---------- the photo at the top of a recipe drifts a little slower than the page ---------- */
+function heroDrift(pane) {
+  var on = false;
+  pane.addEventListener('scroll', function () {
+    if (on || calm()) return; on = true;
+    requestAnimationFrame(function () {
+      on = false;
+      var h = $('.hero', pane); if (!h) return;
+      var y = pane.scrollTop, inner = $$('img, .big', h);
+      if (y > h.offsetTop + h.offsetHeight + 40) return;
+      inner.forEach(function (e) { e.style.transform = y > 0 ? 'translateY(' + Math.round(y * 0.3) + 'px)' : ''; });
+    });
+  }, { passive: true });
+}
+
+/* ---------- messages: swipe one away ---------- */
+function enableToastSwipe() {
+  var el = $('#toast'); if (!el) return;
+  var y0 = null, dy = 0, up = true;
+  el.addEventListener('touchstart', function (e) { if (e.target.closest('button')) { y0 = null; return; } y0 = e.touches[0].clientY; dy = 0; up = el.getBoundingClientRect().top < window.innerHeight / 2; el.style.transition = 'none'; }, { passive: true });
+  el.addEventListener('touchmove', function (e) {
+    if (y0 === null) return;
+    var d = e.touches[0].clientY - y0;
+    dy = up ? Math.min(0, d) : Math.max(0, d);
+    el.style.transform = 'translate(-50%,' + dy + 'px)';
+  }, { passive: true });
+  var end = function () {
+    if (y0 === null) return; y0 = null;
+    el.style.transition = '';
+    if (Math.abs(dy) > 24) { el.style.transform = 'translate(-50%,' + (up ? -120 : 120) + 'px)'; hideToast(); setTimeout(function () { el.style.transform = ''; }, 260); }
+    else el.style.transform = '';
+  };
+  el.addEventListener('touchend', end); el.addEventListener('touchcancel', end);
 }
 
 /* ===================== on a computer =====================
@@ -7083,15 +7465,22 @@ document.addEventListener('click', function (e) {
   var A = ACTIONS[act];
   if (A) {
     e.preventDefault();
-    var sel = POP_ACTS[act] ? '[data-act="' + act + '"]' + ['data-id', 'data-i', 'data-tag', 'data-v'].map(function (k) { var v = t.getAttribute(k); return v === null ? '' : '[' + k + '="' + String(v).replace(/"/g, '\\"') + '"]'; }).join('') : '';
+    var stp = t.closest('.stepper'), sv = stp && $('.v', stp), oldV = sv ? sv.textContent : null, dd = +(t.getAttribute('data-d') || 0);
+    var sel = POP_ACTS[act] && !(act === 'mealcheck' && !id) ? '[data-act="' + act + '"]' + ['data-id', 'data-i', 'data-tag', 'data-v'].map(function (k) { var v = t.getAttribute(k); return v === null ? '' : '[' + k + '="' + String(v).replace(/"/g, '\\"') + '"]'; }).join('') : '';
     A(t, id, r);
     if (HAPTIC_ACTS[act]) haptic();
     if (sel) popAfter(sel);
+    if (oldV !== null && dd) {
+      var bsel = '[data-act="' + act + '"][data-d="' + dd + '"]' + (id ? '[data-id="' + String(id).replace(/"/g, '\\"') + '"]' : '');
+      var nb = null; try { nb = document.querySelector(bsel); } catch (x) { }
+      var nst = nb && nb.closest('.stepper');
+      if (nst) rollNumber($('.v', nst), oldV, dd);
+    }
   }
 });
 /* ---------- a little life: a pop on what you just ticked, and a light tap you can feel on iPhone ---------- */
-var POP_ACTS = { ingck: 1, shopck: 1, fav: 1, tagtoggle: 1, pickcolor: 1, ftag: 1, fset: 1, made: 1 };
-var HAPTIC_ACTS = { ingck: 1, shopck: 1, fav: 1, made: 1, cookdone: 1, saveform: 1, stepdone: 1 };
+var POP_ACTS = { ingck: 1, shopck: 1, fav: 1, tagtoggle: 1, pickcolor: 1, ftag: 1, fset: 1, made: 1, mealcheck: 1, mealmade: 1 };
+var HAPTIC_ACTS = { ingck: 1, shopck: 1, fav: 1, made: 1, mealcheck: 1, mealmade: 1, cookdone: 1, saveform: 1, stepdone: 1 };
 function popAfter(sel) {
   var el = null; try { el = document.querySelector(sel); } catch (e) { }
   if (!el) return;
@@ -7128,9 +7517,11 @@ var ACTIONS = {
   open: function (t, id) {
     if (SHEET) closeSheet();
     if (isWide() && (UI.tab === 'plan' || UI.tab === 'shop')) switchTab('recipes', true);
+    var tile = t && t.classList && t.classList.contains('rrow') ? $('.tile', t) : null, was = UI.openId;
     openRecipe(id);
+    if (tile && (was !== id || !isWide())) flyOpen(tile);
   },
-  back: function () { closeDetail(); },
+  back: function () { closeDetail(true); },
   edit: function (t, id) { if (once('edit')) openEditor(id, null, t.getAttribute('data-focus')); },
   fav: function (t, id, r) {
     if (!r || !once('fav' + id, 400)) return;
@@ -7646,7 +8037,7 @@ function switchTab(tab, keepFilters) {
   var changed = tab !== UI.tab;
   UI.tab = tab;
   render();
-  if (changed) { var lp = $('#listpane'); if (lp) { lp.classList.remove('pane-in'); void lp.offsetWidth; lp.classList.add('pane-in'); } }
+  if (changed) { var lp = $('#listpane'); if (lp) { lp.classList.remove('pane-in'); void lp.offsetWidth; lp.classList.add('pane-in'); } bumpTab(tab); }
 }
 
 var IMPORTING = false;
@@ -7753,7 +8144,7 @@ document.addEventListener('keydown', function (e) {
   if ((e.key === 'Enter' || e.key === ',') && e.target.id === 'f-newtag') { e.preventDefault(); ACTIONS.tagnew(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('filebtn')) { e.preventDefault(); e.target.click(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-act') === 'stepdone') { e.preventDefault(); e.target.click(); }
-  if (e.key === 'Escape') { if (UI.cook) closeCook(); else if (SHEET) closeSheet(); else if (UI.openId && !isWide()) closeDetail(); }
+  if (e.key === 'Escape') { if (UI.cook) closeCook(); else if (SHEET) closeSheet(); else if (UI.openId && !isWide()) closeDetail(true); }
   if (UI.cook && !SHEET) { if (e.key === 'ArrowRight') cookGo(1); if (e.key === 'ArrowLeft') cookGo(-1); }
 });
 
@@ -7840,6 +8231,8 @@ function start() {
   }
   enableDetailPull();
   enableEdgeBack();
+  heroDrift($('#detailpane'));
+  enableToastSwipe();
   $('#detailpane').addEventListener('scroll', function () {
     var b = $('#dbar'); if (b) b.classList.toggle('scrolled', this.scrollTop > 150);
   }, { passive: true });
