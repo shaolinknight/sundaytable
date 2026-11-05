@@ -72,8 +72,8 @@ svg.i{width:1.25rem;height:1.25rem;flex:none;fill:none;stroke:currentColor;strok
 .hdr{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--ch);color:var(--cht);
   padding:calc(var(--top) + 6px) max(var(--pad),env(safe-area-inset-right)) 8px max(var(--pad),env(safe-area-inset-left));
   display:flex;align-items:center;gap:10px;min-height:calc(var(--hdr) + var(--top))}
-.hdr h1{font-family:var(--fdisp);font-weight:400;font-size:1.4rem;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.005em}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;padding:6px 10px;border-radius:999px;background:rgba(127,127,127,.18);color:var(--cht);white-space:nowrap;min-height:32px}
+.hdr h1{font-family:var(--fdisp);font-weight:400;font-size:1.375rem;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.005em}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;padding:6px 10px;border-radius:999px;background:rgba(127,127,127,.18);color:var(--cht);white-space:nowrap;min-height:36px}
 .pill .dot{width:8px;height:8px;border-radius:50%;background:var(--chm)}
 .pill.ok .dot{background:#7FC48A}.pill.wait .dot{background:#E4B65A}.pill.err .dot{background:#F08A7A}
 .pill.busy .dot{animation:pulse 1s infinite alternate}
@@ -97,7 +97,7 @@ svg.i{width:1.25rem;height:1.25rem;flex:none;fill:none;stroke:currentColor;strok
 body.show-detail .detailpane{transform:none;visibility:visible}
 .dbar{position:sticky;top:0;z-index:2;background:var(--ch);color:var(--cht);display:flex;align-items:center;gap:4px;
   padding:calc(var(--top) + 6px) 8px 6px;min-height:calc(var(--hdr) + var(--top))}
-.dbar .t{flex:1;min-width:0;font-family:var(--fdisp);font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s}
+.dbar .t{flex:1;min-width:0;font-family:var(--fdisp);font-size:1.0625rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s}
 .dbar.scrolled .t{opacity:1}
 .dbar .back{display:inline-flex;align-items:center;gap:2px;padding:0 10px 0 4px;height:44px;border-radius:22px;font-size:1rem}
 .dbody{padding:0 max(var(--pad),env(safe-area-inset-right)) calc(var(--bot) + 40px) max(var(--pad),env(safe-area-inset-left));max-width:900px;margin:0 auto}
@@ -125,11 +125,11 @@ body.show-detail .detailpane{transform:none;visibility:visible}
 .fbtn.on{border-color:var(--ac);color:var(--ac)}
 .fbtn .n{background:var(--ac);color:var(--bt);border-radius:999px;font-size:.75rem;min-width:20px;height:20px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center}
 .listtools{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 6px;color:var(--t3);font-size:.875rem}
-.listtools select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--t2);font-weight:600;padding:8px 22px 8px 4px;min-height:40px;
+.listtools select{field-sizing:content;appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--t2);font-weight:600;padding:8px 22px 8px 4px;min-height:40px;
   background-image:linear-gradient(45deg,transparent 50%,var(--t3) 50%),linear-gradient(135deg,var(--t3) 50%,transparent 50%);
   background-position:right 8px top 55%,right 3px top 55%;background-size:5px 5px;background-repeat:no-repeat}
 .linkbtn{color:var(--ac);font-weight:600;padding:8px 4px;min-height:40px}
-.banner{background:var(--acd);color:var(--t1);border-radius:var(--r1);padding:12px 14px;margin:12px 0 4px;font-size:.9rem;display:flex;gap:10px;align-items:flex-start}
+.banner{background:var(--acd);color:var(--t1);border-radius:var(--r1);padding:12px 14px;margin:12px 0 4px;font-size:.875rem;display:flex;gap:10px;align-items:flex-start}
 .banner b{display:block}
 .banner .act{margin-left:auto;flex:none}
 .chiprow{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
@@ -142,8 +142,8 @@ body.show-detail .detailpane{transform:none;visibility:visible}
 .rrow:active,.rrow.sel-on{background:var(--p2)}
 .rrow.current{background:var(--p2)}
 .rrow .info{flex:1;min-width:0}
-.rrow .nm{font-family:var(--fdisp);font-size:1.14rem;line-height:1.2;overflow-wrap:anywhere;color:var(--t1)}
-.rrow .sub{color:var(--t3);font-size:.85rem;margin-top:3px;display:flex;flex-wrap:wrap;gap:4px 10px}
+.rrow .nm{font-family:var(--fdisp);font-size:1.125rem;line-height:1.2;overflow-wrap:anywhere;color:var(--t1)}
+.rrow .sub{color:var(--t3);font-size:.8125rem;margin-top:3px;display:flex;flex-wrap:wrap;gap:4px 10px}
 .rrow .fav{color:var(--ac);flex:none}
 .rrow .selbox{width:24px;height:24px;border-radius:6px;border:2px solid var(--b2);flex:none;display:flex;align-items:center;justify-content:center}
 .rrow.sel-on .selbox{background:var(--ac);border-color:var(--ac);color:var(--bt)}
@@ -165,7 +165,7 @@ body.show-detail .detailpane{transform:none;visibility:visible}
 
 /* ---------- recipe view ---------- */
 .rtitle{font-family:var(--fdisp);font-weight:400;font-size:2rem;line-height:1.12;margin:4px 0 8px;overflow-wrap:anywhere;letter-spacing:-.005em}
-.meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--t2);font-size:.9rem;margin:0 0 12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--t2);font-size:.875rem;margin:0 0 12px}
 .meta span{display:inline-flex;align-items:center;gap:5px}
 .meta svg.i{width:1rem;height:1rem;color:var(--t3)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
@@ -174,22 +174,22 @@ body.show-detail .detailpane{transform:none;visibility:visible}
 .btn.ghost{background:transparent}
 .btn.danger{color:var(--bad);border-color:currentColor;background:transparent}
 .btn.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
-.btn.sm{min-height:38px;padding:0 12px;font-size:.9rem}
+.btn.sm{min-height:38px;padding:0 12px;font-size:.875rem}
 .btn[disabled]{opacity:.5}
 .btn.icon{width:46px;padding:0}
 .btn.on{color:var(--ac);border-color:var(--ac)}
 .cols{display:grid;gap:22px}
 @media (min-width:1100px){.cols{grid-template-columns:minmax(260px,5fr) 7fr;align-items:start}.cols .ingcol{position:sticky;top:0}}
 .sec-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px;flex-wrap:wrap}
-.sec-h h2{font-family:var(--fdisp);font-weight:400;font-size:1.35rem;margin:0}
+.sec-h h2{font-family:var(--fdisp);font-weight:400;font-size:1.375rem;margin:0}
 .stepper{display:inline-flex;align-items:center;border:1.5px solid var(--b1);border-radius:999px;background:var(--p1)}
-.stepper button{width:40px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--t2)}
-.stepper .v{min-width:76px;text-align:center;font-weight:700;font-size:.9rem;white-space:nowrap}
+.stepper button{width:40px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;color:var(--t2)}
+.stepper .v{min-width:76px;text-align:center;font-weight:700;font-size:.875rem;white-space:nowrap}
 .card{background:var(--p1);border-radius:var(--r2);padding:var(--cardpad);box-shadow:var(--shadow)}
 html[data-cards="lined"] .card{box-shadow:none;border:1.5px solid var(--b1)}
 html[data-cards="flat"] .card{box-shadow:none;background:var(--p2)}
 .ings{list-style:none;margin:0;padding:0}
-.ings li.h{font-family:var(--fdisp);font-size:1.05rem;color:var(--t2);padding:12px 0 4px;border:0}
+.ings li.h{font-family:var(--fdisp);font-size:1.0625rem;color:var(--t2);padding:12px 0 4px;border:0}
 .ings li.h:first-child{padding-top:0}
 .ing{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--b1);width:100%;text-align:left;line-height:1.35}
 .ings li:last-child .ing{border-bottom:0}
@@ -199,7 +199,7 @@ html[data-cards="flat"] .card{box-shadow:none;background:var(--p2)}
 .ing .tx{flex:1;min-width:0;overflow-wrap:anywhere}
 .ing .amt{font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
 .steps{list-style:none;margin:0;padding:0}
-.steps li.h{font-family:var(--fdisp);font-size:1.05rem;color:var(--t2);margin:14px 0 4px}
+.steps li.h{font-family:var(--fdisp);font-size:1.0625rem;color:var(--t2);margin:14px 0 4px}
 .step{display:grid;grid-template-columns:2.1rem 1fr;gap:4px 8px;padding:10px 0;border-bottom:1px solid var(--b1);width:100%;text-align:left}
 .step:last-child{border-bottom:0}
 .step .n{font-family:var(--fdisp);font-size:1.5rem;line-height:1;color:var(--ac);padding-top:1px}
@@ -221,9 +221,9 @@ html[data-cards="flat"] .card{box-shadow:none;background:var(--p2)}
 .histlist li:last-child{border-bottom:0}
 .histlist .d{font-weight:700;min-width:7.5rem}
 .block{margin:22px 0}
-.block>h3{font-family:var(--fdisp);font-weight:400;font-size:1.2rem;margin:0 0 8px}
+.block>h3{font-family:var(--fdisp);font-weight:400;font-size:1.25rem;margin:0 0 8px}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
-.tagchip{background:var(--p2);color:var(--t2);border-radius:999px;padding:4px 11px;font-size:.85rem}
+.tagchip{background:var(--p2);color:var(--t2);border-radius:999px;padding:4px 11px;font-size:.8125rem}
 .empty{text-align:center;color:var(--t2);padding:48px 16px}
 .empty h2{font-family:var(--fdisp);font-weight:400;font-size:1.5rem;color:var(--t1);margin:0 0 6px}
 .empty-detail{height:100%;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:var(--t3);padding:40px}
@@ -235,15 +235,15 @@ html[data-cards="flat"] .card{box-shadow:none;background:var(--p2)}
 html[data-cards="lined"] .stat{box-shadow:none;border:1.5px solid var(--b1)}
 html[data-cards="flat"] .stat{box-shadow:none;background:var(--p2)}
 .stat b{display:block;font-family:var(--fdisp);font-weight:400;font-size:1.5rem;line-height:1.15;overflow-wrap:anywhere}
-.stat span{color:var(--t3);font-size:.85rem}
-.month{font-family:var(--fdisp);font-size:1.15rem;margin:18px 0 4px;color:var(--t2)}
+.stat span{color:var(--t3);font-size:.8125rem}
+.month{font-family:var(--fdisp);font-size:1.125rem;margin:18px 0 4px;color:var(--t2)}
 .hrow{display:flex;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--b1);width:100%;text-align:left}
 .hrow .dt{width:3rem;text-align:center;flex:none;line-height:1.1}
-.hrow .dt b{display:block;font-family:var(--fdisp);font-size:1.4rem;font-weight:400}
+.hrow .dt b{display:block;font-family:var(--fdisp);font-size:1.375rem;font-weight:400}
 .hrow .dt span{font-size:.75rem;color:var(--t3)}
 .hrow .info{flex:1;min-width:0}
 .hrow .nm{font-weight:700;overflow-wrap:anywhere}
-.hrow .nt{color:var(--t2);font-size:.9rem;overflow-wrap:anywhere}
+.hrow .nt{color:var(--t2);font-size:.875rem;overflow-wrap:anywhere}
 
 /* ---------- sheets (bottom sheets / dialogs) ---------- */
 .scrim{position:fixed;inset:0;z-index:50;background:rgba(20,12,6,.45);opacity:0;transition:opacity .2s;touch-action:none}
@@ -254,7 +254,7 @@ html[data-cards="flat"] .stat{box-shadow:none;background:var(--p2)}
 .sheet .grab{padding:8px 0 0;display:flex;justify-content:center;touch-action:none}
 .sheet .grab span{width:40px;height:5px;border-radius:3px;background:var(--b2)}
 .sheet .sh-h{display:flex;align-items:center;gap:8px;padding:4px 10px 8px 18px;touch-action:none}
-.sheet .sh-h h2{flex:1;margin:0;font-family:var(--fdisp);font-weight:400;font-size:1.35rem;min-width:0;overflow-wrap:anywhere}
+.sheet .sh-h h2{flex:1;margin:0;font-family:var(--fdisp);font-weight:400;font-size:1.375rem;min-width:0;overflow-wrap:anywhere}
 .sheet .sh-b{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:4px 18px calc(var(--bot) + 20px)}
 .sheet .sh-f{display:flex;gap:8px;padding:10px 18px calc(var(--bot) + 10px);border-top:1px solid var(--b1);background:var(--bg);flex-wrap:wrap}
 .sheet .sh-f .btn{flex:1;min-width:0}
@@ -267,8 +267,8 @@ html[data-cards="flat"] .stat{box-shadow:none;background:var(--p2)}
   .sheet .sh-b,.sheet .sh-f{padding-bottom:18px}
 }
 .field{margin:0 0 14px}
-.field label,.flabel{display:block;font-weight:700;font-size:.9rem;margin:0 0 5px;color:var(--t2)}
-.field .hint{font-size:.82rem;color:var(--t3);margin:4px 0 0}
+.field label,.flabel{display:block;font-weight:700;font-size:.875rem;margin:0 0 5px;color:var(--t2)}
+.field .hint{font-size:.8125rem;color:var(--t3);margin:4px 0 0}
 .inp{width:100%;min-height:46px;border-radius:var(--r1);border:1.5px solid var(--b1);background:var(--p1);padding:10px 12px;outline:none;color:var(--t1)}
 .inp:focus{border-color:var(--ac)}
 textarea.inp{min-height:150px;resize:vertical;line-height:1.45}
@@ -277,12 +277,12 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.45}
 .importbox{background:var(--acd);border-radius:var(--r2);padding:14px;margin:4px 0 18px}
 .importbox .line{display:flex;gap:8px}
 .importbox .line .inp{flex:1;min-width:0}
-.importbox .msg{font-size:.88rem;margin:8px 0 0}
+.importbox .msg{font-size:.875rem;margin:8px 0 0}
 .importbox .msg.err{color:var(--bad)}
 .photo-pick{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .photo-pick .tile{width:72px;height:72px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{border:1.5px solid var(--b1);background:var(--p1);border-radius:999px;padding:8px 14px;min-height:40px;font-size:.9rem;color:var(--t2)}
+.seg button{border:1.5px solid var(--b1);background:var(--p1);border-radius:999px;padding:8px 14px;min-height:40px;font-size:.875rem;color:var(--t2)}
 .seg button[aria-pressed="true"]{border-color:var(--ac);background:var(--acd);color:var(--t1);font-weight:700}
 .toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;width:100%;text-align:left;border-bottom:1px solid var(--b1)}
 .toggle .sw{width:48px;height:28px;border-radius:14px;background:var(--b2);position:relative;flex:none;transition:background .15s}
@@ -294,18 +294,18 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.45}
 .sset{border-bottom:1px solid var(--b1)}
 .sset>button.sh{display:flex;align-items:center;gap:10px;width:100%;padding:14px 2px;text-align:left;min-height:56px}
 .sset>button.sh b{font-weight:700;flex:none}
-.sset>button.sh .val{flex:1;min-width:0;text-align:right;color:var(--t3);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sset>button.sh .val{flex:1;min-width:0;text-align:right;color:var(--t3);font-size:.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sset>button.sh svg{transition:transform .2s;color:var(--t3)}
 .sset.open>button.sh svg{transform:rotate(90deg)}
 .sset .sb{padding:0 2px 16px;display:none}
 .sset.open .sb{display:block}
 .subset{border:1.5px solid var(--b1);border-radius:var(--r1);margin:8px 0;background:var(--p1)}
 .subset>button{display:flex;width:100%;align-items:center;gap:8px;padding:12px;text-align:left;font-weight:700;min-height:48px}
-.subset>button .val{margin-left:auto;font-weight:400;color:var(--t3);font-size:.88rem}
+.subset>button .val{margin-left:auto;font-weight:400;color:var(--t3);font-size:.875rem}
 .subset .sbb{display:none;padding:0 12px 12px}
 .subset.open .sbb{display:block}
 .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
-.swatch{border:2px solid var(--b1);border-radius:var(--r1);padding:6px;text-align:left;font-size:.85rem;background:var(--bg)}
+.swatch{border:2px solid var(--b1);border-radius:var(--r1);padding:6px;text-align:left;font-size:.8125rem;background:var(--bg)}
 .swatch[aria-pressed="true"]{border-color:var(--ac)}
 .swatch .bars{display:flex;height:30px;border-radius:6px;overflow:hidden;margin-bottom:5px}
 .swatch .bars i{flex:1}
@@ -314,18 +314,18 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.45}
 .look .top{height:22px}
 .look .bd{padding:8px 10px}
 .look .bd b{display:block;font-size:1rem;font-weight:400}
-.look .bd span{font-size:.78rem;color:var(--t3)}
+.look .bd span{font-size:.8125rem;color:var(--t3)}
 .iconpick{display:flex;flex-wrap:wrap;gap:10px}
 .iconpick button{border:2px solid transparent;border-radius:16px;padding:2px}
 .iconpick button[aria-pressed="true"]{border-color:var(--ac)}
 .iconpick img{width:56px;height:56px;border-radius:13px}
-.infobox{font-size:.88rem;color:var(--t2);background:var(--p2);border-radius:var(--r1);padding:10px 12px;margin:8px 0}
+.infobox{font-size:.875rem;color:var(--t2);background:var(--p2);border-radius:var(--r1);padding:10px 12px;margin:8px 0}
 .okmsg{color:var(--ok);font-weight:700}
 .errmsg{color:var(--bad);font-weight:700}
 .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-.ver{text-align:center;color:var(--t3);font-size:.85rem;padding:18px 0 4px}
+.ver{text-align:center;color:var(--t3);font-size:.8125rem;padding:18px 0 4px}
 details.help{margin:6px 0}
-details.help summary{cursor:pointer;color:var(--ac);font-weight:600;font-size:.9rem;padding:6px 0}
+details.help summary{cursor:pointer;color:var(--ac);font-weight:600;font-size:.875rem;padding:6px 0}
 
 /* select-mode bar */
 .selbar{position:fixed;left:0;right:0;bottom:calc(var(--tab) + var(--bot));z-index:25;background:var(--p1);border-top:1px solid var(--b1);padding:8px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 -6px 20px -12px rgba(0,0,0,.35)}
@@ -340,8 +340,8 @@ details.help summary{cursor:pointer;color:var(--ac);font-weight:600;font-size:.9
 .toast button{color:var(--bg);font-weight:800;padding:8px 10px;border-radius:10px;background:rgba(127,127,127,.25);flex:none}
 .timers{position:fixed;right:12px;bottom:calc(var(--tab) + var(--bot) + 10px);z-index:60;display:flex;flex-direction:column;gap:6px;align-items:flex-end;max-width:calc(100vw - 24px)}
 .timer{display:flex;align-items:center;gap:8px;background:var(--ch);color:var(--cht);border-radius:999px;padding:4px 4px 4px 14px;box-shadow:0 8px 20px -8px rgba(0,0,0,.5);max-width:100%}
-.timer .lb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.85rem;color:var(--chm)}
-.timer .tm{font-weight:800;font-variant-numeric:tabular-nums;font-size:1.05rem}
+.timer .lb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8125rem;color:var(--chm)}
+.timer .tm{font-weight:800;font-variant-numeric:tabular-nums;font-size:1.0625rem}
 .timer.done{background:var(--ac);color:var(--bt);animation:ring .7s infinite alternate}
 .timer.done .lb{color:var(--bt)}
 @keyframes ring{to{transform:scale(1.04)}}
@@ -350,23 +350,23 @@ details.help summary{cursor:pointer;color:var(--ac);font-weight:600;font-size:.9
 /* ---------- cook mode ---------- */
 .cook{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column}
 .cook .ctop{display:flex;align-items:center;gap:6px;padding:calc(var(--top) + 6px) 10px 6px;background:var(--ch);color:var(--cht)}
-.cook .ctop .t{flex:1;min-width:0;font-family:var(--fdisp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.05rem}
+.cook .ctop .t{flex:1;min-width:0;font-family:var(--fdisp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.0625rem}
 .cook .prog{height:4px;background:var(--p2)}
 .cook .prog i{display:block;height:100%;background:var(--ac);transition:width .25s}
 .cook .cbody{flex:1;overflow-y:auto;padding:20px max(20px,env(safe-area-inset-right)) 20px max(20px,env(safe-area-inset-left));display:flex;flex-direction:column}
 .cook .cin{max-width:760px;width:100%;margin:auto}
-.cook .sect{color:var(--t3);font-family:var(--fdisp);font-size:1.1rem;margin-bottom:4px}
-.cook .num{font-family:var(--fdisp);color:var(--ac);font-size:1.1rem;margin-bottom:10px}
+.cook .sect{color:var(--t3);font-family:var(--fdisp);font-size:1.125rem;margin-bottom:4px}
+.cook .num{font-family:var(--fdisp);color:var(--ac);font-size:1.125rem;margin-bottom:10px}
 .cook .big{font-size:1.75rem;line-height:1.4;overflow-wrap:anywhere}
-.cook .big .tmr{font-size:1.4rem;padding:4px 14px;margin:2px 0}
-.cook .big ul{font-size:1.3rem;color:var(--t2);padding-left:1.3rem}
+.cook .big .tmr{font-size:1.375rem;padding:4px 14px;margin:2px 0}
+.cook .big ul{font-size:1.375rem;color:var(--t2);padding-left:1.3rem}
 .cook .cnav{display:flex;gap:10px;padding:10px 14px calc(var(--bot) + 12px);border-top:1px solid var(--b1)}
-.cook .cnav .btn{flex:1;min-height:60px;font-size:1.1rem}
+.cook .cnav .btn{flex:1;min-height:60px;font-size:1.125rem}
 .cook .drawer{position:absolute;left:0;right:0;bottom:0;top:calc(var(--top) + 60px);background:var(--bg);z-index:2;overflow-y:auto;padding:16px 20px calc(var(--bot) + 24px);transform:translateY(105%);transition:transform .25s;box-shadow:0 -10px 30px -10px rgba(0,0,0,.4)}
 .cook .drawer.in{transform:none}
-.cook .drawer .ing{font-size:1.2rem}
-.cook .wakenote{font-size:.85rem;color:var(--t3);text-align:center;padding:6px}
-.ptr{height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;color:var(--t3);font-size:.85rem;transition:height .2s}
+.cook .drawer .ing{font-size:1.25rem}
+.cook .wakenote{font-size:.8125rem;color:var(--t3);text-align:center;padding:6px}
+.ptr{height:0;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;color:var(--t3);font-size:.8125rem;transition:height .2s}
 
 /* phones have the edit button in the top bar already */
 @media (max-width:759px){.actions .edit-wide{display:none}}
@@ -390,13 +390,13 @@ body.cooking .timers{bottom:calc(var(--bot) + 96px)}
 .shelf{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 6px}
 .ghostchip{border-style:dashed;background:transparent;color:var(--t2)}
 .chip svg.i{width:1rem;height:1rem}
-.chip .cnt{font-size:.78rem;opacity:.75}
-.colnote{font-size:.9rem;color:var(--t2);margin:2px 0 4px}
+.chip .cnt{font-size:.8125rem;opacity:.75}
+.colnote{font-size:.875rem;color:var(--t2);margin:2px 0 4px}
 .act2{display:flex;flex-wrap:wrap;gap:8px;margin:-8px 0 18px}
 .act2 .btn svg.i{width:1.05rem;height:1.05rem}
 
 /* tag suggestions */
-.sugl{font-size:.82rem;color:var(--t3);align-self:center;margin-right:2px}
+.sugl{font-size:.8125rem;color:var(--t3);align-self:center;margin-right:2px}
 .chip.sug{border-color:var(--ac);color:var(--ac);font-weight:700}
 
 /* ---------- plan ---------- */
@@ -404,7 +404,7 @@ body.cooking .timers{bottom:calc(var(--bot) + 96px)}
 .weeknav{display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px}
 .weeknav .wk{text-align:center}
 .weeknav .wk b{display:block;font-family:var(--fdisp);font-weight:400;font-size:1.5rem;line-height:1.15}
-.weeknav .wk span{color:var(--t3);font-size:.88rem}
+.weeknav .wk span{color:var(--t3);font-size:.875rem}
 .weeknav .iconbtn{color:var(--t2);border:1.5px solid var(--b1);background:var(--p1)}
 .day{background:var(--p1);border-radius:var(--r2);padding:10px var(--cardpad) 6px;margin:10px 0;box-shadow:var(--shadow)}
 html[data-cards="lined"] .day{box-shadow:none;border:1.5px solid var(--b1)}
@@ -412,31 +412,32 @@ html[data-cards="flat"] .day{box-shadow:none;background:var(--p2)}
 .day.today{box-shadow:inset 4px 0 0 var(--ac),var(--shadow)}
 .day.past .dayh h2{color:var(--t3)}
 .dayh{display:flex;align-items:center;gap:8px;margin-bottom:2px}
-.dayh h2{font-family:var(--fdisp);font-weight:400;font-size:1.15rem;margin:0}
+.dayh h2{font-family:var(--fdisp);font-weight:400;font-size:1.125rem;margin:0}
 .badge{background:var(--ac);color:var(--bt);border-radius:999px;font-size:.75rem;font-weight:700;padding:2px 9px}
 .prow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:8px 0;border-bottom:1px solid var(--b1)}
-.prow .tile{width:46px;height:46px;font-size:1.4rem}
+.prow .tile{width:46px;height:46px;font-size:1.375rem}
 .prow .info{flex:1;min-width:0}
 .prow .nm{display:block;font-weight:700;overflow-wrap:anywhere}
-.prow .sub{display:block;color:var(--t3);font-size:.85rem}
+.prow .sub{display:block;color:var(--t3);font-size:.8125rem}
 .addday{display:flex;align-items:center;gap:6px;color:var(--ac);font-weight:700;min-height:44px;width:100%}
 .addday svg.i{width:1.1rem;height:1.1rem}
 .shopcta{display:flex;flex-direction:column;gap:12px;margin:18px 0 8px}
-.shopcta b{display:block;font-family:var(--fdisp);font-weight:400;font-size:1.2rem}
-.shopcta .muted{font-size:.9rem}
+.shopcta b{display:block;font-family:var(--fdisp);font-weight:400;font-size:1.25rem}
+.shopcta .muted{font-size:.875rem}
 .daypick{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .daypick button{border:1.5px solid var(--b1);background:var(--p1);border-radius:var(--r1);padding:10px 8px;text-align:left;min-height:64px}
 .daypick b{display:block}
-.daypick span{color:var(--t3);font-size:.85rem}
-.daypick i{display:block;font-style:normal;color:var(--ac);font-size:.78rem;font-weight:700;margin-top:2px}
+.daypick span{color:var(--t3);font-size:.8125rem}
+.daypick i{display:block;font-style:normal;color:var(--ac);font-size:.8125rem;font-weight:700;margin-top:2px}
 
 /* ---------- shopping ---------- */
 .shophead{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .additem{display:flex;gap:8px;margin:6px 0 10px}
 .additem .inp{flex:1;min-width:0}
-.shopacts{margin:4px 0 6px}
+.shopacts{margin:4px 0 6px;display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:8px}
+.shopacts .btn{min-width:0;padding:0 8px}
 .shopacts .btn svg.i{width:1.05rem;height:1.05rem}
-h3.sect{font-family:var(--fdisp);font-weight:400;font-size:1.1rem;color:var(--t2);margin:18px 0 2px}
+h3.sect{font-family:var(--fdisp);font-weight:400;font-size:1.125rem;color:var(--t2);margin:18px 0 2px}
 .shoplist{list-style:none;margin:0;padding:0}
 .srow{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--b1)}
 .sck{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0;text-align:left;padding:10px 0}
@@ -445,7 +446,7 @@ h3.sect{font-family:var(--fdisp);font-weight:400;font-size:1.1rem;color:var(--t2
 .sck .tx{flex:1;min-width:0}
 .sck .nm{display:block;font-weight:700;overflow-wrap:anywhere}
 .sck .amt{font-weight:400;color:var(--t2)}
-.sck .from{display:block;font-size:.8rem;color:var(--t3);overflow-wrap:anywhere}
+.sck .from{display:block;font-size:.8125rem;color:var(--t3);overflow-wrap:anywhere}
 .srow.on .nm{text-decoration:line-through;color:var(--t3)}
 .srow.off .nm{color:var(--t3)}
 .sedit{color:var(--t3)}
@@ -458,19 +459,19 @@ h3.sect{font-family:var(--fdisp);font-weight:400;font-size:1.1rem;color:var(--t2
 .shareopt{display:flex;gap:14px;align-items:flex-start;text-align:left;border:1.5px solid var(--b1);background:var(--p1);border-radius:var(--r1);padding:14px}
 .shareopt svg.i{color:var(--ac);margin-top:2px}
 .shareopt b{display:block}
-.shareopt span span{display:block;color:var(--t3);font-size:.88rem}
+.shareopt span span{display:block;color:var(--t3);font-size:.875rem}
 body.shared .detailpane{position:static;transform:none;visibility:visible;overflow:visible}
 body.shared .main,body.shared .tabbar,body.shared .fab{display:none}
 .sharedmain{padding:calc(var(--hdr) + var(--top) + 4px) 0 40px}
 
 /* ---------- cook mode: up next ---------- */
-.ul{display:block;font-size:.8rem;font-weight:700;color:var(--t3);margin-bottom:6px}
+.ul{display:block;font-size:.8125rem;font-weight:700;color:var(--t3);margin-bottom:6px}
 .uses{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;align-items:center}
 .uses .ul{width:100%;margin-bottom:0}
 .use{background:var(--p2);border-radius:999px;padding:4px 12px;font-size:1rem}
 .upnext{margin-top:26px;border-top:2px dashed var(--b1);padding-top:16px}
-.upnext p{margin:0;font-size:1.15rem;line-height:1.45;color:var(--t2);overflow-wrap:anywhere}
-.upnext .use{font-size:.95rem}
+.upnext p{margin:0;font-size:1.125rem;line-height:1.45;color:var(--t2);overflow-wrap:anywhere}
+.upnext .use{font-size:.9375rem}
 
 /* ---------- printing a recipe card ---------- */
 #print{display:none}
@@ -494,13 +495,13 @@ body.shared .main,body.shared .tabbar,body.shared .fab{display:none}
 .cookserv{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
 .revserv{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--p1);border-radius:var(--r1);padding:10px 12px;margin:0 0 12px}
 .revserv .flabel{margin:0}
-.revfor{font-size:.88rem;color:var(--t2);background:var(--p2);border-radius:var(--r1);padding:10px 12px;margin:0 0 10px}
+.revfor{font-size:.875rem;color:var(--t2);background:var(--p2);border-radius:var(--r1);padding:10px 12px;margin:0 0 10px}
 b.scaled{font-weight:700;color:var(--ac)}
 .row4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .row4 .field{min-width:0}
 
 /* ===================== 2.0 ===================== */
-.hint{font-size:.85rem;color:var(--t3);margin:6px 0 0}
+.hint{font-size:.8125rem;color:var(--t3);margin:6px 0 0}
 .lede{margin:0 0 12px;color:var(--t2)}
 body.cooking .scrim{z-index:74}
 body.cooking .sheet{z-index:75}
@@ -527,22 +528,22 @@ body.cooking .sheet{z-index:75}
 .fmain .tile{width:42px;height:42px;font-size:1.25rem}
 .fmain .info{min-width:0;flex:1}
 .fmain .nm{display:block;font-weight:700;overflow-wrap:anywhere}
-.fmain .sub{display:block;font-size:.85rem;color:var(--t3)}
+.fmain .sub{display:block;font-size:.8125rem;color:var(--t3)}
 .fmain .sub b{color:var(--t2)}
 .frow.urgent .sub{color:var(--bad);font-weight:700}
 .frow.urgent .sub b{color:var(--bad)}
 .frow .btn{flex:none}
 .preplist{list-style:none;margin:6px 0 0;padding:0}
 .preplist li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--b1)}
-.preplist .pn{font-family:var(--fdisp);color:var(--ac);font-size:1.3rem;width:22px;flex:none;text-align:center;line-height:1.6}
-.preplist .tile{width:44px;height:44px;font-size:1.3rem;flex:none}
+.preplist .pn{font-family:var(--fdisp);color:var(--ac);font-size:1.375rem;width:22px;flex:none;text-align:center;line-height:1.6}
+.preplist .tile{width:44px;height:44px;font-size:1.375rem;flex:none}
 .preplist .info{flex:1;min-width:0}
 .preplist .nm{display:block;font-weight:700;overflow-wrap:anywhere}
-.preplist .sub{display:block;font-size:.85rem;color:var(--t3)}
+.preplist .sub{display:block;font-size:.8125rem;color:var(--t3)}
 .preplist .btnrow{margin:8px 0 0;align-items:center}
-.preplist .okmsg{display:inline-flex;align-items:center;gap:4px;font-size:.9rem}
+.preplist .okmsg{display:inline-flex;align-items:center;gap:4px;font-size:.875rem}
 .preplist li.done .nm{color:var(--t2)}
-.subsect{font-weight:700;color:var(--t2);font-size:.9rem;margin:12px 0 0}
+.subsect{font-weight:700;color:var(--t2);font-size:.875rem;margin:12px 0 0}
 
 /* recipe page: meal prep, nutrition, swaps */
 .seg button.sugg{border-style:dashed;border-color:var(--ac)}
@@ -550,10 +551,10 @@ body.cooking .sheet{z-index:75}
 .keepsline svg.i{color:var(--t3)}
 .est{font-family:var(--fbody);font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);background:var(--p2);border-radius:999px;padding:3px 8px;vertical-align:middle;margin-left:4px}
 .nstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;text-align:center}
-.nstats b{display:block;font-family:var(--fdisp);font-weight:400;font-size:1.3rem;line-height:1.2;white-space:nowrap}
-.nstats span{font-size:.8rem;color:var(--t3)}
-.nnote{font-size:.82rem;color:var(--t3);margin:10px 0 0;overflow-wrap:anywhere}
-.costline{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:.92rem;color:var(--t2)}
+.nstats b{display:block;font-family:var(--fdisp);font-weight:400;font-size:1.375rem;line-height:1.2;white-space:nowrap}
+.nstats span{font-size:.8125rem;color:var(--t3)}
+.nnote{font-size:.8125rem;color:var(--t3);margin:10px 0 0;overflow-wrap:anywhere}
+.costline{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:.9375rem;color:var(--t2)}
 .costline svg.i{flex:none;margin-top:1px;color:var(--ok)}
 .costline.muted svg.i{color:var(--t3)}
 .ings li.hasswap{display:flex;align-items:flex-start;gap:2px}
@@ -572,21 +573,21 @@ body.cooking .sheet{z-index:75}
 .viewseg{margin:12px 0 4px}
 .viewseg button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .viewseg button svg.i{width:1.05rem;height:1.05rem}
-.viewseg .cnt{font-size:.78rem;font-weight:700;background:var(--p2);color:var(--t2);border-radius:999px;padding:1px 7px}
+.viewseg .cnt{font-size:.8125rem;font-weight:700;background:var(--p2);color:var(--t2);border-radius:999px;padding:1px 7px}
 .viewseg .cnt.warn{color:var(--warn)}
-.moneyline{display:flex;gap:6px;align-items:flex-start;font-size:.88rem;color:var(--t2);margin:0 0 6px}
+.moneyline{display:flex;gap:6px;align-items:flex-start;font-size:.875rem;color:var(--t2);margin:0 0 6px}
 .moneyline svg.i{width:1.05rem;height:1.05rem;color:var(--ok);flex:none;margin-top:1px}
 .incart>span{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
 .donelist{list-style:none;margin:0;padding:0}
 .donelist li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b1)}
 .donelist .tx{flex:1;min-width:0}
 .donelist .nm{display:block;font-weight:700;overflow-wrap:anywhere}
-.donelist .from{display:block;font-size:.8rem;color:var(--t3)}
+.donelist .from{display:block;font-size:.8125rem;color:var(--t3)}
 .donelist .inp.price{width:88px;flex:none;padding-left:10px;padding-right:8px}
 .donelist .chip{flex:none}
 .pcard{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}
 .pcard b{display:flex;align-items:center;gap:6px}
-.pcard .muted{display:block;font-size:.88rem;overflow-wrap:anywhere}
+.pcard .muted{display:block;font-size:.875rem;overflow-wrap:anywhere}
 .pcard>div{min-width:0;flex:1 1 180px}
 .useup b svg.i{color:var(--ok)}
 .uu{margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -594,25 +595,25 @@ body.cooking .sheet{z-index:75}
 .prow2{padding:6px 0}
 .prow2 .tx{flex:1;min-width:0;padding:6px 0}
 .prow2 .nm{display:block;font-weight:700;overflow-wrap:anywhere}
-.prow2 .from{display:block;font-size:.8rem;color:var(--t3)}
-.pstat{min-width:62px;min-height:36px;border-radius:999px;font-size:.85rem;font-weight:700;padding:0 12px;border:1.5px solid var(--b1);background:var(--p1);color:var(--ok)}
+.prow2 .from{display:block;font-size:.8125rem;color:var(--t3)}
+.pstat{min-width:62px;min-height:36px;border-radius:999px;font-size:.8125rem;font-weight:700;padding:0 12px;border:1.5px solid var(--b1);background:var(--p1);color:var(--ok)}
 .pstat.low{color:var(--warn);border-color:var(--warn)}
 .pstat.out{color:var(--bad);border-color:var(--bad);background:var(--p2)}
 
 /* discover */
-.dsec{font-family:var(--fdisp);font-weight:400;font-size:1.35rem;margin:26px 0 4px;display:flex;align-items:center;gap:8px}
+.dsec{font-family:var(--fdisp);font-weight:400;font-size:1.375rem;margin:26px 0 4px;display:flex;align-items:center;gap:8px}
 .dsec svg.i{color:var(--ac)}
-.dhint{color:var(--t3);font-size:.9rem;margin:0 0 8px}
-.taste h2{font-family:var(--fdisp);font-weight:400;font-size:1.35rem;margin:0}
-.taste>.muted{font-size:.88rem;margin:2px 0 10px}
+.dhint{color:var(--t3);font-size:.875rem;margin:0 0 8px}
+.taste h2{font-family:var(--fdisp);font-weight:400;font-size:1.375rem;margin:0}
+.taste>.muted{font-size:.875rem;margin:2px 0 10px}
 .tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:4px 18px}
-.tgrid h3{font-size:.9rem;color:var(--t2);margin:6px 0 4px}
+.tgrid h3{font-size:.875rem;color:var(--t2);margin:6px 0 4px}
 .bars{list-style:none;margin:0;padding:0}
-.bars li{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.9rem}
+.bars li{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.875rem}
 .bars .tl{width:92px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:capitalize}
 .bars .tb{flex:1;height:10px;background:var(--p2);border-radius:999px;overflow:hidden}
 .bars .tb i{display:block;height:100%;background:var(--ac);border-radius:999px}
-.flav{margin:12px 0 0;font-size:.92rem;color:var(--t2)}
+.flav{margin:12px 0 0;font-size:.9375rem;color:var(--t2)}
 .ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .idea{background:var(--p1);border-radius:var(--r2);padding:var(--cardpad);box-shadow:var(--shadow);min-width:0;position:relative;display:flex;flex-direction:column}
 .idea .ihide{position:absolute;top:4px;right:4px;color:var(--t3)}
@@ -620,11 +621,11 @@ body.cooking .sheet{z-index:75}
 .idea .btnrow{margin-top:auto;padding-top:10px}
 html[data-cards="lined"] .idea{box-shadow:none;border:1.5px solid var(--b1)}
 html[data-cards="flat"] .idea{box-shadow:none;background:var(--p2)}
-.idea h3{font-family:var(--fdisp);font-weight:400;font-size:1.2rem;margin:0 0 4px;overflow-wrap:anywhere}
-.idea p{margin:0 0 6px;color:var(--t2);font-size:.92rem}
-.idea .why{color:var(--ac);font-weight:700;font-size:.85rem}
+.idea h3{font-family:var(--fdisp);font-weight:400;font-size:1.25rem;margin:0 0 4px;overflow-wrap:anywhere}
+.idea p{margin:0 0 6px;color:var(--t2);font-size:.9375rem}
+.idea .why{color:var(--ac);font-weight:700;font-size:.8125rem}
 .idea .tags{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 2px}
-.tagchip.static{font-size:.78rem;padding:2px 9px}
+.tagchip.static{font-size:.8125rem;padding:2px 9px}
 html[data-cards="flat"] .idea .tagchip{background:var(--p1)}
 .idea .btnrow{margin-bottom:0}
 .idea a.btn{text-decoration:none}
@@ -663,14 +664,14 @@ body.typing .tabbar,body.typing .fab,body.typing .timers{display:none}
 .pstat{flex:none}
 .statopts{display:flex;flex-direction:column;gap:8px}
 .statopt{display:grid;grid-template-columns:1fr auto;align-items:center;text-align:left;gap:2px 10px;border:1.5px solid var(--b1);background:var(--p1);border-radius:var(--r1);padding:12px 14px;min-height:60px}
-.statopt b{font-size:1.05rem}
-.statopt span{grid-column:1;color:var(--t3);font-size:.88rem}
+.statopt b{font-size:1.0625rem}
+.statopt span{grid-column:1;color:var(--t3);font-size:.875rem}
 .statopt svg.i{grid-row:1/3;grid-column:2;color:var(--ac)}
 .statopt.have b{color:var(--ok)}.statopt.low b{color:var(--warn)}.statopt.out b{color:var(--bad)}
 .statopt[aria-pressed="true"]{border-color:var(--ac);background:var(--acd)}
 /* calendars: Plan it and the month view */
 .planseg{margin:12px 0 2px}
-.calttl{font-family:var(--fdisp);font-size:1.15rem;margin:0 0 8px;text-align:center}
+.calttl{font-family:var(--fdisp);font-size:1.125rem;margin:0 0 8px;text-align:center}
 .cal{margin:4px 0 10px}
 .calhd,.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .calhd span{text-align:center;font-size:.75rem;font-weight:700;color:var(--t3);padding:2px 0 4px}
@@ -695,12 +696,12 @@ html[data-cards="lined"] .cd.today{border-color:var(--ac)}
 .pancheck{background:var(--p1);border-radius:var(--r1);padding:4px 12px 6px;margin:0 0 6px;box-shadow:var(--shadow)}
 .pancheck .sect{display:flex;align-items:center;gap:6px;margin-top:10px}
 .pancheck .sect svg.i{color:var(--ac)}
-.pancheck>.muted{font-size:.88rem;margin:2px 0 4px}
+.pancheck>.muted{font-size:.875rem;margin:2px 0 4px}
 .pcrow{display:flex;flex-wrap:wrap;align-items:center;gap:0 8px;border-bottom:1px solid var(--b1);padding-bottom:8px}
 .pcrow:last-child{border-bottom:0}
 .pcrow .sck{flex:1 1 180px;min-width:0}
 .seg.mini{flex-wrap:nowrap;gap:4px;margin-left:36px}
-.seg.mini button{min-height:36px;padding:4px 12px;font-size:.85rem}
+.seg.mini button{min-height:36px;padding:4px 12px;font-size:.8125rem}
 .seg.mini button.low[aria-pressed="true"]{border-color:var(--warn)}
 .seg.mini button.out[aria-pressed="true"]{border-color:var(--bad)}
 /* with a panel open, notifications sit above its buttons instead of over its title */
@@ -714,16 +715,16 @@ body.kb .toast{bottom:auto;top:calc(var(--vvtop,0px) + var(--vvh,100%) - 76px)}
 .pstat[aria-expanded="true"] svg.dd{transform:rotate(180deg)}
 .prow2.open{border-bottom:0}
 .pdrop{display:flex;gap:6px;padding:2px 0 10px;border-bottom:1px solid var(--b1)}
-.pdrop button{flex:1;min-width:0;min-height:44px;border-radius:var(--r1);border:1.5px solid var(--b1);background:var(--p1);font-size:.9rem;padding:4px 6px}
+.pdrop button{flex:1;min-width:0;min-height:44px;border-radius:var(--r1);border:1.5px solid var(--b1);background:var(--p1);font-size:.875rem;padding:4px 6px}
 .pdrop button.have b{color:var(--ok)}.pdrop button.low b{color:var(--warn)}.pdrop button.out b{color:var(--bad)}
 .pdrop button[aria-pressed="true"]{border-color:var(--ac);background:var(--acd)}
 .lowlist .pdrop{border-bottom:0}
 .pcrow{display:block;padding:10px 0}
 .pcname{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;margin-bottom:6px}
-.pcname .need{color:var(--t3);font-size:.88rem}
+.pcname .need{color:var(--t3);font-size:.875rem}
 .pcrow .seg.mini{margin-left:0;display:flex}
 .pcrow .seg.mini button{flex:1;min-width:0;padding:4px 6px}
-.pcres{display:flex;align-items:center;gap:6px;margin:6px 0 0;font-size:.85rem;font-weight:700}
+.pcres{display:flex;align-items:center;gap:6px;margin:6px 0 0;font-size:.8125rem;font-weight:700}
 .pcres svg.i{width:1rem;height:1rem}
 .pcres.add{color:var(--ac)}.pcres.skip{color:var(--ok)}
 
@@ -737,17 +738,17 @@ body.kb .toast{bottom:auto;top:calc(var(--vvtop,0px) + var(--vvh,100%) - 76px)}
 .pcline{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--b1)}
 .pcline:last-child{border-bottom:0}
 .pcn{flex:1;min-width:0;overflow-wrap:anywhere;line-height:1.3}
-.pcn .need{color:var(--t3);font-size:.85rem;white-space:nowrap}
+.pcn .need{color:var(--t3);font-size:.8125rem;white-space:nowrap}
 .pcline.adding .pcn b{color:var(--ac)}
 .seg.tiny{display:flex;flex-wrap:nowrap;gap:3px;flex:none}
-.seg.tiny button{min-height:34px;min-width:44px;padding:2px 9px;font-size:.82rem;border-radius:999px}
+.seg.tiny button{min-height:34px;min-width:44px;padding:2px 9px;font-size:.8125rem;border-radius:999px}
 .seg.tiny button.low[aria-pressed="true"]{border-color:var(--warn)}
 .seg.tiny button.out[aria-pressed="true"]{border-color:var(--bad)}
 .pancheck>.muted b{color:var(--t2)}
 /* pantry: restock under the low list */
-.lowsect .cnt{font-family:var(--fbody);font-size:.8rem;font-weight:700;background:var(--p2);color:var(--warn);border-radius:999px;padding:1px 8px;vertical-align:middle;margin-left:4px}
+.lowsect .cnt{font-family:var(--fbody);font-size:.8125rem;font-weight:700;background:var(--p2);color:var(--warn);border-radius:999px;padding:1px 8px;vertical-align:middle;margin-left:4px}
 .restockrow{margin:8px 0 4px}
-.restockrow .btn{min-height:36px;font-size:.88rem}
+.restockrow .btn{min-height:36px;font-size:.875rem}
 .tickhint{margin:8px 2px 0}
 
 /* ===================== 2.4 ===================== */
@@ -760,9 +761,9 @@ body.kb .toast{bottom:auto;top:calc(var(--vvtop,0px) + var(--vvh,100%) - 76px)}
 .importbox>summary::-webkit-details-marker{display:none}
 .importbox .ib-t{display:inline-flex;align-items:center;gap:8px}
 .importbox .ib-t svg.i{color:var(--ac)}
-.importbox:not([open])>summary .ib-t::after{content:"Show";font-weight:400;font-size:.85rem;color:var(--ac);margin-left:4px}
+.importbox:not([open])>summary .ib-t::after{content:"Show";font-weight:400;font-size:.8125rem;color:var(--ac);margin-left:4px}
 .importbox .ib-b{padding:0 14px 12px}
-.impstate{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;font-weight:700;color:var(--t2)}
+.impstate{display:inline-flex;align-items:center;gap:6px;font-size:.875rem;font-weight:700;color:var(--t2)}
 .importbox.ok .impstate{color:var(--ok)}
 .importbox.err .impstate{color:var(--bad)}
 .importbox.busy .impstate{color:var(--ac)}
@@ -770,19 +771,19 @@ body.kb .toast{bottom:auto;top:calc(var(--vvtop,0px) + var(--vvh,100%) - 76px)}
 .spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none;border-right-color:currentColor;opacity:.6}}
-.filebtn,.field label.filebtn{cursor:pointer;display:inline-flex;align-items:center;gap:7px;margin:0;color:var(--t1);font-size:.9rem}
+.filebtn,.field label.filebtn{cursor:pointer;display:inline-flex;align-items:center;gap:7px;margin:0;color:var(--t1);font-size:.875rem}
 .photoimp .filebtn{margin-top:4px}
 /* tags */
 .tagsel{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px;min-height:36px;align-items:center}
 .tagnew{display:flex;gap:8px;margin:0 0 6px}
 .tagnew .inp{flex:1;min-width:0}
 .tagnew .btn{flex:none;min-height:46px}
-.tgl{font-size:.8rem;font-weight:700;color:var(--t3);margin:10px 0 4px}
+.tgl{font-size:.8125rem;font-weight:700;color:var(--t3);margin:10px 0 4px}
 .tchip svg.i{width:.95rem;height:.95rem}
-.taggroups>summary{cursor:pointer;color:var(--ac);font-weight:700;font-size:.92rem;padding:6px 0}
+.taggroups>summary{cursor:pointer;color:var(--ac);font-weight:700;font-size:.9375rem;padding:6px 0}
 /* colors */
 .colorpick{display:flex;flex-wrap:wrap;gap:6px}
-.cswatch{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--b1);background:var(--p1);border-radius:999px;padding:4px 11px 4px 5px;min-height:36px;font-size:.85rem;color:var(--t2)}
+.cswatch{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--b1);background:var(--p1);border-radius:999px;padding:4px 11px 4px 5px;min-height:36px;font-size:.8125rem;color:var(--t2)}
 .cswatch i{width:24px;height:24px;border-radius:50%;background:var(--pig);flex:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.2)}
 .cswatch[aria-pressed="true"]{border-color:var(--ac);background:var(--acd);color:var(--t1);font-weight:700}
 
@@ -817,7 +818,7 @@ details.importbox[open] .ib-b,details.help[open]>:not(summary),details.taggroups
 /* 2.7: works offline */
 .updbar{position:fixed;left:12px;right:12px;bottom:calc(var(--tab) + var(--bot) + 88px);z-index:95;display:flex;align-items:center;gap:10px;padding:10px 8px 10px 16px;border-radius:var(--r1);background:var(--ch);color:var(--cht);box-shadow:0 10px 30px -8px rgba(0,0,0,.45);transform:translateY(16px);opacity:0;transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .25s;max-width:560px;margin:0 auto}
 .updbar.in{transform:none;opacity:1}
-.updbar span{flex:1;min-width:0;font-size:.92rem;line-height:1.3}
+.updbar span{flex:1;min-width:0;font-size:.9375rem;line-height:1.3}
 .updbar .iconbtn{color:inherit;flex:none}
 .updbar .btn{flex:none}
 body.locked .updbar,body.cooking .updbar{bottom:calc(var(--bot) + 12px)}
@@ -827,12 +828,12 @@ body.locked .updbar,body.cooking .updbar{bottom:calc(var(--bot) + 12px)}
 body.locked:not(.cooking) .readd ol{padding-left:1.2rem;margin:8px 0 14px}
 .readd li{margin:0 0 10px;line-height:1.4}
 .readd .copyrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
-.readd code{font-size:.8rem;background:var(--p2);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
+.readd code{font-size:.8125rem;background:var(--p2);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
 body.cooking .scrim{z-index:80}
 body.cooking .sheet{z-index:81}
 
 /* 2.9: two recipes at once */
-.cook .twoplan{background:color-mix(in srgb,var(--ac) 10%,var(--p1));border:1px solid color-mix(in srgb,var(--ac) 25%,transparent);border-radius:var(--r1);padding:12px 14px;margin:0 0 14px;font-size:.95rem;line-height:1.4;color:var(--t1)}
+.cook .twoplan{background:color-mix(in srgb,var(--ac) 10%,var(--p1));border:1px solid color-mix(in srgb,var(--ac) 25%,transparent);border-radius:var(--r1);padding:12px 14px;margin:0 0 14px;font-size:.9375rem;line-height:1.4;color:var(--t1)}
 .cook .cwho{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--t1);font-size:1rem;margin:0 0 6px;max-width:100%}
 .cook .cwho .dot{width:12px;height:12px;border-radius:50%;background:var(--pig);flex:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--pig) 30%,transparent)}
 .cook .cwho .of{font-weight:400;color:var(--t2)}
@@ -843,7 +844,7 @@ body.cooking .sheet{z-index:81}
 .addday.cookboth{color:var(--ac);font-weight:700}
 
 /* 2.9: sites you follow */
-.dsec .dmore{margin-left:auto;font-size:.9rem;font-family:var(--fbody,inherit)}
+.dsec .dmore{margin-left:auto;font-size:.875rem;font-family:var(--fbody,inherit)}
 .followcta p{margin:0 0 12px}
 .followline{display:flex;gap:8px}
 .followline .inp{flex:1;min-width:0}
@@ -852,17 +853,17 @@ body.cooking .sheet{z-index:81}
 .picks li:last-child,.follows li:last-child{border-bottom:0}
 .picks .pk,.follows .pk{flex:1;min-width:0;display:flex;flex-direction:column}
 .picks .pk b,.follows .pk b{font-weight:700;color:var(--t1)}
-.picks .pk span,.follows .pk span{color:var(--t2);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picks .pk span,.follows .pk span{color:var(--t2);font-size:.8125rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .posts{display:flex;flex-direction:column;gap:12px}
 .post{position:relative;display:flex;gap:12px;background:var(--p1);border:1px solid var(--b1);border-radius:var(--r1);padding:12px;padding-right:40px}
 .post .pimg{flex:none;width:84px;height:84px;border-radius:calc(var(--r1) - 4px);overflow:hidden;background:color-mix(in srgb,var(--ac) 18%,var(--p2));position:relative;display:flex;align-items:center;justify-content:center;font-family:var(--fdisp);font-size:2rem;color:var(--t2)}
 .post .pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .post .pbody{flex:1;min-width:0}
-.post .psite{font-size:.8rem;color:var(--t2);font-weight:700;letter-spacing:.01em}
-.post .pnew{display:inline-block;background:var(--ac);color:var(--bt);border-radius:999px;padding:0 7px;font-size:.72rem;margin-left:4px;vertical-align:1px}
-.post h3{margin:2px 0 4px;font-size:1.02rem;line-height:1.3;overflow-wrap:anywhere}
+.post .psite{font-size:.8125rem;color:var(--t2);font-weight:700;letter-spacing:.01em}
+.post .pnew{display:inline-block;background:var(--ac);color:var(--bt);border-radius:999px;padding:0 7px;font-size:.75rem;margin-left:4px;vertical-align:1px}
+.post h3{margin:2px 0 4px;font-size:1.0625rem;line-height:1.3;overflow-wrap:anywhere}
 .post h3 a{color:var(--t1);text-decoration:none}
-.post p{margin:0 0 8px;color:var(--t2);font-size:.88rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post p{margin:0 0 8px;color:var(--t2);font-size:.875rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .post .btnrow{display:flex;gap:8px;flex-wrap:wrap}
 .post .phide{position:absolute;top:4px;right:4px}
 .post .btn .spin{margin-right:6px}
@@ -883,10 +884,10 @@ body.cooking .sheet{z-index:81}
 .post{gap:10px;padding:10px 34px 10px 10px;align-items:flex-start}
 .post .pimg{width:68px;height:68px;font-size:1.6rem}
 .post .psite{font-size:.75rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.post h3{font-size:.95rem;line-height:1.25;margin:2px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.post p{font-size:.82rem;line-height:1.3;margin:0 0 6px;-webkit-line-clamp:1}
+.post h3{font-size:.9375rem;line-height:1.25;margin:2px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post p{font-size:.8125rem;line-height:1.3;margin:0 0 6px;-webkit-line-clamp:1}
 .post .pacts{display:flex;gap:6px;flex-wrap:wrap}
-.post .pacts .btn.sm{min-height:32px;padding:0 10px;font-size:.82rem;gap:5px}
+.post .pacts .btn.sm{min-height:32px;padding:0 10px;font-size:.8125rem;gap:5px}
 .post .pacts .btn.sm svg.i{width:.95rem;height:.95rem}
 .post .pacts .btn.ghost{border-color:transparent;padding:0 6px}
 .post .phide{top:2px;right:2px;width:34px;height:34px}
@@ -901,10 +902,10 @@ body.cooking .sheet{z-index:81}
 /* 2.15: editing shows you where you are */
 #f-ing,#f-steps{min-height:216px}
 textarea.grow{transition:height .12s ease;overflow-y:auto}
-.sec-h .secedit{display:inline-flex;align-items:center;gap:4px;font-size:.9rem;margin-left:8px;padding:6px 4px}
+.sec-h .secedit{display:inline-flex;align-items:center;gap:4px;font-size:.875rem;margin-left:8px;padding:6px 4px}
 .sec-h .secedit svg.i{width:1rem;height:1rem}
 .sec-h .stepper{margin-left:auto}
-.stephint{font-size:.85rem;margin:-4px 0 8px}
+.stephint{font-size:.8125rem;margin:-4px 0 8px}
 #sec-ing,#sec-steps,#sec-notes,#sec-keeps,#sec-tags,#sec-source{scroll-margin-top:76px}
 .justedited{animation:justedited 1.8s ease-out}
 @keyframes justedited{0%,30%{box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 55%,transparent),var(--shadow,0 0 0 transparent)}100%{box-shadow:0 0 0 3px transparent,var(--shadow,0 0 0 transparent)}}
@@ -927,7 +928,7 @@ li.justedited,.prow.justedited{animation:justrow 1.8s ease-out}
 .madetoggle .mk svg.i{width:18px;height:18px;stroke:transparent;stroke-width:3}
 .madetoggle .tx{flex:1;min-width:0}
 .madetoggle b{display:block}
-.madetoggle .tx span{display:block;color:var(--t3);font-size:.85rem}
+.madetoggle .tx span{display:block;color:var(--t3);font-size:.8125rem}
 .madetoggle[aria-pressed="true"]{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--p1))}
 .madetoggle[aria-pressed="true"] .mk{background:var(--ok);border-color:var(--ok)}
 .madetoggle[aria-pressed="true"] .mk svg.i{stroke:#fff}
@@ -947,7 +948,7 @@ kbd{display:inline-flex;align-items:center;justify-content:center;min-width:1.7e
 .keys li{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--b1)}
 .keys li>span:first-child{flex:1;min-width:0}
 .keys .kk{display:inline-flex;gap:4px;align-items:center;flex:none}
-.keys .kk i{font-style:normal;color:var(--t3);font-size:.8rem;padding:0 2px}
+.keys .kk i{font-style:normal;color:var(--t3);font-size:.8125rem;padding:0 2px}
 .dropzone{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:24px;background:color-mix(in srgb,var(--bg) 82%,transparent);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s,visibility 0s .15s}
 .dropzone.in{opacity:1;visibility:visible;transition:opacity .15s}
 .dropzone .dz-in{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:40px 48px;border:3px dashed var(--ac);border-radius:var(--r2);background:var(--p1);color:var(--t1);max-width:520px}
@@ -1111,6 +1112,61 @@ html.sbdrag .sbt,html.sbnow .sbt,html.sbnow body{transition:none!important}
   .tile img,.hero img,.post .pimg img,.photo-pick img{opacity:1}
   .srow.on .sx{background-size:100% 1.5px}
 }
+
+.tile .lt svg.i{width:42%;height:42%}
+.small{font-size:.8125rem}
+
+/* ===================== 2.20 ===================== */
+/* recipe tiles: a drawing of the main ingredient, in the recipe's color */
+svg.food{display:block;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tile .lt{display:flex;align-items:center;justify-content:center;width:100%;height:100%;transform:none}
+.tile .lt svg.food{width:52%;height:52%;stroke-width:1.7}
+.hero .big{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.hero .big svg.food{width:min(30%,110px);height:auto;aspect-ratio:1;stroke-width:1.3}
+.hero.noimg .big svg.food{width:64px}
+/* Plan: an empty day is one slim row; an empty fridge is one line */
+.day.slim{padding:4px 6px 4px var(--cardpad);margin:6px 0}
+.day.slim .dayh{margin:0;min-height:44px}
+.day.slim .dayh h2{font-size:1rem;color:var(--t2)}
+.day.slim.today .dayh h2{color:var(--t1)}
+.day.slim .addday{width:auto;margin-left:auto;padding:0 10px;font-size:.9375rem}
+.day.slim.past .addday{color:var(--t3)}
+.fridge.empty{padding-top:8px;padding-bottom:8px}
+.fridge.empty h2{font-size:1.0625rem}
+.fridge .fe{margin-left:auto;margin-right:4px;font-size:.875rem}
+.fridge.empty .fh{justify-content:flex-start}
+/* a recipe's four main actions: a 2 by 2 grid on iPhone, one row on wider screens */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 18px}
+.actions .btn{min-width:0;padding:0 10px}
+.actions .actx{display:none}
+.dbar .iconbtn.on{color:inherit}
+@media (min-width:760px){
+  .actions{display:flex;flex-wrap:wrap}
+  .actions>.btn{flex:0 1 auto}
+  .actions .actx{display:flex;gap:8px;margin-left:auto}
+  .actions .actx .btn.on{color:var(--ac);border-color:var(--ac)}
+}
+/* editor: More details */
+details.more{border:1.5px solid var(--b1);border-radius:var(--r1);background:var(--p1);margin:4px 0 14px}
+details.more>summary{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:12px 14px;min-height:48px;list-style:none;cursor:pointer}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary .mt{font-weight:700;color:var(--t1)}
+details.more>summary .ms{color:var(--t3);font-size:.875rem;flex:1;min-width:0}
+details.more>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--t3);border-bottom:2px solid var(--t3);transform:rotate(45deg);margin-left:auto;align-self:center;transition:transform .2s}
+details.more[open]>summary::after{transform:rotate(-135deg)}
+details.more .mb{padding:0 14px 4px}
+/* Discover: following a blog, before you follow any */
+.followline1{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:18px 0 6px;padding:14px var(--cardpad)}
+.followline1>svg.i{color:var(--ac);flex:none}
+.followline1>span{flex:1;min-width:0}
+.followline1 b{display:block;font-family:var(--fdisp);font-weight:400;font-size:1.125rem}
+.followline1 span span{display:block;color:var(--t3);font-size:.875rem}
+.followline1>svg.i:last-child{color:var(--t3)}
+/* a recipe that's missing something says so, once, with a way to fix it */
+.todo{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:color-mix(in srgb,var(--warn) 10%,var(--p1));border:1.5px dashed color-mix(in srgb,var(--warn) 45%,transparent);border-radius:var(--r1);padding:10px 12px;margin:4px 0 12px;font-size:.9375rem;color:var(--t1)}
+.todo>svg.i{color:var(--warn);flex:none}
+.todo>span{flex:1;min-width:150px}
+.todo .btn{flex:none}
 
 </style>
 </head>
@@ -2411,7 +2467,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.18';
+var APP_VERSION = '2.20';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -2445,7 +2501,22 @@ var UI = {         // screen-only state
 };
 var CACHE = {};
 
-function blankFilters() { return { tags: [], fav: false, weekly: false, quick: false, stale: false, top: false }; }
+function blankFilters() { return { tags: [], fav: false, weekly: false, quick: false, stale: false, top: false, todo: false }; }
+/** What a recipe is still missing, as edit targets: steps, ingredients, how many it makes. */
+function missingBits(r) {
+  var m = [];
+  if (!String(r.ingredients || '').trim()) m.push(['ing', 'ingredients']);
+  if (!String(r.steps || '').trim()) m.push(['steps', 'steps']);
+  if (!r.servings) m.push(['serv', 'how many it makes']);
+  return m;
+}
+/** Meal and main-ingredient tags for a recipe saved with no tags at all. A recipe you've tagged yourself
+    (even after removing some) is left exactly as you have it. */
+function autoTagsFor(r) {
+  if (r.tags.length) return [];
+  var have = {}, lower = r.tags.map(function (t) { have[tagGroup(t)] = 1; return t.toLowerCase(); });
+  return suggestTags(r, []).filter(function (t) { var g = tagGroup(t); return (g === 'Meal' || g === 'Main ingredient') && !have[g] && lower.indexOf(t) < 0; });
+}
 
 function blankState() {
   return {
@@ -2514,13 +2585,25 @@ function azDefault(settings) {
 
 /** A Google Sheet cell holds 50,000 characters; anything longer would be refused, so very long text is trimmed. */
 function cap(s) { s = String(s || ''); return s.length > 45000 ? s.slice(0, 45000) + '\n…(trimmed: too long for one sheet cell)' : s; }
+/** One spelling per tag: known meals and ingredients lowercase, cuisines capitalized, and no duplicates that differ only in case. */
+function canonTags(list) {
+  var seen = {}, out = [];
+  list.forEach(function (t) {
+    t = String(t).trim(); if (!t) return;
+    var k = t.toLowerCase(), g = tagGroup(k);
+    if (g === 'Cuisine') t = k.charAt(0).toUpperCase() + k.slice(1);
+    else if (g !== 'Other') t = k;
+    if (seen[k]) return; seen[k] = 1; out.push(t);
+  });
+  return out;
+}
 function normRecipe(r) {
   var tags = r.tags;
   if (typeof tags === 'string') tags = tags.split(',');
   return {
     id: String(r.id || newId('r_')), title: String(r.title || r.name || 'Untitled').trim() || 'Untitled', photo: r.photo || '',
     servings: numOr(r.servings), unit: String(r.unit || '').trim(), prep: numOr(r.prep), cook: numOr(r.cook),
-    tags: (tags || []).map(function (t) { return String(t).trim(); }).filter(Boolean),
+    tags: canonTags(tags || []),
     ingredients: cap(r.ingredients), steps: cap(r.steps), source: String(r.source || ''),
     notes: cap(r.notes), rating: +r.rating || 0, fav: !!r.fav, added: r.added || today(),
     freq: freqKey(r.freq), keeps: numOr(r.keeps), freezes: r.freezes === true || /^(true|yes|y|1|x)$/i.test(String(r.freezes || '')),
@@ -2605,7 +2688,7 @@ function searchIndex(r) {
 
 function activeFilterCount() {
   var f = UI.filters;
-  return f.tags.length + (f.fav ? 1 : 0) + (f.weekly ? 1 : 0) + (f.quick ? 1 : 0) + (f.stale ? 1 : 0) + (f.top ? 1 : 0);
+  return f.tags.length + (f.fav ? 1 : 0) + (f.weekly ? 1 : 0) + (f.quick ? 1 : 0) + (f.stale ? 1 : 0) + (f.top ? 1 : 0) + (f.todo ? 1 : 0);
 }
 
 function visibleRecipes() {
@@ -2619,6 +2702,7 @@ function visibleRecipes() {
     if (f.weekly && r.freq !== 'weekly') return false;
     if (f.quick) { var t = totalTime(r); if (!t || t > 30) return false; }
     if (f.stale && daysAgo(statFor(r.id).last) < 30) return false;
+    if (f.todo && !missingBits(r).length) return false;
     if (f.tags.length) {
       var lt = r.tags.map(function (t) { return t.toLowerCase(); });
       for (var i = 0; i < f.tags.length; i++) if (lt.indexOf(f.tags[i]) < 0) return false;
@@ -2944,6 +3028,32 @@ function darken(hex, k) {
   var n = parseInt(String(hex).slice(1), 16), f = function (v) { return Math.round(v * k); };
   return '#' + ((1 << 24) + (f(n >> 16 & 255) << 16) + (f(n >> 8 & 255) << 8) + f(n & 255)).toString(16).slice(1);
 }
+/* ---------- a small drawing of what a recipe is mostly made of (instead of its first letter) ---------- */
+var BOWL = '<path d="M3 11.5h18a9 9 0 0 1-18 0z"/>';
+var FOOD = {
+  chicken: '<path d="M10.4 13.6c-2-2-1.7-5.4.6-7.6s5.8-2.5 7.7-.6 1.5 5.6-.7 7.8-5.6 2.4-7.6.4z"/><path d="M10.4 13.6 7.3 16.7"/><circle cx="5.2" cy="17" r="1.6"/><circle cx="7" cy="18.8" r="1.6"/><path d="M13.2 8.4c.9-.9 2.1-1.3 3.2-1.1"/>',
+  beef: '<path d="M4.5 9.5C5 5.8 8.6 4 12.5 4c4.6 0 7.5 2.6 7.5 6.3 0 4.6-4.2 8.7-9.4 9.5-3.6.6-6.6-1.2-6.6-4.3 0-2.4 1.3-3.1.5-6z"/><circle cx="13.5" cy="10.5" r="2.2"/>',
+  pork: '<path d="M4 7.5c2.7-2 5.3 1.6 8 0s5.3-2 8 0"/><path d="M4 12c2.7-2 5.3 1.6 8 0s5.3-2 8 0"/><path d="M4 16.5c2.7-2 5.3 1.6 8 0s5.3-2 8 0"/>',
+  fish: '<path d="M2.5 12S6.5 6 13 6c4 0 7 3 8.5 6-1.5 3-4.5 6-8.5 6-6.5 0-10.5-6-10.5-6z"/><path d="M2.5 12 1 8.5M2.5 12 1 15.5"/><circle cx="16.5" cy="11" r=".9"/>',
+  seafood: '<path d="M17.5 4.5a7.5 7.5 0 0 1-3.2 13.8c-3 .5-5.6-1.1-6.8-3.6"/><path d="M7.5 14.7 4.2 16l1.2-3.6"/><path d="M14.5 7.5c-2.2.2-3.6 1.8-3.6 4"/><path d="M17.5 4.5 21 3"/>',
+  tofu: '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
+  eggs: '<path d="M12 3c3.6 0 7 5.6 7 10.2A7 7 0 0 1 5 13.2C5 8.6 8.4 3 12 3z"/>',
+  vegetables: '<path d="M5 19C5 10.7 10.7 5 19 5c0 8.3-5.7 14-14 14z"/><path d="M5 19l8.5-8.5"/>',
+  pasta: BOWL + '<path d="M7.5 11.5c0-4 2-6.5 4.5-6.5s4.5 2.5 4.5 6.5"/><path d="M10 11.5c0-2.2 1-3.5 2-3.5s2 1.3 2 3.5"/>',
+  noodles: BOWL + '<path d="M13 9.5 19.5 3M10 9.5 16 2.5"/>',
+  rice: BOWL + '<path d="M5.5 11.5c0-3.4 2.9-5.5 6.5-5.5s6.5 2.1 6.5 5.5"/><path d="M10 8.5h.01M13 7.8h.01M15.5 9.3h.01"/>',
+  beans: '<ellipse cx="9" cy="12" rx="3.8" ry="6" transform="rotate(-25 9 12)"/><ellipse cx="16" cy="12" rx="3.4" ry="5.4" transform="rotate(20 16 12)"/>',
+  baking: '<path d="M4.2 11.2A4 4 0 0 1 6 4h12a4 4 0 0 1 1.8 7.2V19a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1z"/><path d="M9 8l1 2M13 8l1 2"/>',
+  dessert: '<path d="M5 12h14l-2 8H7z"/><path d="M5 12a3 3 0 0 1 2-5.2 5 5 0 0 1 10 0A3 3 0 0 1 19 12"/>',
+  breakfast: '<path d="M4 9h13v4.5a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10.5h1a3 3 0 0 1 0 6h-1.3"/><path d="M8.5 3c0 1.8 1.8 1.8 1.8 3.6M12.5 3c0 1.8 1.8 1.8 1.8 3.6"/>',
+  sauce: '<path d="M10 3h4v3.5l2 3V20a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V9.5l2-3z"/><path d="M8 14h8"/>',
+  soup: BOWL + '<path d="M9 3.5c0 1.8 1.8 1.8 1.8 3.6M13.5 3.5c0 1.8 1.8 1.8 1.8 3.6"/>',
+  snack: '<path d="M4 19 12 4.5 20 19z"/><path d="M10 15h.01M13.5 12.5h.01M12.5 16.5h.01"/>',
+  basics: '<path d="M8.2 9h7.6l-1 11.5H9.2z"/><path d="M8.2 9a3.8 3.8 0 0 1 7.6 0"/><path d="M11 6.2h.01M13 6.2h.01"/>',
+  other: '<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3.2 3-3.2 7.5H17V21"/>'
+};
+FOOD.dip = FOOD.snack;
+function foodSvg(key, cls) { return '<svg class="food' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (FOOD[key] || FOOD.other) + '</svg>'; }
 function initial(r) { var m = r.title.match(/[A-Za-zÀ-ỹ0-9]/); return m ? m[0].toUpperCase() : '•'; }
 
 function scheme() {
@@ -3074,7 +3184,7 @@ function icon(name, cls) { return '<svg class="i' + (cls ? ' ' + cls : '') + '" 
 
 function tileHtml(r, cls) {
   var photo = S.pending[r.id] || r.photo;
-  return '<span class="tile' + (photo ? ' has-img' : '') + (cls ? ' ' + cls : '') + '" style="--pig:' + pigmentFor(r) + '" aria-hidden="true"><span class="lt">' + esc(initial(r)) + '</span>' +
+  return '<span class="tile' + (photo ? ' has-img' : '') + (cls ? ' ' + cls : '') + '" style="--pig:' + pigmentFor(r) + '" aria-hidden="true"><span class="lt">' + foodSvg(pigmentKey(r)) + '</span>' +
     (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="var p=this.parentNode;this.remove();if(p)p.classList.remove(\'has-img\')">' : '') + '</span>';
 }
 
@@ -3368,6 +3478,17 @@ function render() {
   keep();
   flipPlay(flip);
   settleImgs();
+  fitSelects();
+}
+/** Menus as wide as the option showing, so the arrow sits next to the words (browsers without field-sizing). */
+function fitSelects() {
+  if (window.CSS && CSS.supports && CSS.supports('field-sizing', 'content')) return;
+  $$('.listtools select').forEach(function (s) {
+    var o = s.options[s.selectedIndex]; if (!o) return;
+    var cs = getComputedStyle(s), c = fitSelects.c || (fitSelects.c = document.createElement('canvas').getContext('2d'));
+    c.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    s.style.width = Math.ceil(c.measureText(o.text).width + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + 2) + 'px';
+  });
 }
 
 /* ---------- keep your place when the page redraws ----------
@@ -3511,7 +3632,7 @@ function renderList() {
   if (fc) {
     h += '<div class="chiprow">';
     UI.filters.tags.forEach(function (t) { h += '<button class="chip" aria-pressed="true" data-act="untag" data-tag="' + esc(t) + '">' + esc(tagLabel(t)) + ' <span class="x">' + icon('x') + '</span></button>'; });
-    [['fav', 'Favorites'], ['weekly', 'Every week'], ['quick', '30 min or less'], ['stale', 'Not made lately'], ['top', '4+ stars']].forEach(function (f) {
+    [['fav', 'Favorites'], ['weekly', 'Every week'], ['quick', '30 min or less'], ['stale', 'Not made lately'], ['top', '4+ stars'], ['todo', 'Needs details']].forEach(function (f) {
       if (UI.filters[f[0]]) h += '<button class="chip" aria-pressed="true" data-act="unfilter" data-f="' + f[0] + '">' + f[1] + ' <span class="x">' + icon('x') + '</span></button>';
     });
     h += '<button class="linkbtn" data-act="clearfilters">Clear all</button></div>';
@@ -3655,6 +3776,10 @@ function closeDetail(fly) {
 }
 
 
+function favBtn(r, cls) {
+  return '<button class="' + cls + (r.fav ? ' on' : '') + '" data-act="fav" data-id="' + esc(r.id) + '" aria-pressed="' + !!r.fav + '" aria-label="' + (r.fav ? 'Remove from favorites' : 'Add to favorites') + '">' +
+    (r.fav ? icon('heart').replace('<svg class="i"', '<svg class="i" style="fill:currentColor"') : icon('heart')) + '</button>';
+}
 function renderDetail() {
   var pane = $('#detailpane');
   themeEl(pane, null);
@@ -3677,25 +3802,29 @@ function renderDetail() {
   var t = totalTime(r), shared = r.id === 'shared';
   var h = '<div class="dbar" id="dbar"><button class="back" data-act="back" aria-label="Back to recipes">' + icon('back') + 'Recipes</button>' +
     '<span class="t">' + esc(r.title) + '</span>' +
+    (shared ? '' : favBtn(r, 'iconbtn')) + (shared ? '' : '<button class="iconbtn" data-act="share" data-id="' + esc(r.id) + '" aria-label="Share recipe">' + icon('up') + '</button>') +
     '<button class="iconbtn" data-act="edit" data-id="' + esc(r.id) + '" aria-label="Edit recipe">' + icon('edit') + '</button></div><div class="dbody">';
   h += '<div class="hero' + (photo ? '' : ' noimg') + '" style="--pig:' + pigmentFor(r) + '">' +
     (photo ? '<img src="' + esc(photo) + '" alt="" onerror="var p=this.parentNode;this.remove();if(p)p.classList.add(\'noimg\')">' : '') +
-    '<span class="big" aria-hidden="true">' + esc(initial(r)) + '</span></div>';
+    '<span class="big" aria-hidden="true">' + foodSvg(pigmentKey(r)) + '</span></div>';
   h += '<h1 class="rtitle">' + esc(r.title) + '</h1><div class="meta">';
   if (t) h += '<span>' + icon('clock') + minutes(t) + (r.prep && r.cook ? ' <span class="muted">(' + r.prep + ' prep, ' + r.cook + ' cook)</span>' : '') + '</span>';
   if (r.servings) h += '<span>' + icon('users') + esc(servingsText(r, 1)) + '</span>';
   if (!shared && r.freq) h += '<span>' + icon('repeat') + esc(freqLabel(r.freq)) + '</span>';
   if (!shared) h += '<span>' + icon('hist') + (st.n ? 'Made ' + (st.n === 1 ? 'once' : st.n + ' times') + ', last ' + lastText(st.last) : 'Not made yet') + '</span>';
   h += '</div>';
+  var miss = shared ? [] : missingBits(r);
+  if (miss.length) h += '<div class="todo">' + icon('edit') + '<span>Still needs ' + esc(miss.map(function (m) { return m[1]; }).join(miss.length > 2 ? ', ' : ' and ').replace(/, ([^,]*)$/, ' and $1')) + '.</span>' +
+    '<button class="btn sm" data-act="edit" data-id="' + esc(r.id) + '" data-focus="' + miss[0][0] + '">Add ' + (miss[0][0] === 'serv' ? 'it' : esc(miss[0][1])) + '</button></div>';
+  // the four things you do with a recipe; favorite, share and edit sit in the top bar (beside the title on a wide screen)
   h += '<div class="actions">' +
     '<button class="btn primary" data-act="cook" data-id="' + esc(r.id) + '">' + icon('flame') + 'Cook mode</button>' +
     '<button class="btn" data-act="made" data-id="' + esc(r.id) + '">' + icon('check') + 'Made it</button>' +
-    '<button class="btn icon' + (r.fav ? ' on' : '') + '" data-act="fav" data-id="' + esc(r.id) + '" aria-pressed="' + r.fav + '" aria-label="' + (r.fav ? 'Remove from favorites' : 'Add to favorites') + '">' +
-    (r.fav ? icon('heart').replace('<svg class="i"', '<svg class="i" style="fill:currentColor"') : icon('heart')) + '</button>' +
-    '<button class="btn icon edit-wide" data-act="edit" data-id="' + esc(r.id) + '" aria-label="Edit recipe">' + icon('edit') + '</button></div>' +
-    '<div class="act2"><button class="btn sm" data-act="planit" data-id="' + esc(r.id) + '">' + icon('cal') + 'Plan it</button>' +
-    '<button class="btn sm" data-act="listit" data-id="' + esc(r.id) + '">' + icon('cart') + 'Add to list</button>' +
-    '<button class="btn sm" data-act="share" data-id="' + esc(r.id) + '">' + icon('up') + 'Share</button></div>';
+    '<button class="btn" data-act="planit" data-id="' + esc(r.id) + '">' + icon('cal') + 'Plan it</button>' +
+    '<button class="btn" data-act="listit" data-id="' + esc(r.id) + '">' + icon('cart') + 'Add to list</button>' +
+    '<span class="actx">' + favBtn(r, 'btn icon') +
+    '<button class="btn icon" data-act="share" data-id="' + esc(r.id) + '" aria-label="Share recipe">' + icon('up') + '</button>' +
+    '<button class="btn icon" data-act="edit" data-id="' + esc(r.id) + '" aria-label="Edit recipe">' + icon('edit') + '</button></span></div>';
 
   // ingredients
   var ings = ingredientRows(r.ingredients, f, metric);
@@ -3704,7 +3833,7 @@ function renderDetail() {
   var secEdit = function (k) { return shared ? '' : '<button class="linkbtn secedit" data-act="edit" data-id="' + esc(r.id) + '" data-focus="' + k + '" aria-label="Edit ' + (k === 'ing' ? 'ingredients' : 'steps') + '">' + icon('edit') + 'Edit</button>'; };
   h += '<div class="cols"><section class="ingcol" id="sec-ing"><div class="sec-h"><h2>Ingredients</h2>' + secEdit('ing') +
     (r.servings || ings.some(function (x) { return x.amt; }) ? '<span class="stepper" role="group" aria-label="Amount"><button data-act="scale" data-d="-1" aria-label="Less">−</button><span class="v" aria-live="polite">' + esc(scaleLabel) + '</span><button data-act="scale" data-d="1" aria-label="More">+</button></span>' : '') + '</div>';
-  if (f !== 1) h += '<p class="muted" style="margin:-2px 0 8px;font-size:.88rem">Amounts here, in the steps, in Cook mode and on your list follow this. The recipe as written ' + esc(servingsText(r, 1).toLowerCase()) + '. <button class="linkbtn" data-act="scale" data-d="0">Back to original</button></p>';
+  if (f !== 1) h += '<p class="muted" style="margin:-2px 0 8px;font-size:.875rem">Amounts here, in the steps, in Cook mode and on your list follow this. The recipe as written ' + esc(servingsText(r, 1).toLowerCase()) + '. <button class="linkbtn" data-act="scale" data-d="0">Back to original</button></p>';
   h += '<div class="card">' + (ings.length ? ingListHtml(r, ings, checked) : '<p class="muted" style="margin:0">No ingredients yet.</p>') + '</div>' +
     (ings.length && r.id !== 'shared' ? '<p class="hint tickhint" id="tickhint" aria-live="polite">' + esc(tickHint(r.id)) + '</p>' : '') + '</section>';
 
@@ -3745,7 +3874,7 @@ function renderDetail() {
     var isDoc = /docs\.google\.com/.test(r.source), isUrl = /^https?:\/\//.test(r.source);
     h += '<div class="block" id="sec-source"><h3>Source</h3>' + (isUrl ? '<a class="btn sm" href="' + esc(r.source) + '" target="_blank" rel="noopener">' + icon('ext') + (isDoc ? 'Open the original Google Doc' : 'Open the original page') + '</a>' : '<p class="wrap">' + esc(r.source) + '</p>') + '</div>';
   }
-  if (!shared) h += '<p class="muted" style="font-size:.82rem;margin-top:28px">Added ' + esc(niceDate(r.added) || r.added) + '</p></div>';
+  if (!shared) h += '<p class="muted" style="font-size:.8125rem;margin-top:28px">Added ' + esc(niceDate(r.added) || r.added) + '</p></div>';
   pane.innerHTML = h;
 }
 
@@ -3902,6 +4031,10 @@ function madeCheck(planId, cookedId, on, title) {
 }
 function dayHtml(d) {
   var t = today(), entries = planFor(d), past = d < t, rows = dayMeals(d);
+  if (!rows.length) {   // nothing that day: one slim row
+    return '<section class="day slim' + (d === t ? ' today' : '') + (past ? ' past' : '') + '"><div class="dayh"><h2>' + esc(dayLabel(d, true)) + '</h2>' + (d === t ? '<span class="badge">Today</span>' : '') +
+      '<button class="addday" data-act="planadd" data-day="' + d + '" aria-label="Add a recipe to ' + esc(dayLabel(d, true)) + '">' + icon('plus') + 'Add</button></div></section>';
+  }
   var h = '<section class="day' + (d === t ? ' today' : '') + (past ? ' past' : '') + '"><div class="dayh"><h2>' + esc(dayLabel(d, true)) + '</h2>' + (d === t ? '<span class="badge">Today</span>' : '') + '</div>';
   rows.forEach(function (x) {
     if (x.c) {   // made, without being planned
@@ -4241,7 +4374,8 @@ function fridgeUrgent(it) { return !it.frozen && it.until && daysUntil(it.until)
 function fridgeCardHtml() {
   var list = fridgeSorted();
   var h = '<section class="card fridge"><div class="fh"><h2>' + icon('fridge') + 'In the fridge</h2><button class="btn sm" data-act="leftnew">' + icon('plus') + 'Add</button></div>';
-  if (!list.length) return h + '<p class="muted" style="margin:4px 0 0">Leftovers and prepped meals show up here when you tap "Made it", so you know what to eat first.</p></section>';
+  if (!list.length) return '<section class="card fridge empty"><div class="fh"><h2>' + icon('fridge') + 'In the fridge</h2><span class="muted fe">Empty</span>' +
+    '<button class="btn sm" data-act="leftnew" title="Leftovers and prepped meals show up here when you tap Made it">' + icon('plus') + 'Add</button></div></section>';
   h += '<ul class="flist">' + list.map(function (it) {
     var r = it.rid ? byId(it.rid) : null, n = +it.portions || 0;
     return '<li class="frow' + (fridgeUrgent(it) ? ' urgent' : '') + (it.frozen ? ' frozen' : '') + '">' +
@@ -4290,7 +4424,7 @@ function leftBody() {
   if (r && isBatchable(r)) h += '<p class="hint">One meal is enough for ' + esc(S.settings.cookFor ? S.settings.cookFor + (+S.settings.cookFor === 1 ? ' person' : ' people') : 'one sitting') + '.</p>';
   h += '<div class="field" style="margin-top:14px"><label for="left-until">' + (it.frozen ? 'Use by' : 'Eat by') + '</label><input class="inp" id="left-until" type="date" value="' + esc(it.until) + '">' +
     '<p class="hint">' + (it.frozen ? 'Frozen meals are best within about 3 months.' : r && r.keeps ? esc(r.title) + ' keeps ' + r.keeps + ' days in the fridge.' : 'Most cooked food keeps 3 to 4 days in the fridge. Set it per recipe in its editor.') + '</p></div>';
-  h += '<button class="toggle" role="switch" aria-checked="' + !!it.frozen + '" data-act="leftfrz"><span><b>In the freezer</b>' + (r && r.freezes ? '<br><span class="muted" style="font-size:.85rem">This one freezes well.</span>' : '') + '</span><span class="sw"></span></button>';
+  h += '<button class="toggle" role="switch" aria-checked="' + !!it.frozen + '" data-act="leftfrz"><span><b>In the freezer</b>' + (r && r.freezes ? '<br><span class="muted small">This one freezes well.</span>' : '') + '</span><span class="sw"></span></button>';
   return h;
 }
 function readLeft() {
@@ -4364,8 +4498,8 @@ function renderShop(pane, side) {
     return;
   }
   var h = '<div class="btnrow shopacts">' +
-    '<button class="btn sm primary" data-act="toreminders"' + (todo.length ? '' : ' disabled') + '>' + icon('bell') + 'Send to Reminders</button>' +
-    '<button class="btn sm" data-act="copylist"' + (todo.length ? '' : ' disabled') + '>' + icon('paste') + 'Copy list</button>' +
+    '<button class="btn sm primary" data-act="toreminders"' + (todo.length ? '' : ' disabled') + ' aria-label="Send to Reminders">' + icon('bell') + 'Reminders</button>' +
+    '<button class="btn sm" data-act="copylist"' + (todo.length ? '' : ' disabled') + ' aria-label="Copy list">' + icon('paste') + 'Copy</button>' +
     '<button class="btn sm" data-act="sharelist"' + (todo.length ? '' : ' disabled') + '>' + icon('up') + 'Share</button></div>';
   var groups = {};
   todo.forEach(function (it) { var s = SECTIONS.indexOf(it.section) >= 0 ? it.section : 'Other'; (groups[s] = groups[s] || []).push(it); });
@@ -4493,8 +4627,34 @@ function remindersUrl() {
 function sendToReminders() {
   if (!listText()) return;
   var url = remindersUrl();
+  markSent('Reminders');
   toast('Opening Shortcuts…');
   setTimeout(function () { location.href = url; }, 150);
+}
+
+/* ---------- once the list is in Reminders (or shared), offer to clear it here so it doesn't pile up ---------- */
+var SENT_KEY = 'sundaytable.sent';
+function markSent(where) {
+  var ids = S.shop.filter(function (x) { return !x.checked; }).map(function (x) { return x.id; });
+  if (!ids.length) return;
+  try { localStorage.setItem(SENT_KEY, JSON.stringify({ ids: ids, where: where, at: Date.now() })); } catch (e) { }
+}
+function takeSent() {
+  var s = null;
+  try { s = JSON.parse(localStorage.getItem(SENT_KEY) || 'null'); localStorage.removeItem(SENT_KEY); } catch (e) { }
+  if (!s || Date.now() - s.at > 6 * 3600 * 1000) return null;              // only right after sending
+  var ids = s.ids.filter(function (id) { var it = byIdIn(S.shop, id); return it && !it.checked; });
+  return ids.length ? { ids: ids, where: s.where } : null;
+}
+/** "Your list is in Reminders. Clear it here?" Asked once, right after you send it. */
+function offerClearSent() {
+  if (SHEET || UI.cook) return;
+  var s = takeSent(); if (!s) return;
+  var n = s.ids.length, items = n + (n === 1 ? ' item' : ' items');
+  openSheet('sent', 'Sent to ' + s.where,
+    '<p>Your ' + items + ' should be in ' + esc(s.where) + ' now. Clear ' + (n === 1 ? 'it' : 'them') + ' from Sunday Table\'s list so the two don\'t get out of step?</p>' +
+    '<p class="hint">Anything you add after this stays. You\'ll get an Undo.</p>',
+    '<button class="btn" data-act="sentkeep">Keep them</button><button class="btn primary" data-act="sentclear" data-ids="' + esc(s.ids.join(',')) + '">Clear ' + items + '</button>');
 }
 function copyList() {
   var txt = listText();
@@ -4505,7 +4665,7 @@ function copyList() {
 }
 function shareList() {
   var txt = listText();
-  if (navigator.share) navigator.share({ title: 'Shopping list', text: txt }).catch(function () { });
+  if (navigator.share) navigator.share({ title: 'Shopping list', text: txt }).then(function () { markSent('your shared list'); offerClearSent(); }, function () { });
   else copyList();
 }
 function openRemindersHelp() {
@@ -4901,7 +5061,7 @@ function renderDiscover(pane) {
   if (never.length && S.cooked.length) h += '<h2 class="dsec">' + icon('book') + 'In your book, not made yet</h2><ul class="rlist">' + never.map(function (r) { return bookRow(r, r.tags.slice(0, 3).join(', ')); }).join('') + '</ul>';
 
   var hidden = (S.settings.hiddenIdeas || []).length;
-  h += '<p class="muted" style="text-align:center;font-size:.85rem;margin:24px 0 8px">Ideas come from a built-in list matched to your taste' + (hidden ? '. ' + hidden + ' hidden. <button class="linkbtn" data-act="ideashow">Show them again</button>' : '.') + '</p>';
+  h += '<p class="muted" style="text-align:center;font-size:.8125rem;margin:24px 0 8px">Ideas come from a built-in list matched to your taste' + (hidden ? '. ' + hidden + ' hidden. <button class="linkbtn" data-act="ideashow">Show them again</button>' : '.') + '</p>';
   pane.innerHTML = h;
 }
 
@@ -5064,6 +5224,8 @@ function followSectionHtml() {
   var follows = S.settings.follows || [], why = feedBlocker();
   var h = '<h2 class="dsec">' + icon('rss') + 'From sites you follow' + (follows.length ? '<button class="linkbtn dmore" data-act="follows">Manage</button>' : '') + '</h2>';
   if (!follows.length) {
+    // until you follow a site, just one line; tap it for the details
+    if (!UI.followOpen) return '<button class="card followline1" data-act="followopen">' + icon('rss') + '<span><b>Follow a food blog</b><span>Its new recipes show up here</span></span>' + icon('chev') + '</button>';
     return h + '<section class="card followcta"><p>Follow your favorite food blogs and their new recipes show up here. Add one with a tap.</p>' + followForm() + picksHtml(4) + '</section>';
   }
   var posts = feedPosts(), F = feedsLoad(), more = UI.postsAll ? posts.length : 8;
@@ -5374,7 +5536,7 @@ function openFilters() {
   var f = UI.filters;
   var tags = allTags();
   var body = '<p class="flabel">Show only</p><div class="chiprow">' +
-    [['fav', 'Favorites'], ['weekly', 'Every week'], ['quick', '30 min or less'], ['stale', 'Not made in 30 days'], ['top', '4+ stars']].map(function (x) {
+    [['fav', 'Favorites'], ['weekly', 'Every week'], ['quick', '30 min or less'], ['stale', 'Not made in 30 days'], ['top', '4+ stars'], ['todo', 'Needs details']].map(function (x) {
       return '<button class="chip" data-act="fset" data-f="' + x[0] + '" aria-pressed="' + !!f[x[0]] + '">' + x[1] + '</button>';
     }).join('') + '</div>' +
     '<p class="infobox">"30 min or less" only includes recipes with prep or cook times filled in.</p>' +
@@ -5432,18 +5594,20 @@ function openEditor(id, draft, focusField) {
     '<div class="field"><label for="f-prep">Prep time</label><input class="inp" id="f-prep" value="' + esc(minutes(v.prep)) + '" autocomplete="off" placeholder="20 min" data-dur="1"></div>' +
     '<div class="field"><label for="f-cook">Cook time</label><input class="inp" id="f-cook" value="' + esc(minutes(v.cook)) + '" autocomplete="off" placeholder="1 hr 30 min" data-dur="1"></div></div>' +
     '<p class="hint" style="margin:-8px 0 12px">Times: type minutes (45), hours and minutes (1:30), or words (2 hr 15 min).</p>' +
-    '<div class="row3"><div class="field"><label for="f-freq">How often</label><select class="inp" id="f-freq"><option value="">Not set</option>' + FREQ.map(function (f) { return '<option value="' + f[0] + '"' + (v.freq === f[0] ? ' selected' : '') + '>' + f[1] + '</option>'; }).join('') + '</select></div>' +
-    '<div class="field"><label for="f-keeps">Keeps (days)</label><input class="inp" id="f-keeps" type="number" inputmode="numeric" min="0" max="60" value="' + esc(v.keeps) + '" placeholder="' + esc(S.settings.keepDays || 4) + '"></div>' +
-    '<div class="field"><span class="flabel">Freezer</span><label class="checkrow"><input type="checkbox" id="f-freezes"' + (v.freezes ? ' checked' : '') + '><span>Freezes well</span></label></div></div>' +
-    '<div class="field"><span class="flabel" id="taglbl">Tags</span><input class="sr" id="f-tags" value="' + esc(v.tags.join(', ')) + '" tabindex="-1" aria-hidden="true">' +
-    '<div class="tagedit" id="tagedit" aria-labelledby="taglbl">' + tagEditHtml(v.tags, v) + '</div></div>' +
-    '<div class="field"><span class="flabel">Color</span><div class="colorpick" id="colorpick" role="group" aria-label="Recipe color">' + colorPickHtml(v) + '</div></div>' +
     '<div class="field"><label for="f-ing">Ingredients</label><textarea class="inp grow" id="f-ing" rows="10" placeholder="One per line, like:\n2 cups flour\n1 tsp salt\n\nSauce:\n2 tbsp soy sauce">' + esc(v.ingredients) + '</textarea>' +
     '<p class="hint">One per line, amount first. A short line ending in ":" starts a section, like "Sauce:".</p></div>' +
     '<div class="field"><label for="f-steps">Steps</label><textarea class="inp grow" id="f-steps" rows="10" placeholder="One step per line">' + esc(v.steps) + '</textarea>' +
     '<p class="hint">One step per line. Start a line with "- " to add a tip under the step above. Times like "10 min" become tap-to-start timers.</p></div>' +
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp grow" id="f-notes" rows="4" style="min-height:110px" placeholder="Less salt next time…">' + esc(v.notes) + '</textarea></div>' +
-    '<div class="field"><label for="f-source">Source link</label><input class="inp" id="f-source" type="url" inputmode="url" value="' + esc(v.source) + '" autocomplete="off"></div>';
+    '<div class="field"><span class="flabel" id="taglbl">Tags</span><input class="sr" id="f-tags" value="' + esc(v.tags.join(', ')) + '" tabindex="-1" aria-hidden="true">' +
+    '<div class="tagedit" id="tagedit" aria-labelledby="taglbl">' + tagEditHtml(v.tags, v) + '</div></div>' +
+    '<div class="field"><label for="f-source">Source link</label><input class="inp" id="f-source" type="url" inputmode="url" value="' + esc(v.source) + '" autocomplete="off"></div>' +
+    // things you set now and then, tucked away so the recipe itself comes first
+    '<details class="more" id="moredet"><summary><span class="mt">More details</span><span class="ms" id="moresum">' + esc(moreSummary(v)) + '</span></summary><div class="mb">' +
+    '<div class="row3"><div class="field"><label for="f-freq">How often</label><select class="inp" id="f-freq"><option value="">Not set</option>' + FREQ.map(function (f) { return '<option value="' + f[0] + '"' + (v.freq === f[0] ? ' selected' : '') + '>' + f[1] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="field"><label for="f-keeps">Keeps (days)</label><input class="inp" id="f-keeps" type="number" inputmode="numeric" min="0" max="60" value="' + esc(v.keeps) + '" placeholder="' + esc(S.settings.keepDays || 4) + '"></div>' +
+    '<div class="field"><span class="flabel">Freezer</span><label class="checkrow"><input type="checkbox" id="f-freezes"' + (v.freezes ? ' checked' : '') + '><span>Freezes well</span></label></div></div>' +
+    '<div class="field"><span class="flabel">Color</span><div class="colorpick" id="colorpick" role="group" aria-label="Recipe color">' + colorPickHtml(v) + '</div></div></div></details>';
   if (!isNew) body += '<div class="btnrow" style="margin-top:20px"><button class="btn danger" data-act="delrecipe" data-id="' + esc(v.id) + '" data-confirm="1">Delete recipe</button></div>';
   var foot = (isNew ? '<button class="btn" data-act="saveform" data-more="1">Save &amp; new</button>' : '') +
     '<button class="btn primary" data-act="saveform">Save</button>';
@@ -5454,6 +5618,7 @@ function openEditor(id, draft, focusField) {
   // iOS only shows the keyboard when focus happens inside the tap
   var first = focusField ? $('#f-' + focusField, el) : (isNew ? $('#f-link', el) : null);
   if (first) {
+    var md = first.closest('details'); if (md) md.open = true;
     if (focusField) showField(first, 'top');                         // in place before the sheet arrives
     try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
     if (focusField && first.tagName === 'TEXTAREA') { var n = first.value.length; try { first.setSelectionRange(n, n); } catch (e) { } first.scrollTop = first.scrollHeight; }
@@ -5466,10 +5631,20 @@ function formRecipeLike(v) {
   var g = function (id) { var e = $('#' + id); return e ? e.value : ''; };
   return { id: '', title: (v && v.title) || g('f-title') || '?', tags: $('#f-tags') ? getTags() : ((v && v.tags) || []), ingredients: $('#f-ing') ? g('f-ing') : ((v && v.ingredients) || ''), color: FORM.color || '' };
 }
+/** What's set under More details, in a few words, so you know without opening it. */
+function moreSummary(v) {
+  var bits = [];
+  var fq = (FREQ.filter(function (f) { return f[0] === v.freq; })[0] || [])[1]; if (fq) bits.push(fq);
+  if (v.keeps) bits.push('keeps ' + v.keeps + ' days');
+  if (v.freezes) bits.push('freezes well');
+  var c = FORM && FORM.color; if (c) bits.push(c + ' color');
+  return bits.length ? bits.join(' · ') : 'How often, keeps, freezer, color';
+}
 function photoPickHtml(v) {
   var src = FORM.photoData || FORM.photoUrl;
   var r = formRecipeLike(v);
-  return '<span class="tile' + (src ? ' has-img' : '') + '" style="--pig:' + pigmentFor(r) + '"><span class="lt">' + esc(initial(r)) + '</span>' + (src ? '<img src="' + esc(src) + '" alt="" onerror="var p=this.parentNode;this.remove();if(p)p.classList.remove(\'has-img\')">' : '') + '</span>' +
+  var lt = foodSvg(pigmentKey(r));
+  return '<span class="tile' + (src ? ' has-img' : '') + '" style="--pig:' + pigmentFor(r) + '"><span class="lt">' + lt + '</span>' + (src ? '<img src="' + esc(src) + '" alt="" onerror="var p=this.parentNode;this.remove();if(p)p.classList.remove(\'has-img\')">' : '') + '</span>' +
     '<label class="btn sm filebtn" for="f-photo" tabindex="0" role="button">' + icon('cam') + (src ? 'Change photo' : 'Add photo') + '</label>' +
     (src ? '<button class="btn sm ghost" data-act="rmphoto">Remove</button>' : '') +
     '<input class="inp" id="f-photourl" type="url" inputmode="url" placeholder="…or paste a photo link" value="' + esc(FORM.photoData ? '' : FORM.photoUrl) + '" style="flex:1 1 100%">';
@@ -5592,6 +5767,8 @@ function commitForm(msg) {
   var r = normRecipe(Object.assign({}, prev || {}, v, { added: prev ? prev.added : today(), rating: prev ? prev.rating : 0, fav: prev ? prev.fav : false, cols: prev ? prev.cols : [] }));
   if (FORM.photoData) r.photo = prev && !/^data:/.test(prev.photo) ? prev.photo : '';
   if (FORM.removed && !FORM.photoData) { r.photo = v.photo || ''; delete S.pending[r.id]; }
+  var auto = autoTagsFor(r);
+  if (auto.length) { r.tags = canonTags(r.tags.concat(auto)); if (msg) msg += '. Tagged ' + auto.join(', '); }
   var cols = S.settings.recipeColors || {};
   if ((cols[r.id] || '') !== (FORM.color || '')) { var nc = clone(cols); if (FORM.color) nc[r.id] = FORM.color; else delete nc[r.id]; setSetting('recipeColors', nc); }
   saveRecipe(r, msg === false ? '' : msg);
@@ -6510,6 +6687,9 @@ function enableEdgeBack() {
 /* ===================== settings ===================== */
 function openSettings(openKey) {
   UI.open = {};                       // always start at the top with everything closed
+  var moved = { shopplan: 'mealprep', home: 'look' };          // sections that were folded into others
+  if (openKey === 'home') UI.open['look-home'] = true;
+  openKey = moved[openKey] || openKey;
   if (openKey) UI.open[openKey] = true;
   openSheet('settings', 'Settings', settingsHtml(), '', { onClose: function () { UI.conn.msg = ''; } });
 }
@@ -6541,7 +6721,7 @@ function seg(setting, options) {
 }
 function toggleRow(setting, label, hint) {
   var on = !!S.settings[setting];
-  return '<button class="toggle" role="switch" aria-checked="' + on + '" data-act="set" data-k="' + setting + '" data-v="' + (!on) + '"><span><b>' + label + '</b>' + (hint ? '<br><span class="muted" style="font-size:.85rem">' + hint + '</span>' : '') + '</span><span class="sw"></span></button>';
+  return '<button class="toggle" role="switch" aria-checked="' + on + '" data-act="set" data-k="' + setting + '" data-v="' + (!on) + '"><span><b>' + label + '</b>' + (hint ? '<br><span class="muted small">' + hint + '</span>' : '') + '</span><span class="sw"></span></button>';
 }
 
 function settingsHtml() {
@@ -6559,7 +6739,7 @@ function settingsHtml() {
       b += '<div class="btnrow"><button class="btn sm" data-act="syncnow">' + icon('sync') + 'Sync now</button>' +
         '<button class="btn sm" data-act="backup">' + icon('up') + 'Save a backup copy to Drive</button>' +
         '<button class="btn sm danger" data-act="disconnect" data-confirm="1">Disconnect</button></div>' +
-        '<p class="muted" style="font-size:.85rem">Script version ' + (S.scriptV || '?') + '. Changes save to the sheet automatically and wait here when you\'re offline.</p>';
+        '<p class="muted small">Script version ' + (S.scriptV || '?') + '. Changes save to the sheet automatically and wait here when you\'re offline.</p>';
     } else {
       b += '<p>Your recipes are saved in a Google Sheet in your Drive, one row per recipe, so you can read or edit them there too. Photos go in a "Recipe photos" folder next to it.</p>' +
         '<div class="field"><label for="set-url">Script link</label><input class="inp" id="set-url" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(S.conn.url) + '"></div>' +
@@ -6599,49 +6779,46 @@ function settingsHtml() {
     b += sub('look-text', 'Text size', { standard: 'Standard', large: 'Large', larger: 'Larger' }[st.text], function () {
       return seg('text', [['standard', 'Standard'], ['large', 'Large'], ['larger', 'Larger']]);
     });
+    b += sub('look-home', 'App name and icon', st.appName, function () {
+      return '<div class="field"><label for="set-name">App name</label><input class="inp" id="set-name" value="' + esc(st.appName) + '" maxlength="30" autocomplete="off" data-input="appname"></div>' +
+        '<p class="flabel">Icon</p><div class="iconpick">' + Object.keys(ICONS).map(function (k) {
+          return '<button data-act="set" data-k="icon" data-v="' + k + '" aria-pressed="' + (st.icon === k) + '" aria-label="' + ICONS[k] + '"><img src="' + iconData(k) + '" alt=""></button>';
+        }).join('') + '</div>' +
+        '<p class="infobox">iPhone only picks up a new icon or name when you add the app to your home screen. To change it: tap "Copy link with this icon", remove the app from your home screen, open the copied link in Safari, then Share → Add to Home Screen. Your recipes come back from your sheet.</p>' +
+        '<button class="btn sm" data-act="iconlink">' + icon('link') + 'Copy link with this icon</button>';
+    });
     return b;
   });
 
-  h += section('computer', 'On a computer', isInstalled() && isDesk() ? 'Installed' : (INSTALL_EVT ? 'Ready to install' : ''), computerHtml);
-  h += section('home', 'Home screen', st.appName, function () {
-    return '<div class="field"><label for="set-name">App name</label><input class="inp" id="set-name" value="' + esc(st.appName) + '" maxlength="30" autocomplete="off" data-input="appname"></div>' +
-      '<p class="flabel">Icon</p><div class="iconpick">' + Object.keys(ICONS).map(function (k) {
-        return '<button data-act="set" data-k="icon" data-v="' + k + '" aria-pressed="' + (st.icon === k) + '" aria-label="' + ICONS[k] + '"><img src="' + iconData(k) + '" alt=""></button>';
-      }).join('') + '</div>' +
-      '<p class="infobox">iPhone only picks up a new icon or name when you add the app to your home screen. To change it: tap "Copy link with this icon", remove the app from your home screen, open the copied link in Safari, then Share → Add to Home Screen. Your recipes come back from your sheet.</p>' +
-      '<button class="btn sm" data-act="iconlink">' + icon('link') + 'Copy link with this icon</button>';
-  });
-
-  h += section('shopplan', 'Plan & shopping', st.weeklyEmail ? 'Sunday email on' : 'Week starts ' + (st.weekStart === 'mon' ? 'Monday' : 'Sunday'), function () {
-    var b = '<p class="flabel">Week starts on</p>' + seg('weekStart', [['sun', 'Sunday'], ['mon', 'Monday']]);
-    b += '<div style="margin-top:12px">' + toggleRow('weeklyEmail', 'Email me the week on Sundays', 'At 8 am: the next 7 days of meals plus your shopping list, sent to the Google account that owns the sheet.') + '</div>';
-    if (st.weeklyEmail && connected() && !S.emailReady) b += '<p class="infobox">One more step: in the sheet\'s script editor, choose <b>setupWeeklyEmail</b> and click <b>Run</b> once. The setup guide shows where.</p>';
-    if (st.weeklyEmail && !connected()) b += '<p class="infobox">The email is sent by your Google Sheet, so connect it first.</p>';
-    if (connected()) b += '<div class="btnrow"><button class="btn sm" data-act="testemail">Send a test email now</button></div>';
-    b += '<div class="field" style="margin-top:14px"><label for="set-sc">Reminders shortcut name</label><input class="inp" id="set-sc" data-input="shortcut" value="' + esc(st.shortcut) + '" autocomplete="off">' +
-      '<p class="hint">"Send to Reminders" runs this Shortcut. <button class="linkbtn" data-act="remhelp">How to make it</button></p></div>' +
-      '<div class="field"><label for="set-staples">Things you always have</label><input class="inp" id="set-staples" data-input="staples" value="' + esc((st.staples || []).join(', ')) + '" autocomplete="off">' +
-      '<p class="hint">Start unticked when adding to the list, and don\'t count as missing in "What can I make?".</p></div>';
-    return b;
-  });
-
-  h += section('mealprep', 'Meal prep', DAY_NAMES[+st.prepDay || 0] + 's, ' + (+st.prepMeals || 5) + ' meals a batch', function () {
+  h += section('mealprep', 'Planning & meal prep', 'Week starts ' + (st.weekStart === 'mon' ? 'Monday' : 'Sunday') + ', prep on ' + DAY_NAMES[+st.prepDay || 0] + 's', function () {
     var unset = S.recipes.filter(function (r) { return !r.freq && suggestFreq(r); }).length;
-    return '<p class="flabel">Prep day</p>' + seg('prepDay', [['0', 'Sun'], ['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['6', 'Sat']]) +
-      '<p class="hint muted" style="font-size:.85rem">"Add my regulars" on the Plan tab puts your Every-week recipes on this day.</p>' +
+    var em = '<div style="margin-top:12px">' + toggleRow('weeklyEmail', 'Email me the week on Sundays', 'At 8 am: the next 7 days of meals plus your shopping list, sent to the Google account that owns the sheet.') + '</div>';
+    if (st.weeklyEmail && connected() && !S.emailReady) em += '<p class="infobox">One more step: in the sheet\'s script editor, choose <b>setupWeeklyEmail</b> and click <b>Run</b> once. The setup guide shows where.</p>';
+    if (st.weeklyEmail && !connected()) em += '<p class="infobox">The email is sent by your Google Sheet, so connect it first.</p>';
+    if (connected()) em += '<div class="btnrow"><button class="btn sm" data-act="testemail">Send a test email now</button></div>';
+    return '<p class="flabel">Week starts on</p>' + seg('weekStart', [['sun', 'Sunday'], ['mon', 'Monday']]) + em +
+      '<p class="flabel" style="margin-top:14px">Prep day</p>' + seg('prepDay', [['0', 'Sun'], ['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['6', 'Sat']]) +
+      '<p class="hint muted">"Add my regulars" on the Plan tab puts your Every-week recipes on this day.</p>' +
       '<p class="flabel" style="margin-top:14px">A prep batch covers</p>' + seg('prepMeals', [['3', '3 meals'], ['4', '4'], ['5', '5'], ['6', '6'], ['7', '7'], ['10', '10']]) +
-      '<p class="hint muted" style="font-size:.85rem">5 is lunches Monday to Friday. Each meal is for ' + (st.cookFor ? st.cookFor + (+st.cookFor === 1 ? ' person' : ' people') : 'the number of people the recipe serves') + ' (from "Usually cooking for"). You can change it on any planned meal.</p>' +
+      '<p class="hint muted">5 is lunches Monday to Friday. Each meal is for ' + (st.cookFor ? st.cookFor + (+st.cookFor === 1 ? ' person' : ' people') : 'the number of people the recipe serves') + ' (from "Usually cooking for"). You can change it on any planned meal.</p>' +
       '<p class="flabel" style="margin-top:14px">Leftovers keep for</p>' + seg('keepDays', [['2', '2 days'], ['3', '3 days'], ['4', '4 days'], ['5', '5 days']]) +
-      '<p class="hint muted" style="font-size:.85rem">Used for the fridge when a recipe doesn\'t say. Most cooked food is good for 3 to 4 days.</p>' +
+      '<p class="hint muted">Used for the fridge when a recipe doesn\'t say. Most cooked food is good for 3 to 4 days.</p>' +
       '<p class="flabel" style="margin-top:14px">How often you make things</p><p class="hint muted" style="margin-top:0">Fills in "Every week", "Now and then" or "Once in a while" from your History, for recipes that don\'t have one yet' + (unset ? ' (' + unset + ' can be filled in)' : '') + '.</p>' +
       '<button class="btn sm" data-act="autofreq"' + (unset ? '' : ' disabled') + '>Fill in from History</button>';
   });
 
+  h += section('shopping', 'Shopping', st.shortcut ? 'Reminders: ' + st.shortcut : '', function () {
+    return '<div class="field"><label for="set-sc">Reminders shortcut name</label><input class="inp" id="set-sc" data-input="shortcut" value="' + esc(st.shortcut) + '" autocomplete="off">' +
+      '<p class="hint">"Reminders" on the shopping list runs this Shortcut. <button class="linkbtn" data-act="remhelp">How to make it</button></p></div>' +
+      '<div class="field"><label for="set-staples">Things you always have</label><input class="inp" id="set-staples" data-input="staples" value="' + esc((st.staples || []).join(', ')) + '" autocomplete="off">' +
+      '<p class="hint">Start unticked when adding to the list, and don\'t count as missing in "What can I make?".</p></div>';
+  });
+
   h += section('cooking', 'Recipes and cooking', (st.cookFor ? 'Cooking for ' + st.cookFor + ', ' : '') + (st.units === 'metric' ? 'metric' : 'amounts as written'), function () {
     return '<p class="flabel">Usually cooking for</p>' + seg('cookFor', [['', 'Recipe as written'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'], ['6', '6'], ['8', '8']]) +
-      '<p class="hint muted" style="font-size:.85rem">Recipes open scaled to this many people, and new planned meals start at it. You can still change it on any recipe, in Cook mode, and when adding to your list. Baked goods and sauces keep their own amounts.</p>' +
+      '<p class="hint muted">Recipes open scaled to this many people, and new planned meals start at it. You can still change it on any recipe, in Cook mode, and when adding to your list. Baked goods and sauces keep their own amounts.</p>' +
       '<p class="flabel" style="margin-top:14px">Amounts</p>' + seg('units', [['written', 'As written'], ['metric', 'Metric (g, ml, °C)']]) +
-      '<p class="hint muted" style="font-size:.85rem">Metric turns cups, ounces, pounds and °F into ml, grams and °C. Teaspoons and tablespoons stay as they are.</p>' +
+      '<p class="hint muted">Metric turns cups, ounces, pounds and °F into ml, grams and °C. Teaspoons and tablespoons stay as they are.</p>' +
       '<p class="flabel" style="margin-top:14px">When the app opens, show</p>' + seg('openTo', [['list', 'All recipes'], ['last', 'The last recipe I opened'], ['plan', 'Plan'], ['shop', 'Shopping list'], ['discover', 'Discover'], ['history', 'History']]) +
       '<div style="margin-top:10px">' + toggleRow('wake', 'Keep the screen on in Cook mode', 'Uses a bit more battery while cooking') + '</div>' +
       '<p class="flabel" style="margin-top:14px">Tags</p><p class="hint muted" style="margin-top:0">Adds a meal (dinner, breakfast…) and main ingredient (chicken, beef, rice…) to any recipe missing them. Your own tags stay.</p>' +
@@ -6653,9 +6830,10 @@ function settingsHtml() {
       '<div class="btnrow"><button class="btn sm" data-act="export">' + icon('dl') + 'Save a backup file</button>' +
       '<button class="btn sm" data-act="importfile">' + icon('up') + 'Restore from a file</button></div>' +
       '<input type="file" id="importfile" accept="application/json,.json" class="sr" tabindex="-1">' +
-      '<p class="muted" style="font-size:.85rem">Restoring replaces the recipes on this device with the ones in the file' + (connected() ? ' and updates your sheet to match' : '') + '. You\'ll get an Undo.</p>';
+      '<p class="muted small">Restoring replaces the recipes on this device with the ones in the file' + (connected() ? ' and updates your sheet to match' : '') + '. You\'ll get an Undo.</p>';
   });
 
+  if (isWide()) h += section('computer', 'On a computer', isInstalled() && isDesk() ? 'Installed' : (INSTALL_EVT ? 'Ready to install' : ''), computerHtml);
   h += '<p class="ver offline" id="offline-line">' + offlineLineHtml() + '</p>';
   h += '<p class="ver">' + esc(st.appName) + ' ' + APP_VERSION + (S.scriptV ? ', sheet script ' + S.scriptV : '') + '</p>';
   return h;
@@ -7107,7 +7285,7 @@ function flyOpen(tile) {
   if (b.bottom < 0 || b.top > window.innerHeight) return;
   var tr = getComputedStyle(tile).borderRadius, hr = getComputedStyle(hero).borderRadius;
   var tl = $('.lt', tile), hb = $('.big', hero);
-  var bigScale = tl && hb ? parseFloat(getComputedStyle(tl).fontSize) / parseFloat(getComputedStyle(hb).fontSize) : 0;
+  var bigScale = tl && hb ? tl.getBoundingClientRect().width / Math.max(1, hb.getBoundingClientRect().width) : 0;
   hero.style.visibility = 'hidden'; tile.style.visibility = 'hidden';
   flyer(hero, { left: a.left, top: a.top, width: a.width, height: a.height, radius: tr, big: bigScale }, { left: b.left, top: b.top, width: b.width, height: b.height, radius: hr }, function () {
     hero.style.visibility = ''; tile.style.visibility = '';
@@ -7128,7 +7306,7 @@ function flyClose(id) {
   var b = restingRect(row, lp);
   if (b.top + b.height < 0 || b.top > window.innerHeight) return;
   var tl = $('.lt', row), hb = $('.big', hero);
-  var bigScale = tl && hb ? parseFloat(getComputedStyle(tl).fontSize) / parseFloat(getComputedStyle(hb).fontSize) : 0;
+  var bigScale = tl && hb ? tl.getBoundingClientRect().width / Math.max(1, hb.getBoundingClientRect().width) : 0;
   row.style.visibility = 'hidden'; hero.style.visibility = 'hidden';
   flyer(hero, { left: a.left, top: a.top, width: a.width, height: a.height, radius: getComputedStyle(hero).borderRadius, big: 1 },
     { left: b.left, top: b.top, width: b.width, height: b.height, radius: getComputedStyle(row).borderRadius, big: bigScale || (b.width / a.width) }, function () {
@@ -7154,10 +7332,14 @@ function flipRows() {
     var key = flipKey(row); if (!key || out[key]) return false;
     var r = row.getBoundingClientRect();
     if (!r.height || r.bottom < -80 || r.top > vh + 80) return false;
-    out[key] = { el: row, r: r };
+    out[key] = { el: row, r: r, k: key };
     return ++n > 120;
   });
   return out;
+}
+var ENTERING = {};
+function enterRow(el, elapsed) {
+  anim(el, [{ opacity: 0, transform: 'translateY(-8px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 300, delay: -elapsed, easing: EASE });
 }
 function flipFirst(sameView) { if (!sameView || calm()) return null; return flipRows(); }
 function flipPlay(before) {
@@ -7167,12 +7349,12 @@ function flipPlay(before) {
     var a = after[k], b = before[k];
     if (!b) { added.push(a); return; }
     var dx = b.r.left - a.r.left, dy = b.r.top - a.r.top;
+    var since = ENTERING[k] ? Date.now() - ENTERING[k] : 1e9;
+    if (since < 300 && a.el !== b.el) { enterRow(a.el, since); return; }          // redrawn mid slide-in: carry on from where it was
     if (Math.abs(dy) > 1 || Math.abs(dx) > 1) anim(a.el, [{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 320, easing: EASE });
   });
   Object.keys(before).forEach(function (k) { if (!after[k] && !before[k].el.isConnected) gone.push(before[k]); });
-  if (added.length && added.length <= 4) added.forEach(function (a) {
-    anim(a.el, [{ opacity: 0, transform: 'translateY(-8px) scale(.98)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: EASE });
-  });
+  if (added.length && added.length <= 4) added.forEach(function (a) { ENTERING[a.k] = Date.now(); enterRow(a.el, 0); });
   if (gone.length && gone.length <= 4) gone.forEach(function (g) {
     var gh = document.createElement('div');
     gh.className = 'flipghost'; gh.setAttribute('aria-hidden', 'true');
@@ -7511,6 +7693,7 @@ document.addEventListener('touchstart', function () { }, { passive: true });   /
 var ACTIONS = {
   add: function () { if (once('add')) openEditor(null); },
   install: function () { installApp(); },
+  followopen: function () { UI.followOpen = true; var el = $('#followsec'); if (el) { el.innerHTML = followSectionHtml(); var u = $('#followurl'); if (u && isWide()) u.focus(); } },
   keys: function () { if (SHEET && SHEET.id === 'settings') closeSheet(true); openKeys(); },
   settings: function (t) { openSettings(t.getAttribute('data-open')); },
   status: function () { if (connected() && !S.awaitSeed && UI.syncState !== 'err') { sync(); toast(S.outbox.length ? 'Sending ' + S.outbox.length + ' change' + (S.outbox.length > 1 ? 's' : '') + '…' : 'Syncing with your sheet…'); } else openSettings('sheet'); },
@@ -7711,7 +7894,7 @@ var ACTIONS = {
     var k = t.getAttribute('data-k'), v = t.getAttribute('data-v');
     if (v === 'true') v = true; else if (v === 'false') v = false;
     setSetting(k, v);
-    if (k === 'sort') renderList();
+    if (k === 'sort') { renderList(); fitSelects(); }
     render(); refreshSettings();
   },
   look: function (t) {
@@ -7854,7 +8037,7 @@ var ACTIONS = {
     var res = swapLines(line, sub);
     var body = '<p class="lede">The recipe uses <b>' + esc(prettyFractions(line)) + '</b>. Instead you can use:</p><ul class="swaps">' + res.lines.map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('') + '</ul>' +
       (res.scaled ? '' : '<p class="hint">Amounts are for ' + esc(prettyFractions(sub.per)) + ' of ' + esc(it.name) + '.</p>') +
-      '<p class="muted" style="font-size:.88rem">Swaps change the taste or texture a little. If you like how it turns out, note it in the recipe.</p>';
+      '<p class="muted" style="font-size:.875rem">Swaps change the taste or texture a little. If you like how it turns out, note it in the recipe.</p>';
     openSheet('swap', 'Out of ' + it.name + '?', body, '<button class="btn primary" data-act="sheet-close">Got it</button>');
   },
 
@@ -7977,6 +8160,12 @@ var ACTIONS = {
   },
   clearlist: function () { var ids = S.shop.map(function (x) { return x.id; }); shopQueue([], ids, 'Cleared the list'); render(); },
   toreminders: function () { sendToReminders(); },
+  sentkeep: function () { closeSheet(); },
+  sentclear: function (t) {
+    var ids = (t.getAttribute('data-ids') || '').split(',').filter(function (id) { return byIdIn(S.shop, id); });
+    closeSheet();
+    if (ids.length) { shopQueue([], ids, 'Cleared ' + ids.length + (ids.length === 1 ? ' item' : ' items')); render(); }
+  },
   copylist: function () { copyList(); },
   sharelist: function () { shareList(); },
   remhelp: function () { openRemindersHelp(); },
@@ -8109,7 +8298,7 @@ document.addEventListener('input', function (e) {
 });
 document.addEventListener('change', function (e) {
   var t = e.target;
-  if (t.id === 'sort') { setSetting('sort', t.value); renderList(); }
+  if (t.id === 'sort') { setSetting('sort', t.value); renderList(); fitSelects(); }
   else if (t.id === 'f-photo' && t.files && t.files[0]) {
     shrinkPhoto(t.files[0], function (data) { FORM.photoData = data; FORM.removed = false; $('#photopick').innerHTML = photoPickHtml(readForm()); });
     t.value = '';
@@ -8207,10 +8396,12 @@ function start() {
     $('#app').removeAttribute('aria-busy');
     if (connected()) sync();
     setupOffline();
+    setTimeout(offerClearSent, 600);            // reopened after sending the list
   });
 
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState !== 'visible' || !S) return;
+    setTimeout(offerClearSent, 400);
     if (connected()) sync();
     if (UI.cook && S.settings.wake && !WAKE) keepAwake();
     tick && UI.timers.length && tick();
