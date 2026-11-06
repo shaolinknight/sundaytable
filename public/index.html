@@ -1167,6 +1167,19 @@ details.more .mb{padding:0 14px 4px}
 .todo>svg.i{color:var(--warn);flex:none}
 .todo>span{flex:1;min-width:150px}
 .todo .btn{flex:none}
+/* wide screens: one pane until you open a recipe */
+.dclose{display:none}
+@media (min-width:760px){
+  body.solo .main{grid-template-columns:1fr!important}
+  body.solo #detailpane{display:none}
+  body.solo .listpane{border-right:0}
+  body.solo .listpane>*{max-width:1180px;margin-left:auto;margin-right:auto}
+  html[data-tab="plan"] body.solo .listpane>*,html[data-tab="shop"] body.solo .listpane>*,html[data-tab="history"] body.solo .listpane>*{max-width:820px}
+  body.solo .rlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));column-gap:24px}
+  body.solo .rlist>li{min-width:0}
+  .dclose{display:flex;position:sticky;top:12px;float:right;z-index:3;margin:-8px -12px -40px 0;width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;background:color-mix(in srgb,var(--p1) 88%,transparent);box-shadow:var(--shadow);color:var(--t2)}
+  .dclose:hover{color:var(--t1)}
+}
 
 </style>
 </head>
@@ -2467,7 +2480,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.20';
+var APP_VERSION = '2.21';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -3472,6 +3485,7 @@ function render() {
   else if (UI.tab === 'discover') renderDiscover();
   else renderList();
   document.documentElement.setAttribute('data-tab', UI.tab);
+  soloLayout();
   var fab = $('#fab'); if (fab) fab.hidden = (UI.tab !== 'recipes' && !isDesk()) || UI.selecting;
   renderDetail();
   renderSelBar();
@@ -3752,7 +3766,7 @@ function openRecipe(id) {
   if (!byId(id)) return;
   var was = UI.openId;
   if (was && was !== id) forgetTicks(was);          // ticked ingredients and steps don't stick around
-  UI.openId = id;
+  UI.openId = id; UI.openTab = UI.tab;
   S.lastOpen = id; save();
   if (!isWide()) {
     sheetBack(false, true);                          // the page must be back in place before the recipe slides over it
@@ -3761,6 +3775,7 @@ function openRecipe(id) {
   } else if (was !== id) {
     $('#detailpane').scrollTop = 0;
   }
+  soloLayout();
   renderDetail();
   settleImgs($('#detailpane'));
   if (isWide()) $$('.rrow').forEach(function (b) { b.classList.toggle('current', b.getAttribute('data-id') === id); });
@@ -3772,7 +3787,13 @@ function closeDetail(fly) {
   UI.openId = '';
   document.body.classList.remove('show-detail');
   if (!UI.cook) topEdge('');
-  if (isWide()) renderDetail();
+  if (isWide()) { $$('.rrow.current').forEach(function (b) { b.classList.remove('current'); }); soloLayout(); renderDetail(); }
+}
+/** On a wide screen, the second pane only appears for a recipe you opened from this tab; otherwise the tab gets the whole width. */
+function soloLayout() {
+  var solo = isWide() && !(UI.openId && byId(UI.openId) && UI.openTab === UI.tab);
+  document.body.classList.toggle('solo', solo);
+  return solo;
 }
 
 
@@ -3783,13 +3804,7 @@ function favBtn(r, cls) {
 function renderDetail() {
   var pane = $('#detailpane');
   themeEl(pane, null);
-  // on the iPad, Plan and Shopping sit side by side
-  if (isWide() && (UI.tab === 'plan' || UI.tab === 'shop')) {
-    var sp = $('.sidepane', pane);
-    if (!sp || sp.getAttribute('data-for') !== UI.tab) { pane.innerHTML = '<div class="dbody sidepane" data-for="' + UI.tab + '"></div>'; sp = $('.sidepane', pane); }
-    if (UI.tab === 'plan') renderShop(sp, true); else renderPlan(sp, true);
-    return;
-  }
+  if (soloLayout()) { if (pane.innerHTML) pane.innerHTML = ''; return; }      // nothing open: no second pane
   var r = UI.openId ? byId(UI.openId) : null;
   if (!r) {
     var any = S.recipes[0];
@@ -3803,7 +3818,8 @@ function renderDetail() {
   var h = '<div class="dbar" id="dbar"><button class="back" data-act="back" aria-label="Back to recipes">' + icon('back') + 'Recipes</button>' +
     '<span class="t">' + esc(r.title) + '</span>' +
     (shared ? '' : favBtn(r, 'iconbtn')) + (shared ? '' : '<button class="iconbtn" data-act="share" data-id="' + esc(r.id) + '" aria-label="Share recipe">' + icon('up') + '</button>') +
-    '<button class="iconbtn" data-act="edit" data-id="' + esc(r.id) + '" aria-label="Edit recipe">' + icon('edit') + '</button></div><div class="dbody">';
+    '<button class="iconbtn" data-act="edit" data-id="' + esc(r.id) + '" aria-label="Edit recipe">' + icon('edit') + '</button></div><div class="dbody">' +
+    (shared ? '' : '<button class="dclose" data-act="back" aria-label="Close recipe" title="Close (Esc)">' + icon('x') + '</button>');
   h += '<div class="hero' + (photo ? '' : ' noimg') + '" style="--pig:' + pigmentFor(r) + '">' +
     (photo ? '<img src="' + esc(photo) + '" alt="" onerror="var p=this.parentNode;this.remove();if(p)p.classList.add(\'noimg\')">' : '') +
     '<span class="big" aria-hidden="true">' + foodSvg(pigmentKey(r)) + '</span></div>';
@@ -4667,6 +4683,32 @@ function shareList() {
   var txt = listText();
   if (navigator.share) navigator.share({ title: 'Shopping list', text: txt }).then(function () { markSent('your shared list'); offerClearSent(); }, function () { });
   else copyList();
+}
+/* ---------- a Shortcut that fetches the list itself: runs from Siri, a widget or an automation, in the background ---------- */
+var GROCERIES_SCRIPT = 7;
+function groceriesLink() {
+  var u = S.conn.url || '';
+  return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'action=groceries&clear=1&pass=' + encodeURIComponent(S.conn.pass || '');
+}
+function bgRemindersHtml() {
+  if (!connected()) return '<p class="hint">This works once your Google Sheet is connected.</p>';
+  if ((S.scriptV || 0) < GROCERIES_SCRIPT) return '<p class="infobox">Update the sheet script to version ' + GROCERIES_SCRIPT + ' first (the setup guide shows how), then come back here.</p>';
+  return '<p class="hint" style="margin-top:0">A second Shortcut can fetch your list straight from your sheet, so it runs from Siri, a Home Screen widget or an automation without opening anything.</p>' +
+    '<div class="btnrow"><button class="btn sm primary" data-act="copygrocerylink">' + icon('link') + 'Copy the link for it</button><button class="btn sm" data-act="bgremhelp">How to set it up</button></div>';
+}
+function openBgRemindersHelp() {
+  var body = '<p>This Shortcut gets your list from your Google Sheet by itself, so nothing has to open. Make it once:</p><ol class="howto">' +
+    '<li>In Sunday Table, tap <b>Copy the link for it</b> (Settings → Shopping).</li>' +
+    '<li>In <b>Shortcuts</b>, tap <b>+</b>. Add <b>Get Contents of URL</b> and paste the link into it.</li>' +
+    '<li>Add <b>Split Text</b> (it splits the contents by New Lines).</li>' +
+    '<li>Add <b>Repeat with Each</b>, and inside it <b>Add New Reminder</b>: tap "Reminder" and choose <b>Repeat Item</b>, then choose your grocery list.</li>' +
+    '<li>Name it something easy to say, like <b>Groceries</b>.</li></ol>' +
+    '<p><b>Run it in the background</b> any of these ways:</p><ul class="howto">' +
+    '<li>Say "Hey Siri, Groceries".</li>' +
+    '<li>Add a <b>Shortcuts widget</b> to your Home Screen and tap it. It runs right there.</li>' +
+    '<li>Or make it automatic: in Shortcuts → <b>Automation</b> → <b>+</b>, pick a time (say, Saturday 9 am) or arriving at your store, choose this shortcut, and set it to <b>Run Immediately</b>.</li></ul>' +
+    '<p class="muted">The items it sends come off Sunday Table\'s list, so nothing gets added twice. The link includes your sheet passphrase, so keep it to yourself.</p>';
+  openSheet('remhelp', 'Send to Reminders in the background', body, '<button class="btn primary" data-act="sheet-close">Done</button>');
 }
 function openRemindersHelp() {
   var body = '<p>iPhone doesn\'t let web apps write to Reminders directly, so a small Shortcut does it. You make it once:</p><ol class="howto">' +
@@ -6810,6 +6852,7 @@ function settingsHtml() {
   h += section('shopping', 'Shopping', st.shortcut ? 'Reminders: ' + st.shortcut : '', function () {
     return '<div class="field"><label for="set-sc">Reminders shortcut name</label><input class="inp" id="set-sc" data-input="shortcut" value="' + esc(st.shortcut) + '" autocomplete="off">' +
       '<p class="hint">"Reminders" on the shopping list runs this Shortcut. <button class="linkbtn" data-act="remhelp">How to make it</button></p></div>' +
+      '<p class="flabel" style="margin-top:14px">Send it without opening the app</p>' + bgRemindersHtml() +
       '<div class="field"><label for="set-staples">Things you always have</label><input class="inp" id="set-staples" data-input="staples" value="' + esc((st.staples || []).join(', ')) + '" autocomplete="off">' +
       '<p class="hint">Start unticked when adding to the list, and don\'t count as missing in "What can I make?".</p></div>';
   });
@@ -8169,6 +8212,8 @@ var ACTIONS = {
   copylist: function () { copyList(); },
   sharelist: function () { shareList(); },
   remhelp: function () { openRemindersHelp(); },
+  bgremhelp: function () { openBgRemindersHelp(); },
+  copygrocerylink: function () { copyText(groceriesLink(), 'Link copied. Paste it into Get Contents of URL'); },
 
   /* sharing */
   share: function (t, id) { openShare(id); },
@@ -8333,7 +8378,7 @@ document.addEventListener('keydown', function (e) {
   if ((e.key === 'Enter' || e.key === ',') && e.target.id === 'f-newtag') { e.preventDefault(); ACTIONS.tagnew(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('filebtn')) { e.preventDefault(); e.target.click(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-act') === 'stepdone') { e.preventDefault(); e.target.click(); }
-  if (e.key === 'Escape') { if (UI.cook) closeCook(); else if (SHEET) closeSheet(); else if (UI.openId && !isWide()) closeDetail(true); }
+  if (e.key === 'Escape') { if (UI.cook) closeCook(); else if (SHEET) closeSheet(); else if (UI.openId && (!isWide() || !document.body.classList.contains('solo'))) closeDetail(true); }
   if (UI.cook && !SHEET) { if (e.key === 'ArrowRight') cookGo(1); if (e.key === 'ArrowLeft') cookGo(-1); }
 });
 
@@ -8392,7 +8437,7 @@ function start() {
     render();
     if (jump === 'new') setTimeout(function () { openEditor(null); }, 50);
     if (S.settings.openTo === 'last' && S.lastOpen && byId(S.lastOpen)) openRecipe(S.lastOpen);
-    else if (isWide() && S.recipes.length && !UI.openId) openRecipe(visibleRecipes()[0].id);
+    // wide screens start with just the list; a recipe opens beside it when you pick one
     $('#app').removeAttribute('aria-busy');
     if (connected()) sync();
     setupOffline();
@@ -8414,7 +8459,7 @@ function start() {
     var wq = window.matchMedia('(min-width: 760px)'), lastWide = wq.matches;
     var onWide = function () {
       if (!S || wq.matches === lastWide) return; lastWide = wq.matches;
-      if (wq.matches) { document.body.classList.remove('show-detail'); if (!UI.openId && S.recipes.length) UI.openId = visibleRecipes()[0] ? visibleRecipes()[0].id : ''; }
+      if (wq.matches) document.body.classList.remove('show-detail');
       else if (UI.openId) document.body.classList.add('show-detail');
       render();
     };
