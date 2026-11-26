@@ -38,8 +38,8 @@ var URL_ICON = null, ICON_FROM_URL = false;
   --bg:#F2EADB;--p1:#FBF6EC;--p2:#E9DDC8;--b1:#DDCDB3;--b2:#C6AF8E;
   --t1:#2A1C13;--t2:#5B4433;--t3:#735C49;--ac:#AE3A1F;--acd:#F1D9CC;--bt:#FFFFFF;
   --ch:#2E1F17;--cht:#F6ECDD;--chm:#CBB59C;--ok:#2F6B3A;--bad:#A3291B;--warn:#875800;
-  --fdisp:'Young Serif',Georgia,'Times New Roman',serif;
-  --fbody:'Atkinson Hyperlegible Next','Atkinson Hyperlegible',-apple-system,system-ui,sans-serif;
+  --fdisp:'Fraunces',Georgia,'Times New Roman',serif;
+  --fbody:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;
   --r1:10px;--r2:16px;--pad:16px;--cardpad:14px;
   --shadow:0 1px 0 rgba(60,35,15,.06),0 6px 18px -10px rgba(60,35,15,.35);
   --top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px);
@@ -56,6 +56,7 @@ html{font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%;backgrou
 body{margin:0;background:var(--bg);color:var(--t1);font-family:var(--fbody);font-size:1rem;line-height:1.45;
   -webkit-tap-highlight-color:transparent;min-height:100vh;min-height:100dvh;overflow-x:hidden}
 body.locked{overflow:hidden}
+body{font-variation-settings:'SOFT' 100,'WONK' 0}
 button,input,select,textarea{font:inherit;color:inherit}
 input,select,textarea{font-size:max(16px,1rem)}
 button{background:none;border:0;padding:0;cursor:pointer;touch-action:manipulation}
@@ -1181,6 +1182,28 @@ details.more .mb{padding:0 14px 4px}
   .dclose:hover{color:var(--t1)}
 }
 
+
+/* 2.22: sections you can see, in the recipe and while you write it */
+.ings li.h,.steps li.h{display:flex;align-items:center;gap:10px;font-family:var(--fdisp);font-size:1.1875rem;line-height:1.25;color:var(--t1);
+  margin:0;padding:18px 0 6px;border:0;overflow-wrap:anywhere}
+.ings li.h::before,.steps li.h::before{content:"";flex:none;width:4px;align-self:stretch;min-height:1.1em;border-radius:2px;background:var(--ac)}
+.ings li.h::after,.steps li.h::after{content:"";flex:1 1 24px;min-width:24px;height:1.5px;background:var(--b1)}
+.ings li.h:first-child,.steps li.h:first-child{padding-top:2px}
+.ings li.h + li .ing{padding-top:6px}
+.steps li.h + li .step{padding-top:6px}
+.cook .sect{display:flex;align-items:center;gap:8px;color:var(--t1);font-size:1.25rem;margin-bottom:6px}
+.cook .sect::before{content:"";flex:none;width:4px;height:1.1em;border-radius:2px;background:var(--ac)}
+.flabrow{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.flabrow label{margin-bottom:6px}
+.addsec{display:inline-flex;align-items:center;gap:4px;font-size:.875rem;font-weight:700;color:var(--ac);padding:4px 2px 8px;min-height:34px}
+.addsec svg.i{width:1rem;height:1rem}
+.hlbox{position:relative;border-radius:var(--r1);background:var(--p1)}
+.hlbox > textarea.inp{position:relative;z-index:1;background:transparent;display:block}
+.hlbox .hl{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:var(--r1);border:1.5px solid transparent}
+.hlbox .hlin{white-space:pre-wrap;overflow-wrap:break-word;word-wrap:break-word;color:transparent;padding:10px 12px}
+.hlbox .hlin > div{min-height:1em}
+.hlbox .hlin > .hd{margin:0 -12px;padding:0 12px;background:color-mix(in srgb,var(--ac) 13%,transparent);box-shadow:inset 4px 0 0 var(--ac)}
+.hlbox .hlin > .hd + .hd{box-shadow:inset 4px 0 0 var(--ac),0 -1px 0 var(--p1)}
 </style>
 </head>
 <body>
@@ -2480,7 +2503,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.21';
+var APP_VERSION = '2.22';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -2981,12 +3004,12 @@ var PALETTES = {
 };
 
 var FONTS = {
-  cookbook: { name: 'Cookbook', note: 'Young Serif + Atkinson', disp: "'Young Serif',Georgia,serif", body: "'Atkinson Hyperlegible Next','Atkinson Hyperlegible',-apple-system,system-ui,sans-serif",
-    css: 'family=Young+Serif&family=Atkinson+Hyperlegible+Next:wght@400;700' },
+  cookbook: { name: 'Cookbook', note: 'Fraunces + Be Vietnam Pro', disp: "'Fraunces',Georgia,serif", body: "'Be Vietnam Pro',-apple-system,system-ui,sans-serif",
+    css: 'family=Fraunces:opsz,wght,SOFT,WONK@9..144,100..900,0..100,0..1&family=Be+Vietnam+Pro:wght@400;600;700' },
   diner: { name: 'Diner', note: 'Bricolage Grotesque', disp: "'Bricolage Grotesque',system-ui,sans-serif", body: "'Bricolage Grotesque',-apple-system,system-ui,sans-serif",
     css: 'family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700' },
-  card: { name: 'Recipe card', note: 'Typewriter titles', disp: "'Courier Prime','Courier New',monospace", body: "'Atkinson Hyperlegible Next','Atkinson Hyperlegible',-apple-system,system-ui,sans-serif",
-    css: 'family=Courier+Prime:wght@400;700&family=Atkinson+Hyperlegible+Next:wght@400;700' },
+  card: { name: 'Recipe card', note: 'Typewriter titles', disp: "'IBM Plex Mono','Courier New',monospace", body: "'Be Vietnam Pro',-apple-system,system-ui,sans-serif",
+    css: 'family=IBM+Plex+Mono:wght@400;700&family=Be+Vietnam+Pro:wght@400;600;700' },
   system: { name: 'Phone default', note: 'No download', disp: "ui-serif,Georgia,serif", body: "-apple-system,system-ui,sans-serif", css: '' }
 };
 
@@ -3140,7 +3163,7 @@ function iconData(kind, palKey, size, safe) {
     roundRect(x, 78, 58, 46, 8, 4); x.fill(); roundRect(x, 78, 76, 34, 8, 4); x.fill();
   } else {
     x.fillStyle = ac; x.beginPath(); x.arc(90, 90, 62, 0, Math.PI * 2); x.fill();
-    x.fillStyle = fg; x.font = '400 92px "Young Serif", Georgia, serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = fg; x.font = '400 92px "Fraunces", Georgia, serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
     x.fillText(((S.settings.appName || 'S').match(/[A-Za-z0-9]/) || ['S'])[0].toUpperCase(), 90, 98);
   }
   return (ICON_CACHE[key] = cv.toDataURL('image/png'));
@@ -5636,10 +5659,10 @@ function openEditor(id, draft, focusField) {
     '<div class="field"><label for="f-prep">Prep time</label><input class="inp" id="f-prep" value="' + esc(minutes(v.prep)) + '" autocomplete="off" placeholder="20 min" data-dur="1"></div>' +
     '<div class="field"><label for="f-cook">Cook time</label><input class="inp" id="f-cook" value="' + esc(minutes(v.cook)) + '" autocomplete="off" placeholder="1 hr 30 min" data-dur="1"></div></div>' +
     '<p class="hint" style="margin:-8px 0 12px">Times: type minutes (45), hours and minutes (1:30), or words (2 hr 15 min).</p>' +
-    '<div class="field"><label for="f-ing">Ingredients</label><textarea class="inp grow" id="f-ing" rows="10" placeholder="One per line, like:\n2 cups flour\n1 tsp salt\n\nSauce:\n2 tbsp soy sauce">' + esc(v.ingredients) + '</textarea>' +
-    '<p class="hint">One per line, amount first. A short line ending in ":" starts a section, like "Sauce:".</p></div>' +
-    '<div class="field"><label for="f-steps">Steps</label><textarea class="inp grow" id="f-steps" rows="10" placeholder="One step per line">' + esc(v.steps) + '</textarea>' +
-    '<p class="hint">One step per line. Start a line with "- " to add a tip under the step above. Times like "10 min" become tap-to-start timers.</p></div>' +
+    '<div class="field">' + secLabel('f-ing', 'Ingredients') + hlBox('<textarea class="inp grow" id="f-ing" rows="10" placeholder="One per line, like:\n2 cups flour\n1 tsp salt\n\nSauce:\n2 tbsp soy sauce">' + esc(v.ingredients) + '</textarea>') +
+    '<p class="hint">One per line, amount first. Split it into parts (like the sauce and the chicken) with <b>Add a section</b>. A section title ends in ":" and shows highlighted.</p></div>' +
+    '<div class="field">' + secLabel('f-steps', 'Steps') + hlBox('<textarea class="inp grow" id="f-steps" rows="10" placeholder="One step per line\n\nMake the sauce:\nWhisk everything together.">' + esc(v.steps) + '</textarea>') +
+    '<p class="hint">One step per line. <b>Add a section</b> puts a title above the step you\'re on, like "Make the sauce:". Start a line with a dash (-) for a tip under the step above. Times like "10 min" become tap-to-start timers.</p></div>' +
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp grow" id="f-notes" rows="4" style="min-height:110px" placeholder="Less salt next time…">' + esc(v.notes) + '</textarea></div>' +
     '<div class="field"><span class="flabel" id="taglbl">Tags</span><input class="sr" id="f-tags" value="' + esc(v.tags.join(', ')) + '" tabindex="-1" aria-hidden="true">' +
     '<div class="tagedit" id="tagedit" aria-labelledby="taglbl">' + tagEditHtml(v.tags, v) + '</div></div>' +
@@ -5787,6 +5810,7 @@ function fillForm(x) {
   set('f-ing', x.ingredients); set('f-steps', x.steps); set('f-notes', x.notes); set('f-source', x.source);
   if (x.photo) { FORM.photoUrl = x.photo; FORM.photoData = ''; }
   refreshTagUI();
+  $$('textarea.grow').forEach(sizeBox);
 }
 
 /* ---------- the import box: says what it's doing, and folds away when done ---------- */
@@ -5872,6 +5896,7 @@ function sizeBox(t) {
   var want = Math.round(Math.min(max, Math.max(t.scrollHeight + lh * 2, minH))) + 'px';
   t.style.height = want === was ? was : want;
   if (sb) sb.scrollTop = st;          // measuring must never move the page
+  syncHl(t);
 }
 /** Keep the box you're typing in on screen: nudge the editor just enough, never a jump. */
 function keepTyping(t) {
@@ -5914,6 +5939,86 @@ function showField(inp, how) {
   timer = setTimeout(settle, 320);    // no keyboard on the way (iPad keyboard, or already open): don't wait
   setTimeout(settle, 900);
 }
+
+/* ---------- sections in the ingredients and steps boxes (2.22) ----------
+   The boxes stay plain text (the same text that goes to your sheet). A title line is one that ends in ":"
+   (the same test the recipe page uses), and it shows as a highlighted band behind the text while you write. */
+var SEC_PLACEHOLDER = 'Section name';
+function secLabel(id, text) {
+  return '<div class="flabrow"><label for="' + id + '">' + text + '</label><button type="button" class="addsec" data-act="addsec" data-for="' + id + '">' + icon('plus') + 'Add a section</button></div>';
+}
+function hlBox(ta) { return '<div class="hlbox"><div class="hl" aria-hidden="true"><div class="hlin"></div></div>' + ta + '</div>'; }
+/** Redraw the bands behind a box: one row per line, title lines tinted. Copies the box's own type and size so the rows line up. */
+function syncHl(t) {
+  var box = t && t.parentNode; if (!box || !box.classList || !box.classList.contains('hlbox')) return;
+  var hl = box.firstChild, inner = hl && hl.firstChild; if (!inner) return;
+  var cs = getComputedStyle(t);
+  var st = inner.style;
+  st.font = cs.font; st.letterSpacing = cs.letterSpacing; st.lineHeight = cs.lineHeight; st.tabSize = cs.tabSize;
+  st.paddingTop = cs.paddingTop; st.paddingBottom = cs.paddingBottom; st.paddingLeft = cs.paddingLeft; st.paddingRight = cs.paddingRight;
+  st.width = t.clientWidth + 'px';                      // the space the text wraps in (no scrollbar)
+  var lines = t.value.split('\n'), key = lines.map(function (l) { return isHeaderLine(l) ? 1 : 0; }).join('') + '|' + t.value;
+  if (inner._key !== key) {
+    inner._key = key;
+    inner.innerHTML = lines.map(function (l) {
+      var h = l.trim() && isHeaderLine(l);
+      return '<div' + (h ? ' class="hd"' : '') + '>' + (l ? esc(l) : '<br>') + '</div>';
+    }).join('');
+  }
+  inner.style.transform = 'translateY(' + (-t.scrollTop) + 'px)';
+  box.classList.toggle('hasd', /\S:\s*$/m.test(t.value));
+}
+function syncAllHl() { $$('.hlbox > textarea').forEach(syncHl); }
+/** The line the caret is on: [start, end] of that line in the text. */
+function lineAt(v, pos) {
+  var a = v.lastIndexOf('\n', pos - 1) + 1, b = v.indexOf('\n', pos);
+  return [a, b < 0 ? v.length : b];
+}
+/** Put text into a box the way typing would (so Undo still works), then select part of it. */
+function typeInto(t, from, to, text, selA, selB) {
+  t.focus({ preventScroll: true });
+  t.setSelectionRange(from, to);
+  var ok = false;
+  try { ok = document.execCommand && document.execCommand('insertText', false, text); } catch (e) { ok = false; }
+  if (!ok || t.value.slice(from, from + text.length) !== text) {
+    t.setRangeText(text, from, to, 'end');
+    t.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  t.setSelectionRange(from + selA, from + selB);
+  syncHl(t); sizeBox(t); keepTyping(t);
+}
+/** "Add a section": a title line above the step or ingredient you're on (or right here on an empty line,
+    or below if you're at the end of a line), with its name selected so you can just type it. */
+function addSection(t) {
+  if (!t) return;
+  var v = t.value, focused = document.activeElement === t;
+  var pos = focused ? t.selectionStart : v.length;
+  var ln = lineAt(v, pos), line = v.slice(ln[0], ln[1]);
+  var title = SEC_PLACEHOLDER + ':';
+  if (!line.trim()) {
+    // an empty line: the title goes right here
+    typeInto(t, ln[0], ln[1], title, 0, SEC_PLACEHOLDER.length);
+  } else if (isHeaderLine(line) && focused) {
+    // already a title: just select its name to rename it
+    var lead = line.match(/^\s*/)[0].length, nm = line.trim().replace(/:$/, '');
+    t.setSelectionRange(ln[0] + lead, ln[0] + lead + nm.length); t.focus({ preventScroll: true });
+  } else if (!focused) {
+    // the box isn't open yet: a new section at the end
+    var end = v.replace(/\s+$/, '').length, gap = end ? '\n' : '';
+    typeInto(t, end, v.length, gap + title, gap.length, gap.length + SEC_PLACEHOLDER.length);
+  } else if (pos >= ln[1]) {
+    // at the end of a line: a new section on the next line
+    typeInto(t, ln[1], ln[1], '\n' + title, 1, 1 + SEC_PLACEHOLDER.length);
+  } else {
+    // the caret is in the middle of a line: the section starts with this line
+    typeInto(t, ln[0], ln[0], title + '\n', 0, SEC_PLACEHOLDER.length);
+  }
+}
+document.addEventListener('scroll', function (e) { var t = e.target; if (t && t.tagName === 'TEXTAREA' && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) syncHl(t); }, true);
+window.addEventListener('resize', function () { if ($('.hlbox')) syncAllHl(); });
+// keep the box focused (and the keyboard up) when the button is pressed
+document.addEventListener('pointerdown', function (e) { var b = e.target.closest && e.target.closest('.addsec'); if (b && document.activeElement && document.activeElement.id === b.getAttribute('data-for')) e.preventDefault(); }, true);
+document.addEventListener('mousedown', function (e) { var b = e.target.closest && e.target.closest('.addsec'); if (b && document.activeElement && document.activeElement.id === b.getAttribute('data-for')) e.preventDefault(); }, true);
 
 /** Shrink a phone photo before saving (big photos upload slowly and fill storage). */
 function shrinkPhoto(file, cb) {
@@ -7735,6 +7840,7 @@ document.addEventListener('touchstart', function () { }, { passive: true });   /
 
 var ACTIONS = {
   add: function () { if (once('add')) openEditor(null); },
+  addsec: function (t) { addSection($('#' + t.getAttribute('data-for'))); },
   install: function () { installApp(); },
   followopen: function () { UI.followOpen = true; var el = $('#followsec'); if (el) { el.innerHTML = followSectionHtml(); var u = $('#followurl'); if (u && isWide()) u.focus(); } },
   keys: function () { if (SHEET && SHEET.id === 'settings') closeSheet(true); openKeys(); },
