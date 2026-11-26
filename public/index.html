@@ -1204,6 +1204,25 @@ details.more .mb{padding:0 14px 4px}
 .hlbox .hlin > div{min-height:1em}
 .hlbox .hlin > .hd{margin:0 -12px;padding:0 12px;background:color-mix(in srgb,var(--ac) 13%,transparent);box-shadow:inset 4px 0 0 var(--ac)}
 .hlbox .hlin > .hd + .hd{box-shadow:inset 4px 0 0 var(--ac),0 -1px 0 var(--p1)}
+
+.sheetfix{border:1.5px solid var(--b1);border-radius:var(--r1);padding:12px 14px;margin:10px 0 14px;background:var(--p1)}
+.sheetfix p{margin:0 0 6px}
+.sheetfix ol{margin:0 0 12px;padding-left:1.2rem}
+.sheetfix li{margin:0 0 10px;line-height:1.45}
+.sheetfix li .btn{margin:6px 0 4px}
+.sheetfix code{font-size:.8125rem;background:var(--p2);padding:1px 4px;border-radius:4px}
+
+.pdfpages{display:flex;flex-direction:column;gap:12px}
+.pdfpages img{display:block;width:100%;max-width:520px;margin:0 auto;border-radius:6px;box-shadow:0 1px 0 rgba(0,0,0,.06),0 8px 24px -10px rgba(0,0,0,.35);background:#fff}
+
+.secbtns{display:inline-flex;gap:14px;align-items:flex-end;flex-wrap:wrap;justify-content:flex-end}
+.secbtns .linesec{color:var(--t2)}
+.secbtns .linesec[hidden]{display:none}
+.secsum{margin:6px 0 0;font-size:.8125rem;color:var(--t2);line-height:1.45}
+.secsum:empty{display:none}
+.secsum i{font-style:normal;color:var(--t3)}
+.secsum .ph{color:var(--bad)}
+a.btn{text-decoration:none}
 </style>
 </head>
 <body>
@@ -1324,14 +1343,17 @@ function plural(u, numText) {
 
 function isHeaderLine(line) {
   var s = String(line).trim();
+  if (/^\[[^\[\]]{1,60}\]:?$/.test(s)) return true;          // [Make the sauce] is always a section title
   return /:$/.test(s) && s.length <= 42 && !/^[-•*]/.test(s) && !/\.\s/.test(s) && !/^\d/.test(s);
 }
+/** "Sauce:" or "[Sauce]" → "Sauce" */
+function headerText(line) { return String(line).trim().replace(/:$/, '').replace(/^\[\s*([\s\S]*?)\s*\]$/, '$1').trim(); }
 
 /** One ingredient line → {h:true,text} or {amt, rest}. Scales by factor; metric converts cups/oz/lb. */
 function parseIngredient(line, factor, metric) {
   var raw = String(line).replace(/^\s*[-•*·]\s*/, '').trim();
   if (!raw) return null;
-  if (isHeaderLine(raw)) return { h: true, text: raw.replace(/:$/, '') };
+  if (isHeaderLine(raw)) return { h: true, text: headerText(raw) };
   factor = factor || 1;
   var m = raw.match(LEAD_RE);
   var amt = '', rest = raw;
@@ -1388,7 +1410,7 @@ function stepRows(text) {
       else { n++; last = { n: n, text: sub, subs: [] }; out.push(last); }
       return;
     }
-    if (isHeaderLine(s)) { out.push({ h: s.replace(/:$/, '') }); last = null; return; }
+    if (isHeaderLine(s)) { out.push({ h: headerText(s) }); last = null; return; }
     s = s.replace(/^(?:step\s*)?\d+[.)]\s+/i, '');
     n++; last = { n: n, text: s, subs: [] }; out.push(last);
   });
@@ -2503,7 +2525,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.22';
+var APP_VERSION = '2.24';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -2556,7 +2578,7 @@ function autoTagsFor(r) {
 
 function blankState() {
   return {
-    v: 1, recipes: [], cooked: [], plan: [], shop: [], pantry: [], fridge: [], prices: [], settings: clone(DEFAULT_SETTINGS), conn: { url: '', pass: '' }, emailReady: false,
+    v: 1, recipes: [], cooked: [], plan: [], shop: [], pantry: [], fridge: [], prices: [], settings: clone(DEFAULT_SETTINGS), conn: {}, emailReady: false, shortcutToken: '',
     outbox: [], pending: {}, preview: true, awaitSeed: false, sheetName: '', scriptV: 0, lastSync: 0, lastOpen: '', seedVersion: 0
   };
 }
@@ -2582,12 +2604,17 @@ function migrate(o) {
   st.plan = (o.plan || []).filter(function (e) { return e && e.id && e.rid && e.date; }).map(function (e) { e.meals = Math.max(1, +e.meals || 1); return e; });
   st.shop = (o.shop || []).filter(function (x) { return x && x.id && x.name; });
   ['pantry', 'fridge', 'prices'].forEach(function (k) { st[k] = (o[k] || []).filter(function (x) { return x && x.id && x.name; }); });
-  if (o.conn && o.conn.url) st.conn = { url: String(o.conn.url), pass: String(o.conn.pass || '') };
+  // 2.24: Supabase instead of the Google Sheet. An old sheet connection is let go; what's waiting to go up stays queued,
+  // and the first sign-in counts as a first look (your sheet copy moves in, then those changes go on top).
+  var fromSheet = false;
+  if (o.conn && o.conn.supa) ['supa', 'key', 'email', 'uid', 'access', 'refresh', 'exp', 'signedOut'].forEach(function (k) { if (o.conn[k] !== undefined) st.conn[k] = o.conn[k]; });
+  else if (o.conn && o.conn.url) fromSheet = true;
   st.outbox = Array.isArray(o.outbox) ? o.outbox.filter(function (op) { return op && op.op; }) : [];
   st.pending = o.pending && typeof o.pending === 'object' ? o.pending : {};
   st.preview = o.preview !== false && !o.lastSync;
   st.awaitSeed = !!o.awaitSeed;
-  ['sheetName', 'scriptV', 'lastSync', 'lastOpen', 'seedVersion', 'emailReady'].forEach(function (k) { if (o[k] !== undefined) st[k] = o[k]; });
+  ['sheetName', 'scriptV', 'lastSync', 'lastOpen', 'seedVersion', 'emailReady', 'shortcutToken'].forEach(function (k) { if (o[k] !== undefined) st[k] = o[k]; });
+  if (fromSheet) { st.preview = true; st.lastSync = 0; st.awaitSeed = false; st.sheetName = ''; st.wasSheet = true; }
   // recipes bundled with 1.0 get the new meal / main-ingredient tags (your own extra tags are kept)
   if (st.preview && (st.seedVersion || 0) < 2) {
     SEED.forEach(function (sr, i) {
@@ -2658,7 +2685,7 @@ var saveWarned = false;
 function save() {
   CACHE = {};
   return STORE.set(KEY, JSON.stringify(S)).catch(function () {
-    if (!saveWarned) { saveWarned = true; toast('Phone storage is full. Connect your sheet so photos can upload and free up space.'); }
+    if (!saveWarned) { saveWarned = true; toast('Phone storage is full. Sign in to Supabase (Settings) so photos can upload and free up space.'); }
   });
 }
 
@@ -2690,7 +2717,7 @@ function byIdIn(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id
 function $(sel, root) { return (root || document).querySelector(sel); }
 function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 function isWide() { return window.matchMedia('(min-width: 760px)').matches; }
-function connected() { return !!(S.conn.url && S.conn.pass); }
+function connected() { return !!(S.conn && S.conn.refresh && !S.conn.signedOut); }
 
 var LOCKS = {};
 /** Ignore repeat taps on the same action for a moment, so three fast taps save once. */
@@ -3224,34 +3251,195 @@ function tileHtml(r, cls) {
     (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy" onerror="var p=this.parentNode;this.remove();if(p)p.classList.remove(\'has-img\')">' : '') + '</span>';
 }
 
-/* ===================== talking to the Google Sheet ===================== */
-function request(body, slow) {
-  body.pass = S.conn.pass;
-  var ctrl = window.AbortController ? new AbortController() : null;
-  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, slow ? SLOW_TIMEOUT : REQ_TIMEOUT);
-  var url = S.conn.url, opts;
-  if (body.action === 'pull' || body.action === 'ping') {
-    url += (url.indexOf('?') >= 0 ? '&' : '?') + 'action=' + body.action + '&pass=' + encodeURIComponent(body.pass) + '&t=' + Date.now();
-    opts = { method: 'GET' };
-  } else {
-    // text/plain avoids a CORS preflight, which Apps Script can't answer
-    opts = { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'text/plain;charset=utf-8' } };
-  }
-  if (ctrl) opts.signal = ctrl.signal;
-  opts.redirect = 'follow';
-  return fetch(url, opts).then(function (res) {
-    return res.text().then(function (txt) {
-      clearTimeout(timer);
-      try { return JSON.parse(txt); }
-      catch (e) {
-        // Google returns a sign-in page when the script isn't shared with "Anyone"
-        return { ok: false, code: 'notjson', error: 'The sheet link answered with a web page instead of data. In the deployment, "Who has access" must be "Anyone".' };
-      }
+/* ===================== talking to Supabase (2.24) =====================
+   Your recipes live in your Supabase project, one row per recipe (or planned meal, shopping item…), and only
+   your account can read or change them. Changes go up one at a time from the queue, exactly as before. */
+var SUPA_DEFAULT = { url: 'https://drkddavnbumydkjcigmt.supabase.co', key: 'sb_publishable_DWEQiBj8UJW4stsz97hyGQ_p1jD06SQ' };
+var SUPA_V = 8;                   // stands in for the old script version, so the features that needed a newer script are on
+var SUPA_KINDS = { recipe: 1, cooked: 1, plan: 1, shop: 1, pantry: 1, fridge: 1, prices: 1, settings: 1 };
+function supaBase() { return String((S.conn && S.conn.supa) || SUPA_DEFAULT.url).replace(/\/+$/, ''); }
+function supaKey() { return (S.conn && S.conn.key) || SUPA_DEFAULT.key; }
+function supaRef() { var m = supaBase().match(/^https:\/\/([\w-]+)\.supabase\.co/); return m ? m[1] : ''; }
+function sessionFresh() { return !!S.conn.access && (S.conn.exp || 0) * 1000 > Date.now() + 60000; }
+
+/** The sign-in endpoints (they only need the project's public key). */
+function authCall(path, body) {
+  return fetch(supaBase() + '/auth/v1/' + path, { method: 'POST', headers: { apikey: supaKey(), 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function (res) { return res.json().catch(function () { return {}; }).then(function (j) { j = j || {}; j._status = res.status; return j; }); });
+}
+function keepSession(j) {
+  S.conn.access = j.access_token;
+  if (j.refresh_token) S.conn.refresh = j.refresh_token;
+  S.conn.exp = +j.expires_at || Math.floor(Date.now() / 1000) + (+j.expires_in || 3600);
+  if (j.user) { S.conn.uid = j.user.id; S.conn.email = j.user.email || S.conn.email; }
+  S.conn.signedOut = false;
+  save();
+}
+var REFRESHING = null;
+/** A fresh sign-in ticket (they last an hour). false = the account signed out for good; throws when offline. */
+function refreshSession() {
+  if (REFRESHING) return REFRESHING;
+  REFRESHING = authCall('token?grant_type=refresh_token', { refresh_token: S.conn.refresh }).then(function (j) {
+    REFRESHING = null;
+    if (j.access_token) { keepSession(j); return true; }
+    if (j._status >= 400 && j._status < 500) { S.conn.signedOut = true; save(); renderStatus(); return false; }
+    throw new Error('busy');
+  }, function (e) { REFRESHING = null; throw e; });
+  return REFRESHING;
+}
+
+/** Any call to Supabase as you. → { ok, data } or { ok: false, code, error } (codes as the sync expects). */
+function supaFetch(path, opts, slow) {
+  opts = opts || {};
+  var go = function (retry) {
+    return (sessionFresh() ? Promise.resolve(true) : refreshSession()).then(function (ok) {
+      if (!ok) return { ok: false, code: 'auth', error: 'You\'re signed out. Sign in again in Settings.' };
+      var ctrl = window.AbortController ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, slow ? SLOW_TIMEOUT : REQ_TIMEOUT);
+      var h = Object.assign({ apikey: supaKey(), Authorization: 'Bearer ' + S.conn.access }, opts.headers || {});
+      var o = { method: opts.method || 'GET', headers: h };
+      if (opts.body !== undefined) o.body = opts.body;
+      if (ctrl) o.signal = ctrl.signal;
+      return fetch(supaBase() + path, o).then(function (res) {
+        return res.text().then(function (t) {
+          clearTimeout(timer);
+          var data = null; try { data = t ? JSON.parse(t) : null; } catch (e) { data = t; }
+          if (res.ok) return { ok: true, data: data };
+          if (res.status === 401 && retry) { S.conn.exp = 0; return go(false); }
+          var msg = String((data && (data.message || data.msg || data.error_description || data.error)) || ('error ' + res.status));
+          if (res.status === 401) return { ok: false, code: 'auth', error: 'You\'re signed out. Sign in again in Settings.' };
+          if (data && /^(PGRST205|PGRST202|42P01|42883)$/.test(String(data.code || ''))) return { ok: false, code: 'setup', error: 'Supabase isn\'t set up for Sunday Table yet (see the setup guide).' };
+          if (res.status >= 500 || res.status === 429 || res.status === 408) return { ok: false, code: 'busy', reach: true, error: 'Supabase is busy right now (' + res.status + '). Trying again soon.' };
+          return { ok: false, code: 'bad', error: msg };
+        });
+      }, function (err) { clearTimeout(timer); throw err; });
     });
-  }, function (err) {
-    clearTimeout(timer);
-    return { ok: false, code: 'net', error: err && err.name === 'AbortError' ? 'The sheet took too long to answer.' : 'No connection.' };
+  };
+  return go(true).catch(function (err) {
+    var online = navigator.onLine !== false;
+    return { ok: false, code: 'net', reach: online, error: err && err.name === 'AbortError' ? 'Supabase took too long to answer.' : online ? 'Your phone is online, but Supabase didn\'t answer.' : 'No connection.' };
   });
+}
+function rest(path, opts, slow) { return supaFetch('/rest/v1/' + path, opts, slow); }
+function rpc(name, args) { return rest('rpc/' + name, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) }); }
+function pgList(ids) { return '(' + ids.map(function (i) { return '"' + String(i).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }).join(',') + ')'; }
+
+/** Save rows of one kind (200 at a time). ignoreDup: keep what's there (safe to send twice). */
+function putDocs(kind, items, ignoreDup) {
+  items = (items || []).filter(function (x) { return x && x.id !== undefined && x.id !== null && String(x.id) !== ''; });
+  if (!items.length) return Promise.resolve({ ok: true });
+  var rows = items.map(function (x) { return { user_id: S.conn.uid, kind: kind, id: String(x.id), data: x.data }; });
+  var chunks = []; for (var i = 0; i < rows.length; i += 200) chunks.push(rows.slice(i, i + 200));
+  var step = function (k) {
+    if (k >= chunks.length) return Promise.resolve({ ok: true });
+    return rest('docs?on_conflict=user_id,kind,id', {
+      method: 'POST', body: JSON.stringify(chunks[k]),
+      headers: { 'Content-Type': 'application/json', Prefer: 'resolution=' + (ignoreDup ? 'ignore' : 'merge') + '-duplicates,return=minimal' }
+    }, chunks.length > 1 || rows.length > 20).then(function (r) { return r.ok ? step(k + 1) : r; });
+  };
+  return step(0);
+}
+function dropDocs(kind, ids) {
+  ids = (ids || []).filter(function (x) { return x !== undefined && x !== null && String(x) !== ''; });
+  if (!ids.length) return Promise.resolve({ ok: true });
+  return rest('docs?kind=eq.' + kind + '&id=in.' + encodeURIComponent(pgList(ids)), { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+}
+function asDocs(list) { return (list || []).map(function (x) { return { id: x && x.id, data: x }; }); }
+
+/** Everything, the way the old sheet's "pull" answered. The first time, your Google Sheet copy moves in. */
+function supaPull() {
+  var all = [];
+  var claim = S.preview ? rpc('claim_seed').then(function (r) { if (r.ok && +r.data > 0) UI.claimed = +r.data; return r.code === 'net' || r.code === 'auth' ? r : { ok: true }; }) : Promise.resolve({ ok: true });
+  var page = function (from) {
+    return rest('docs?select=kind,id,data&order=kind,id&limit=1000&offset=' + from, {}, true).then(function (r) {
+      if (!r.ok) return r;
+      all = all.concat(r.data || []);
+      return (r.data || []).length === 1000 ? page(from + 1000) : { ok: true };
+    });
+  };
+  return claim.then(function (c) { return c.ok ? page(0) : c; }).then(function (r) {
+    if (!r.ok) return r;
+    var by = {}; Object.keys(SUPA_KINDS).forEach(function (k) { by[k] = []; });
+    all.forEach(function (d) { if (by[d.kind]) by[d.kind].push(d.data); });
+    var er = S.settings.weeklyEmail ? callFn({ action: 'ping' }).then(function (p) { return p.ok ? !!p.emailReady : S.emailReady; }) : Promise.resolve(S.emailReady);
+    return er.then(function (ready) {
+      return { ok: true, v: SUPA_V, name: S.conn.email || 'Supabase', recipes: by.recipe, cooked: by.cooked, plan: by.plan, shopping: by.shop,
+        pantry: by.pantry, fridge: by.fridge, prices: by.prices, settings: by.settings[0] || null, emailReady: ready };
+    });
+  });
+}
+/** Your time zone (for the Sunday email) and the private key for the Reminders Shortcut. */
+function saveProfile() {
+  var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { }
+  return rest('profile?on_conflict=user_id&select=shortcut_token', {
+    method: 'POST', body: JSON.stringify([{ user_id: S.conn.uid, tz: tz || 'America/Denver' }]),
+    headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=representation' }
+  }).then(function (r) {
+    if (r.ok && r.data && r.data[0]) { S.shortcutToken = r.data[0].shortcut_token || S.shortcutToken; save(); }
+    return r;
+  });
+}
+function supaPing() {
+  return supaFetch('/auth/v1/user', {}).then(function (r) {
+    if (!r.ok) return r;
+    if (r.data && r.data.email) S.conn.email = r.data.email;
+    return saveProfile().then(function (p) {
+      if (!p.ok) return p;
+      return { ok: true, v: SUPA_V, name: S.conn.email, emailReady: S.emailReady };
+    });
+  });
+}
+/** A recipe photo: into your "photos" folder in Supabase, then the recipe points at it. */
+function supaPhoto(body) {
+  var m = String(body.data || '').match(/^data:(image\/[\w.+-]+);base64,(.+)$/);
+  if (!m) return Promise.resolve({ ok: false, code: 'bad', error: 'No photo' });
+  var bin = atob(m[2]), arr = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  var ext = m[1] === 'image/png' ? 'png' : m[1] === 'image/webp' ? 'webp' : 'jpg';
+  var name = S.conn.uid + '/' + String(body.rid || 'recipe').replace(/[^\w-]/g, '') + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8) + '.' + ext;
+  return supaFetch('/storage/v1/object/photos/' + name, { method: 'POST', headers: { 'Content-Type': m[1], 'x-upsert': 'true', 'cache-control': 'max-age=31536000' }, body: arr }, true).then(function (r) {
+    if (!r.ok) return r;
+    var url = supaBase() + '/storage/v1/object/public/photos/' + name;
+    if (!body.rid) return { ok: true, url: url };
+    return rpc('set_recipe_photo', { rid: String(body.rid), url: url }).then(function (r2) { return r2.ok ? { ok: true, url: url } : r2; });
+  });
+}
+/** The server helper (website imports, blog posts, the Sunday email). */
+function callFn(body, slow) {
+  return supaFetch('/functions/v1/sunday', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }, slow).then(function (r) {
+    if (r.ok) return r.data && typeof r.data === 'object' ? r.data : { ok: false, code: 'bad', error: 'Unexpected answer' };
+    if (r.code === 'bad' && /not found|404/i.test(r.error || '')) return { ok: false, code: 'unknown', error: 'The "sunday" server function isn\'t set up in Supabase yet.' };
+    return r;
+  });
+}
+
+/** One change (or question) for Supabase, answered the way the old sheet script answered. */
+function request(body, slow) {
+  if (!connected()) return Promise.resolve({ ok: false, code: 'auth', error: 'Sign in first (Settings → Cloud backup).' });
+  var del = {};
+  switch (body.action) {
+    case 'ping': return supaPing();
+    case 'pull': return supaPull();
+    case 'upsert': return putDocs('recipe', [{ id: body.recipe && body.recipe.id, data: body.recipe }]);
+    case 'addMany':
+      return putDocs('recipe', asDocs(body.recipes), true).then(function (r) { return r.ok ? putDocs('cooked', asDocs(body.cooked), true) : r; });
+    case 'delete': return dropDocs('recipe', [body.id]);
+    case 'cook': return putDocs('cooked', [{ id: body.entry && body.entry.id, data: body.entry }]);
+    case 'uncook': return dropDocs('cooked', [body.id]);
+    case 'plan': return putDocs('plan', [{ id: body.entry && body.entry.id, data: body.entry }]);
+    case 'unplan': return dropDocs('plan', [body.id]);
+    case 'settings': return putDocs('settings', [{ id: 'main', data: body.settings || {} }]);
+    case 'shop':
+    case 'table':
+      var kind = body.action === 'shop' ? 'shop' : String(body.t || '');
+      if (!/^(shop|pantry|fridge|prices)$/.test(kind)) return Promise.resolve({ ok: false, code: 'bad', error: 'Unknown list: ' + kind });
+      (body.del || []).forEach(function (id) { del[id] = 1; });
+      return putDocs(kind, asDocs((body.items || []).filter(function (it) { return it && !del[it.id]; }), false))
+        .then(function (r) { return r.ok ? dropDocs(kind, body.del || []) : r; });
+    case 'photo': return supaPhoto(body);
+    case 'import': case 'feeds': case 'testEmail': return callFn(body, true);
+  }
+  return Promise.resolve({ ok: false, code: 'unknown', error: 'Not available with Supabase: ' + body.action });
 }
 
 var SYNCING = null, SYNC_TIMER = null, RETRY_MS = 15000;
@@ -3261,7 +3449,7 @@ function scheduleSync(ms) {
   SYNC_TIMER = setTimeout(sync, ms || 0);
 }
 
-function setSync(state, msg) { UI.syncState = state; UI.syncMsg = msg || ''; renderStatus(); }
+function setSync(state, msg) { if (state !== 'off') UI.syncReach = false; UI.syncState = state; UI.syncMsg = msg || ''; renderStatus(); }
 
 function sync() {
   clearTimeout(SYNC_TIMER);
@@ -3305,10 +3493,10 @@ function sendNext() {
 }
 
 function handleFail(res, op) {
-  if (res.code === 'net' || res.code === 'busy') { setSync('off', res.error); return false; }
-  if (res.code === 'auth') { setSync('err', 'Wrong passphrase. Check it in Settings.'); return false; }
-  if (res.code === 'notjson' || res.code === 'unknown') { setSync('err', res.code === 'unknown' ? 'Your sheet\'s script is out of date. Update it (see the setup guide).' : res.error); return false; }
-  // the sheet refused this one change for good: drop it so the rest can go through
+  if (res.code === 'net' || res.code === 'busy') { UI.syncReach = !!res.reach; setSync('off', res.error); return false; }
+  if (res.code === 'auth') { setSync('err', res.error || 'You\'re signed out. Sign in again in Settings.'); render(); return false; }
+  if (res.code === 'setup' || res.code === 'unknown') { setSync('err', res.error || 'Supabase isn\'t set up for Sunday Table yet.'); return false; }
+  // Supabase refused this one change for good: drop it so the rest can go through
   if (S.outbox[0] === op) S.outbox.shift();
   if (op.op === 'photo') delete S.pending[op.rid];
   save();
@@ -3340,12 +3528,12 @@ function opRequest(op) {
 function pull() {
   return request({ action: 'pull' }).then(function (res) {
     if (!res.ok) return handleFail(res, null);
-    if ((res.v || 0) < SCRIPT_MIN) { setSync('err', 'Your sheet\'s script is out of date. Update it (see the setup guide).'); return false; }
+    if ((res.v || 0) < SCRIPT_MIN) { setSync('err', 'Supabase isn\'t set up for Sunday Table yet.'); return false; }
     S.scriptV = res.v || 0;
     S.sheetName = res.name || '';
     var firstTime = S.preview;
     if (firstTime && !res.recipes.length && S.recipes.length) {
-      // brand-new sheet: keep what's on the phone until you choose to copy it up
+      // empty Supabase: keep what's on the phone until you choose to copy it up
       S.awaitSeed = true;
     }
     if (S.awaitSeed && !res.recipes.length) {
@@ -3380,35 +3568,59 @@ function pull() {
     save();
     applyAppearance();
     render();
-    if (sortMoved) setSettings({});              // tell the sheet about the new default once
+    if (sortMoved) setSettings({});              // save the new default once
     return true;
   });
 }
 
-/* ---------- connecting ---------- */
-function connect(url, pass) {
-  url = String(url || '').trim(); pass = String(pass || '').trim();
-  if (!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(url) && !/^https?:\/\/(localhost|127\.0\.0\.1)/.test(url)) {
-    return Promise.resolve({ ok: false, error: 'That doesn\'t look like the script link. It starts with https://script.google.com/ and ends with /exec.' });
+/* ---------- signing in ---------- */
+/** Sign in (or make the account) and bring everything up to date. mode: 'in' or 'new'. */
+function connect(email, pass, mode, url, key) {
+  email = String(email || '').trim(); pass = String(pass || '');
+  url = String(url || SUPA_DEFAULT.url).trim().replace(/\/+$/, ''); key = String(key || SUPA_DEFAULT.key).trim();
+  if (!/^\S+@\S+\.\S+$/.test(email)) return Promise.resolve({ ok: false, error: 'Type your email address.' });
+  if (pass.length < 6) return Promise.resolve({ ok: false, error: 'Passwords are at least 6 characters.' });
+  if (!/^https:\/\/[\w-]+\.supabase\.co$/.test(url) && !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(url)) {
+    return Promise.resolve({ ok: false, error: 'That doesn\'t look like a Supabase project link. It looks like https://abcd1234.supabase.co' });
   }
   var old = clone(S.conn);
-  S.conn = { url: url, pass: pass };
-  return request({ action: 'ping' }).then(function (res) {
-    if (!res.ok) { S.conn = old; return res; }
-    if ((res.v || 0) < SCRIPT_MIN) { S.conn = old; return { ok: false, error: 'That sheet has an older script (version ' + (res.v || 0) + '). Paste the new Code.gs and deploy a new version.' }; }
-    S.scriptV = res.v; S.sheetName = res.name || ''; S.emailReady = !!res.emailReady;
+  S.conn = { supa: url, key: key, email: email };
+  var ask = mode === 'new' ? authCall('signup', { email: email, password: pass }) : authCall('token?grant_type=password', { email: email, password: pass });
+  return ask.then(function (j) {
+    if (!j.access_token) {
+      S.conn = old;
+      if (mode === 'new' && j._status < 300) return { ok: false, confirm: true, error: 'Almost there: open the email from Supabase and tap the link to confirm, then come back here and tap Sign in.' };
+      var m = String(j.error_description || j.msg || j.message || j.error || '');
+      if (/not confirmed|confirm/i.test(m)) m = 'Your email isn\'t confirmed yet. Open the email from Supabase, tap the link, then tap Sign in.';
+      else if (/invalid login|invalid credentials|invalid_grant/i.test(m)) m = 'That email and password don\'t match. New here? Tap Create account.';
+      else if (/already registered|already been registered|already exists/i.test(m)) m = 'There\'s already an account for that email. Tap Sign in instead.';
+      else if (/signups? not allowed|signup is disabled/i.test(m)) m = 'New accounts are turned off for this project. Sign in with the account you made.';
+      else if (j._status === 429) m = 'Too many tries. Wait a minute and try again.';
+      return { ok: false, error: m || 'That didn\'t work (' + j._status + ').' };
+    }
+    keepSession(j);
+    delete S.wasSheet;
+    S.preview = true;            // look at Supabase before sending anything: your sheet copy moves in, or an empty project is offered what's here
     save();
-    return sync().then(function () { return { ok: true, name: res.name }; });
+    return supaPing().then(function (res) {
+      if (!res.ok) return res;
+      return sync().then(function () { return { ok: true, name: S.conn.email, claimed: UI.claimed || 0 }; });
+    });
+  }, function () {
+    S.conn = old;
+    return { ok: false, error: navigator.onLine === false ? 'No connection right now. Try again when you\'re online.' : 'Supabase didn\'t answer. Check the project link, or try again in a minute.' };
   });
 }
 
 function disconnect() {
-  S.conn = { url: '', pass: '' };
+  var c = S.conn || {};
+  if (c.access) { try { fetch(supaBase() + '/auth/v1/logout', { method: 'POST', headers: { apikey: supaKey(), Authorization: 'Bearer ' + c.access } }).catch(function () { }); } catch (e) { } }
+  S.conn = { supa: c.supa, key: c.key, email: c.email };
   S.preview = true; S.awaitSeed = false; UI.syncState = 'idle';
   save(); render();
 }
 
-/** Copy everything on the phone into an empty sheet. */
+/** Copy everything on the phone into an empty Supabase. */
 function copyToSheet() {
   var recipes = S.recipes.map(function (r) { var c = clone(r); if (/^data:/.test(c.photo)) c.photo = ''; return c; });
   S.awaitSeed = false;
@@ -3419,7 +3631,7 @@ function copyToSheet() {
   ['pantry', 'fridge', 'prices'].forEach(function (t) { if (S[t].length) more.push({ op: 'table', t: t, items: clone(S[t]), del: [] }); });
   S.outbox = [{ op: 'addMany', recipes: recipes, cooked: clone(S.cooked) }].concat(more, S.outbox);
   save();
-  toast('Copying ' + recipes.length + ' recipes to your sheet…');
+  toast('Copying ' + recipes.length + ' recipes to Supabase…');
   return sync();
 }
 
@@ -3431,7 +3643,7 @@ function startEmpty() {
 /* ---------- import from a link ---------- */
 /** Without the sheet: ask a free public page reader (r.jina.ai) for the page, then find the recipe in it here. */
 function readerImport(url) {
-  var nope = 'Couldn\'t get that page without your Google Sheet. Connect it in Settings (it gets past more websites), take screenshots of the recipe and use "Add photos, screenshots or files", or paste the recipe text below.';
+  var nope = 'Couldn\'t get that page. Sign in to Supabase in Settings (it gets past more websites), take screenshots of the recipe and use "Add photos, screenshots or files", or paste the recipe text below.';
   if (!window.fetch) return Promise.resolve({ ok: false, error: nope });
   var ctl = window.AbortController ? new AbortController() : null, timer = ctl && setTimeout(function () { ctl.abort(); }, 25000);
   return fetch('https://r.jina.ai/' + url, { headers: { 'X-Return-Format': 'html' }, signal: ctl ? ctl.signal : undefined }).then(function (res) {
@@ -3485,13 +3697,8 @@ function titleCase(s) {
   return s;
 }
 
-function backupToDrive() {
-  if (!connected()) return Promise.resolve({ ok: false, error: 'Connect your sheet first.' });
-  return request({ action: 'backup' }, true);
-}
-
 function testEmail() {
-  if (!connected()) return Promise.resolve({ ok: false, error: 'Connect your sheet first.' });
+  if (!connected()) return Promise.resolve({ ok: false, error: 'Sign in first (Settings → Cloud backup).' });
   return request({ action: 'testEmail' }, true);
 }
 
@@ -3593,10 +3800,12 @@ function renderHeader() {
 
 function statusInfo() {
   var n = S.outbox.length;
-  if (!connected()) return { cls: '', text: 'Not backed up', title: 'Only on this device. Tap to connect your Google Sheet.' };
-  if (S.awaitSeed) return { cls: 'wait', text: 'Sheet is empty', title: 'Choose what to do in Settings' };
+  if (!connected() && S.conn && S.conn.signedOut) return { cls: 'err', text: 'Signed out', title: 'Sign in again in Settings so your changes go up.' };
+  if (!connected()) return { cls: '', text: 'Not backed up', title: 'Only on this device. Tap to sign in to Supabase.' };
+  if (S.awaitSeed) return { cls: 'wait', text: 'Supabase is empty', title: 'Choose what to do in Settings' };
   if (UI.syncState === 'busy') return { cls: 'busy wait', text: n ? 'Saving ' + n + '…' : 'Syncing…', title: '' };
   if (UI.syncState === 'err') return { cls: 'err', text: 'Not syncing', title: UI.syncMsg };
+  if (UI.syncState === 'off' && UI.syncReach) return { cls: 'err', text: 'Not syncing', title: 'Your phone is online, but Supabase didn\'t answer. ' + (n ? n + ' change' + (n > 1 ? 's are' : ' is') + ' kept here until it does.' : '') };
   if (UI.syncState === 'off') return { cls: 'wait', text: n ? 'Offline, ' + n + ' waiting' : 'Offline', title: UI.syncMsg };
   if (n) return { cls: 'wait', text: n + ' waiting', title: '' };
   return { cls: 'ok', text: 'Saved', title: S.lastSync ? 'Last synced ' + new Date(S.lastSync).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '' };
@@ -3618,19 +3827,23 @@ function renderTabs() {
 /* ---------- recipes list ---------- */
 function bannerHtml() {
   if (!connected()) {
-    return '<div class="banner"><div class="wrap"><b>These recipes live only on this device for now.</b>Connect your Google Sheet to back them up.</div>' +
-      '<button class="btn sm primary act" data-act="settings" data-open="sheet">Connect</button></div>';
+    if (S.conn && S.conn.signedOut) return '<div class="banner"><div class="wrap"><b>You\'re signed out of Supabase.</b>Sign in again so your changes are backed up.</div>' +
+      '<button class="btn sm primary act" data-act="settings" data-open="sheet">Sign in</button></div>';
+    if (S.wasSheet) return '<div class="banner"><div class="wrap"><b>Sunday Table now saves to Supabase.</b>Sign in once and your recipes from the Google Sheet come with you.</div>' +
+      '<button class="btn sm primary act" data-act="settings" data-open="sheet">Sign in</button></div>';
+    return '<div class="banner"><div class="wrap"><b>These recipes live only on this device for now.</b>Sign in to Supabase to back them up.</div>' +
+      '<button class="btn sm primary act" data-act="settings" data-open="sheet">Sign in</button></div>';
   }
   if (S.awaitSeed) {
-    return '<div class="banner"><div class="wrap"><b>Your sheet "' + esc(S.sheetName) + '" is empty.</b>Copy the ' + S.recipes.length + ' recipes on this device into it?</div>' +
-      '<button class="btn sm primary act" data-act="copyseed">Copy to sheet</button></div>';
+    return '<div class="banner"><div class="wrap"><b>Your Supabase is empty.</b>Copy the ' + S.recipes.length + ' recipes on this device into it?</div>' +
+      '<button class="btn sm primary act" data-act="copyseed">Copy them</button></div>';
   }
   if (needsReadd()) {
     return '<div class="banner"><div class="wrap"><b>One step left to remove the blur at the top.</b>Re-add Sunday Table to your Home Screen once.</div>' +
       '<button class="btn sm primary act" data-act="readd">Show me</button></div>';
   }
   if (UI.syncState === 'err') {
-    return '<div class="banner"><div class="wrap"><b>Changes aren\'t reaching your sheet.</b>' + esc(UI.syncMsg) + '</div><button class="btn sm act" data-act="settings" data-open="sheet">Fix</button></div>';
+    return '<div class="banner"><div class="wrap"><b>Changes aren\'t reaching Supabase.</b>' + esc(UI.syncMsg) + '</div><button class="btn sm act" data-act="settings" data-open="sheet">Fix</button></div>';
   }
   return '';
 }
@@ -3649,11 +3862,10 @@ function needsReadd() {
 function openReadd() {
   var app = location.origin + location.pathname + (location.search || '');
   var body = '<div class="readd"><p>iPhone only picks up the solid top bar (no blur) when the app is added to the Home Screen, so do this once:</p><ol>' +
-    '<li>Check the header says <b>Saved</b>, so everything is in your sheet.</li>' +
-    '<li>Copy your sheet link (you\'ll need it in step 5):<div class="copyrow"><button class="btn sm" data-act="copytext" data-t="' + esc(S.conn && S.conn.url || '') + '">Copy sheet link</button></div></li>' +
+    '<li>Check the header says <b>Saved</b>, so everything is in Supabase.</li>' +
     '<li>Press and hold the Sunday Table icon on your Home Screen and remove it.</li>' +
     '<li>Open <code>' + esc(app) + '</code> in Safari, tap Share → <b>Add to Home Screen</b> → Add.<div class="copyrow"><button class="btn sm" data-act="copytext" data-t="' + esc(app) + '">Copy app link</button></div></li>' +
-    '<li>Open the new icon, then Settings → Google Sheet: paste the sheet link, type your passphrase, Connect. Your recipes, plan and look come back.</li></ol></div>';
+    '<li>Open the new icon, then Settings → Cloud backup and sign in. Your recipes, plan and look come back.</li></ol></div>';
   openSheet('readd', 'Re-add to Home Screen', body, '<button class="btn" data-act="readdoff">Not now</button><button class="btn primary" data-act="sheet-close">Got it</button>');
 }
 function renderList() {
@@ -4708,19 +4920,21 @@ function shareList() {
   else copyList();
 }
 /* ---------- a Shortcut that fetches the list itself: runs from Siri, a widget or an automation, in the background ---------- */
-var GROCERIES_SCRIPT = 7;
 function groceriesLink() {
-  var u = S.conn.url || '';
-  return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'action=groceries&clear=1&pass=' + encodeURIComponent(S.conn.pass || '');
+  return supaBase() + '/functions/v1/sunday?action=groceries&clear=1&token=' + encodeURIComponent(S.shortcutToken || '');
 }
 function bgRemindersHtml() {
-  if (!connected()) return '<p class="hint">This works once your Google Sheet is connected.</p>';
-  if ((S.scriptV || 0) < GROCERIES_SCRIPT) return '<p class="infobox">Update the sheet script to version ' + GROCERIES_SCRIPT + ' first (the setup guide shows how), then come back here.</p>';
-  return '<p class="hint" style="margin-top:0">A second Shortcut can fetch your list straight from your sheet, so it runs from Siri, a Home Screen widget or an automation without opening anything.</p>' +
-    '<div class="btnrow"><button class="btn sm primary" data-act="copygrocerylink">' + icon('link') + 'Copy the link for it</button><button class="btn sm" data-act="bgremhelp">How to set it up</button></div>';
+  if (!connected()) return '<p class="hint">This works once you\'re signed in (Settings → Cloud backup).</p>';
+  if (!S.shortcutToken) {
+    if (!UI.gettingToken) { UI.gettingToken = true; saveProfile().then(function () { UI.gettingToken = false; refreshSettings(); }); }
+    return '<p class="hint">Getting your link…</p>';
+  }
+  return '<p class="hint" style="margin-top:0">A second Shortcut can fetch your list straight from Supabase, so it runs from Siri, a Home Screen widget or an automation without opening anything.</p>' +
+    '<div class="btnrow"><button class="btn sm primary" data-act="copygrocerylink">' + icon('link') + 'Copy the link for it</button><button class="btn sm" data-act="bgremhelp">How to set it up</button></div>' +
+    '<p class="hint">If you made this Shortcut before (with the Google Sheet link), paste this new link into its Get Contents of URL step. <button class="linkbtn" data-act="newgrocerylink" data-confirm="1">Make a new link</button> if the old one got out.</p>';
 }
 function openBgRemindersHelp() {
-  var body = '<p>This Shortcut gets your list from your Google Sheet by itself, so nothing has to open. Make it once:</p><ol class="howto">' +
+  var body = '<p>This Shortcut gets your list from Supabase by itself, so nothing has to open. Make it once:</p><ol class="howto">' +
     '<li>In Sunday Table, tap <b>Copy the link for it</b> (Settings → Shopping).</li>' +
     '<li>In <b>Shortcuts</b>, tap <b>+</b>. Add <b>Get Contents of URL</b> and paste the link into it.</li>' +
     '<li>Add <b>Split Text</b> (it splits the contents by New Lines).</li>' +
@@ -4730,7 +4944,7 @@ function openBgRemindersHelp() {
     '<li>Say "Hey Siri, Groceries".</li>' +
     '<li>Add a <b>Shortcuts widget</b> to your Home Screen and tap it. It runs right there.</li>' +
     '<li>Or make it automatic: in Shortcuts → <b>Automation</b> → <b>+</b>, pick a time (say, Saturday 9 am) or arriving at your store, choose this shortcut, and set it to <b>Run Immediately</b>.</li></ul>' +
-    '<p class="muted">The items it sends come off Sunday Table\'s list, so nothing gets added twice. The link includes your sheet passphrase, so keep it to yourself.</p>';
+    '<p class="muted">The items it sends come off Sunday Table\'s list, so nothing gets added twice. The link includes a private key to your list, so keep it to yourself.</p>';
   openSheet('remhelp', 'Send to Reminders in the background', body, '<button class="btn primary" data-act="sheet-close">Done</button>');
 }
 function openRemindersHelp() {
@@ -5205,7 +5419,7 @@ function followSite(raw) {
   var follows = S.settings.follows || [];
   if (follows.some(function (f) { return siteKey(f.url) === siteKey(url) || (f.feed && siteKey(f.feed) === siteKey(url)); })) { msg('You already follow that site.', false); return; }
   var why = feedBlocker();
-  if (why) { msg(why === 'connect' ? 'Connect your Google Sheet first (Settings → Google Sheet): it fetches the posts.' : 'Your sheet\'s script needs updating to version 6 first. See Settings → Google Sheet.', true); return; }
+  if (why) { msg(why === 'connect' ? 'Sign in to Supabase first (Settings → Cloud backup): it fetches the posts.' : 'Sign in to Supabase first (Settings → Cloud backup).', true); return; }
   var btn = $('[data-act="follow"]'); if (btn) { btn.disabled = true; btn.textContent = 'Looking…'; }
   msg('Looking for new recipes on ' + url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '') + '…');
   return request({ action: 'feeds', sites: [url] }, true).then(function (res) {
@@ -5294,8 +5508,7 @@ function followSectionHtml() {
     return h + '<section class="card followcta"><p>Follow your favorite food blogs and their new recipes show up here. Add one with a tap.</p>' + followForm() + picksHtml(4) + '</section>';
   }
   var posts = feedPosts(), F = feedsLoad(), more = UI.postsAll ? posts.length : 8;
-  if (why === 'connect') h += '<p class="dhint">Connect your Google Sheet (Settings → Google Sheet) to check for new posts.</p>';
-  else if (why === 'script') h += '<p class="dhint">Update your sheet\'s script to version 6 to check for new posts (Settings → Google Sheet).</p>';
+  if (why) h += '<p class="dhint">Sign in to Supabase (Settings → Cloud backup) to check for new posts.</p>';
   else if (FEED_BUSY) h += '<p class="dhint"><span class="spin" aria-hidden="true"></span> Checking ' + follows.length + ' site' + (follows.length > 1 ? 's' : '') + ' for new recipes…</p>';
   else if (FEED_ERR === 'offline') h += '<p class="dhint">You\'re offline. These are from the last check.</p>';
   var bad = follows.filter(function (f) { var s = F.sites[siteKey(f.url)]; return s && !s.ok; });
@@ -5359,7 +5572,7 @@ function openShare(id) {
   var body = '<div class="sharelist">' +
     '<button class="shareopt" data-act="sharetext" data-id="' + esc(id) + '">' + icon('list') + '<span><b>Send the recipe as text</b><span>Ingredients and steps in a message or email.</span></span></button>' +
     '<button class="shareopt" data-act="sharelink" data-id="' + esc(id) + '">' + icon('link') + '<span><b>Send a link</b><span>Opens a page with just this recipe, photo included. Your other recipes stay private.</span></span></button>' +
-    '<button class="shareopt" data-act="print" data-id="' + esc(id) + '">' + icon('book') + '<span><b>Print or save as PDF</b><span>A one-page recipe card.</span></span></button></div>';
+    '<button class="shareopt" data-act="print" data-id="' + esc(id) + '">' + icon('book') + '<span><b>Send as a PDF</b><span>A printable recipe card, ready to text, email or save to Files.</span></span></button></div>';
   openSheet('share', 'Share ' + r.title, body);
 }
 
@@ -5418,7 +5631,7 @@ function showShared(code) {
     $('#app').innerHTML = '<header class="hdr"><h1>' + esc(r.title) + '</h1></header><main class="sharedmain"><div class="detailpane" id="detailpane"></div></main>';
     renderDetail();
     var acts = $('#detailpane .actions');
-    if (acts) acts.innerHTML = '<button class="btn primary" data-act="print" data-id="shared">' + icon('book') + 'Print</button>' +
+    if (acts) acts.innerHTML = '<button class="btn primary" data-act="print" data-id="shared">' + icon('book') + 'PDF</button>' +
       '<button class="btn" data-act="sharetext" data-id="shared">' + icon('list') + 'Copy as text</button>' +
       (own ? '<button class="btn" data-act="saveshared">' + icon('plus') + 'Add to my recipes</button>' : '');
     $$('#detailpane .act2, #detailpane .colblock, #detailpane .dbar, #detailpane .ratingblock').forEach(function (x) { x.remove(); });
@@ -5448,6 +5661,202 @@ function printRecipe(r) {
 // iPhone fires "afterprint" unreliably (sometimes before the print preview is drawn),
 // so the card stays the print target until the next tap anywhere in the app
 document.addEventListener('pointerdown', function () { if (document.body.classList.contains('printing')) setTimeout(function () { document.body.classList.remove('printing'); }, 0); }, true);
+
+/* ===================== a PDF recipe card, made right here (2.23) =====================
+   iPhone ignores "print" in a Home Screen app, so the card is drawn on a canvas (in your fonts, Vietnamese
+   accents and all), each page turned into a picture, and the pictures wrapped in a small PDF file you can send. */
+var PDF_W = 1275, PDF_H = 1650, PDF_M = 96;            // US Letter at 150 dots per inch, 0.64 in margins
+var PDF = null;                                         // { file, url, rid, pages: [dataURL] }
+function pdfFonts() {
+  var f = FONTS[S.settings.fonts] || FONTS.cookbook;
+  return { disp: f.disp, body: f.body };
+}
+/** Words in mixed styles → lines that fit the width. runs: [{t, f, c}] */
+function pdfWrap(x, runs, width) {
+  var words = [];
+  runs.forEach(function (r) {
+    String(r.t).split(/(\s+)/).forEach(function (w) { if (w) words.push({ t: w, f: r.f, c: r.c, sp: /^\s+$/.test(w) }); });
+  });
+  var lines = [], line = [], w = 0;
+  var push = function () { while (line.length && line[line.length - 1].sp) line.pop(); lines.push(line); line = []; w = 0; };
+  words.forEach(function (wd) {
+    x.font = wd.f; var ww = x.measureText(wd.sp ? ' ' : wd.t).width;
+    if (wd.sp) { if (line.length) { line.push({ t: ' ', f: wd.f, c: wd.c, sp: true, w: ww }); w += ww; } return; }
+    if (w + ww > width && line.length) push();
+    if (ww > width) {                                    // one very long word: break it
+      var part = '';
+      for (var i = 0; i < wd.t.length; i++) {
+        var nx = part + wd.t[i];
+        if (x.measureText(nx).width > width && part) { line.push({ t: part, f: wd.f, c: wd.c, w: x.measureText(part).width }); push(); part = wd.t[i]; }
+        else part = nx;
+      }
+      wd = { t: part, f: wd.f, c: wd.c }; ww = x.measureText(part).width;
+    }
+    line.push({ t: wd.t, f: wd.f, c: wd.c, w: ww }); w += ww;
+  });
+  if (line.length) push();
+  return lines;
+}
+function pdfDrawLine(x, line, left, base) {
+  var at = left;
+  line.forEach(function (s) { x.font = s.f; x.fillStyle = s.c; if (!s.sp) x.fillText(s.t, at, base); at += s.w; });
+}
+/** Lay the recipe out as blocks with heights, then deal them onto pages. */
+function pdfPages(r) {
+  var F = pdfFonts(), pal = (PALETTES[S.settings.palette] || PALETTES.espresso).light;
+  var INK = '#1F1A17', SOFT = '#5E5650', AC = pal.ac, RULE = '#D9D2CA';
+  var f = scaleFor(r), ings = ingredientRows(r.ingredients, f, S.settings.units === 'metric'), steps = stepRows(r.steps);
+  var cv = document.createElement('canvas'); cv.width = PDF_W; cv.height = PDF_H;
+  var x = cv.getContext('2d'); x.textBaseline = 'alphabetic';
+  var W = PDF_W - PDF_M * 2;
+  var body = '400 25px ' + F.body, bold = '700 25px ' + F.body, small = '400 21px ' + F.body;
+  var LH = 38, blocks = [];
+  // each block: { h, draw(x, top), keep } ; keep = stays with the next block (titles)
+  var text = function (runs, indent, lh, gapAfter) {
+    var lines = pdfWrap(x, runs, W - indent);
+    return { h: lines.length * lh + (gapAfter || 0), draw: function (x, top) { lines.forEach(function (l, i) { pdfDrawLine(x, l, PDF_M + indent, top + (i + 1) * lh - lh * 0.28); }); } };
+  };
+  // title and what it makes
+  var tl = pdfWrap(x, [{ t: r.title, f: '400 60px ' + F.disp, c: INK }], W);
+  blocks.push({ h: tl.length * 70 + 8, draw: function (x, top) { tl.forEach(function (l, i) { pdfDrawLine(x, l, PDF_M, top + (i + 1) * 70 - 16); }); } });
+  var meta = [];
+  if (r.servings) meta.push(servingsText(r, f));
+  if (totalTime(r)) meta.push(minutes(totalTime(r)));
+  if (meta.length) blocks.push(text([{ t: meta.join('  ·  '), f: small, c: SOFT }], 0, 32, 4));
+  blocks.push({ h: 34, draw: function (x, top) { x.fillStyle = AC; x.fillRect(PDF_M, top + 12, 120, 5); } });
+  var heading = function (t) {
+    return { h: 72, keep: true, draw: function (x, top) { x.font = '400 40px ' + F.disp; x.fillStyle = INK; x.fillText(t, PDF_M, top + 50); } };
+  };
+  var section = function (t) {
+    var lines = pdfWrap(x, [{ t: t, f: '400 31px ' + F.disp, c: INK }], W - 22);
+    return { h: lines.length * 40 + 22, keep: true, draw: function (x, top) {
+      x.fillStyle = AC; x.fillRect(PDF_M, top + 12, 6, lines.length * 40 - 4);
+      lines.forEach(function (l, i) { pdfDrawLine(x, l, PDF_M + 22, top + 10 + (i + 1) * 40 - 10); });
+      var lw = x.measureText(t).width;
+      if (lines.length === 1 && PDF_M + 22 + lw + 24 < PDF_M + W) { x.fillStyle = RULE; x.fillRect(PDF_M + 22 + lw + 18, top + 32, W - 22 - lw - 18, 2); }
+    } };
+  };
+  if (ings.length) {
+    blocks.push(heading('Ingredients'));
+    ings.forEach(function (it, i) {
+      if (it.h) { blocks.push(section(it.text)); return; }
+      var runs = it.amt ? [{ t: it.amt + ' ', f: bold, c: INK }, { t: it.rest, f: body, c: INK }] : [{ t: it.rest, f: body, c: INK }];
+      var b = text(runs, 34, LH, 8), d = b.draw;
+      b.draw = function (x, top) { x.strokeStyle = '#9C928A'; x.lineWidth = 2; x.strokeRect(PDF_M + 2, top + 10, 18, 18); d(x, top); };
+      blocks.push(b);
+    });
+    blocks.push({ h: 26, draw: function () { } });
+  }
+  if (steps.length) {
+    blocks.push(heading('Steps'));
+    steps.forEach(function (s) {
+      if (s.h) { blocks.push(section(s.h)); return; }
+      var b = text([{ t: prettyFractions(scaleText(s.text, f, false)), f: body, c: INK }], 56, LH, 6), d = b.draw, n = s.n;
+      b.draw = function (x, top) { x.font = '400 32px ' + F.disp; x.fillStyle = AC; x.fillText(String(n), PDF_M, top + LH - LH * 0.28 + 2); d(x, top); };
+      blocks.push(b);
+      s.subs.forEach(function (sub) {
+        var sb = text([{ t: prettyFractions(sub), f: body, c: SOFT }], 92, LH, 4), sd = sb.draw;
+        sb.draw = function (x, top) { x.fillStyle = SOFT; x.beginPath(); x.arc(PDF_M + 72, top + LH / 2 + 1, 4, 0, Math.PI * 2); x.fill(); sd(x, top); };
+        blocks.push(sb);
+      });
+      blocks[blocks.length - 1].h += 8;
+    });
+  }
+  if (r.notes) {
+    blocks.push({ h: 20, draw: function () { } });
+    blocks.push(heading('Notes'));
+    String(prettyFractions(r.notes)).split(/\n/).forEach(function (p) { if (p.trim()) blocks.push(text([{ t: p, f: body, c: INK }], 0, LH, 8)); });
+  }
+  // deal onto pages (a section title never sits alone at the bottom of a page)
+  var bottom = PDF_H - PDF_M - 40, pages = [[]], y = PDF_M;
+  blocks.forEach(function (b, i) {
+    var need = b.h;
+    if (b.keep && blocks[i + 1]) need += blocks[i + 1].h;
+    if (y + need > bottom && pages[pages.length - 1].length) { pages.push([]); y = PDF_M; }
+    pages[pages.length - 1].push({ b: b, y: y }); y += b.h;
+  });
+  return pages.map(function (pg, pi) {
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, PDF_W, PDF_H);
+    pg.forEach(function (it) { it.b.draw(x, it.y); });
+    x.font = small; x.fillStyle = '#8A817A'; x.textAlign = 'left';
+    x.fillText((S.settings.appName || 'Sunday Table'), PDF_M, PDF_H - PDF_M + 10);
+    if (pages.length > 1) { x.textAlign = 'right'; x.fillText((pi + 1) + ' of ' + pages.length, PDF_W - PDF_M, PDF_H - PDF_M + 10); x.textAlign = 'left'; }
+    return cv.toDataURL('image/jpeg', 0.88);
+  });
+}
+/** JPEG pages → a PDF file (one picture per Letter-size page). */
+function pdfFromJpegs(jpegs, title) {
+  var enc = new TextEncoder(), parts = [], len = 0, offs = [];
+  var add = function (p) { var b = typeof p === 'string' ? enc.encode(p) : p; parts.push(b); len += b.length; };
+  var obj = function (n, head, stream) {
+    offs[n] = len;
+    add(n + ' 0 obj\n' + head);
+    if (stream) { add('\nstream\n'); add(stream); add('\nendstream'); }
+    add('\nendobj\n');
+  };
+  var n = jpegs.length, kids = [];
+  for (var i = 0; i < n; i++) kids.push((3 + i * 3) + ' 0 R');
+  add('%PDF-1.4\n%âãÏÓ\n');
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + n + ' >>');
+  jpegs.forEach(function (d, i) {
+    var bin = atob(d.split(',')[1]), img = new Uint8Array(bin.length);
+    for (var k = 0; k < bin.length; k++) img[k] = bin.charCodeAt(k);
+    var p = 3 + i * 3, draw = 'q 612 0 0 792 0 0 cm /Im0 Do Q';
+    obj(p, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 ' + (p + 2) + ' 0 R >> >> /Contents ' + (p + 1) + ' 0 R >>');
+    obj(p + 1, '<< /Length ' + draw.length + ' >>', enc.encode(draw));
+    obj(p + 2, '<< /Type /XObject /Subtype /Image /Width ' + PDF_W + ' /Height ' + PDF_H + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + img.length + ' >>', img);
+  });
+  var total = 3 + n * 3, xref = len;
+  var t = 'xref\n0 ' + total + '\n0000000000 65535 f \n';
+  for (var j = 1; j < total; j++) t += String(offs[j]).padStart(10, '0') + ' 00000 n \n';
+  var info = String(title || 'Recipe').replace(/[()\\]/g, '').replace(/[^\x20-\x7e]/g, '');
+  add(t + 'trailer\n<< /Size ' + total + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+  return new Blob(parts, { type: 'application/pdf' });
+}
+function pdfName(r) {
+  return (String(r.title || 'Recipe').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, ' ') || 'Recipe') + '.pdf';
+}
+/** Make the PDF (fonts first, so accents come out right), then show it with a Send button. */
+function openPdf(r) {
+  if (!r) return;
+  if (SHEET) closeSheet(true);
+  var el = openSheet('pdf', 'PDF of ' + r.title, '<div id="pdfbody" class="pdfbody"><p class="muted">Making the PDF…</p></div>', '');
+  var F = pdfFonts(), sample = r.title + ' ' + (r.ingredients || '').slice(0, 300) + ' Ăăâêôơưđ';
+  var loads = [];
+  if (document.fonts && document.fonts.load) {
+    ['400 60px ' + F.disp, '400 25px ' + F.body, '700 25px ' + F.body].forEach(function (fs) { loads.push(document.fonts.load(fs, sample).catch(function () { })); });
+  }
+  var timeout = new Promise(function (res) { setTimeout(res, 2500); });
+  Promise.race([Promise.all(loads), timeout]).then(function () {
+    if (!SHEET || SHEET.id !== 'pdf') return;
+    var pages = pdfPages(r), blob = pdfFromJpegs(pages, r.title);
+    if (PDF && PDF.url) URL.revokeObjectURL(PDF.url);
+    var name = pdfName(r), file = null;
+    try { file = new File([blob], name, { type: 'application/pdf' }); } catch (e) { }
+    PDF = { blob: blob, file: file, name: name, url: URL.createObjectURL(blob), rid: r.id, pages: pages };
+    var canSend = !!(file && navigator.canShare && navigator.canShare({ files: [file] }));
+    var b = $('#pdfbody'); if (!b) return;
+    b.innerHTML = '<div class="pdfpages">' + pages.map(function (p, i) { return '<img src="' + p + '" alt="Page ' + (i + 1) + '">'; }).join('') + '</div>' +
+      '<p class="muted small" style="margin:10px 0 0">' + pages.length + ' page' + (pages.length > 1 ? 's' : '') + ', ' + Math.max(1, Math.round(blob.size / 1024)) + ' KB' +
+      (scaleFor(r) !== 1 ? ', with amounts for ' + esc(servingsText(r, scaleFor(r))) : '') + '.</p>';
+    var foot = (canSend ? '<button class="btn primary" data-act="pdfsend">' + icon('up') + 'Send PDF</button>' : '') +
+      '<a class="btn' + (canSend ? '' : ' primary') + '" href="' + PDF.url + '" download="' + esc(name) + '">' + icon('dl') + (canSend ? 'Save' : 'Download PDF') + '</a>' +
+      (isDesk() ? '<button class="btn" data-act="pdfprint" data-id="' + esc(r.id || '') + '">Print</button>' : '');
+    var f = SHEET && $('.sh-f', SHEET.el), sb = SHEET && $('.sh-b', SHEET.el);
+    if (!f && sb) { f = document.createElement('div'); f.className = 'sh-f'; sb.parentNode.insertBefore(f, sb.nextSibling); }
+    if (f) f.innerHTML = foot;
+  });
+  return el;
+}
+function sendPdf() {
+  if (!PDF || !PDF.file) return;
+  navigator.share({ files: [PDF.file], title: PDF.name.replace(/\.pdf$/, '') }).catch(function (e) {
+    if (e && e.name === 'AbortError') return;
+    // some apps refuse a file with a title: try once more with the file alone
+    navigator.share({ files: [PDF.file] }).catch(function () { toast('Couldn\'t open the share sheet. Use Save instead.'); });
+  });
+}
 
 /* ===================== collections ===================== */
 function openNewCollection(forId) {
@@ -5660,9 +6069,9 @@ function openEditor(id, draft, focusField) {
     '<div class="field"><label for="f-cook">Cook time</label><input class="inp" id="f-cook" value="' + esc(minutes(v.cook)) + '" autocomplete="off" placeholder="1 hr 30 min" data-dur="1"></div></div>' +
     '<p class="hint" style="margin:-8px 0 12px">Times: type minutes (45), hours and minutes (1:30), or words (2 hr 15 min).</p>' +
     '<div class="field">' + secLabel('f-ing', 'Ingredients') + hlBox('<textarea class="inp grow" id="f-ing" rows="10" placeholder="One per line, like:\n2 cups flour\n1 tsp salt\n\nSauce:\n2 tbsp soy sauce">' + esc(v.ingredients) + '</textarea>') +
-    '<p class="hint">One per line, amount first. Split it into parts (like the sauce and the chicken) with <b>Add a section</b>. A section title ends in ":" and shows highlighted.</p></div>' +
+    '<p class="hint">One per line, amount first. To split it into parts (like the sauce and the chicken), tap <b>Add a section</b> and type over <b>Add title here</b>. Titles show highlighted.</p></div>' +
     '<div class="field">' + secLabel('f-steps', 'Steps') + hlBox('<textarea class="inp grow" id="f-steps" rows="10" placeholder="One step per line\n\nMake the sauce:\nWhisk everything together.">' + esc(v.steps) + '</textarea>') +
-    '<p class="hint">One step per line. <b>Add a section</b> puts a title above the step you\'re on, like "Make the sauce:". Start a line with a dash (-) for a tip under the step above. Times like "10 min" become tap-to-start timers.</p></div>' +
+    '<p class="hint">One step per line. Put your cursor on the step where a new part starts, tap <b>Add a section</b>, and type over <b>Add title here</b>. Or tap a line and choose <b>Make this line a title</b>. Start a line with a dash (-) for a tip under the step above.</p></div>' +
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp grow" id="f-notes" rows="4" style="min-height:110px" placeholder="Less salt next time…">' + esc(v.notes) + '</textarea></div>' +
     '<div class="field"><span class="flabel" id="taglbl">Tags</span><input class="sr" id="f-tags" value="' + esc(v.tags.join(', ')) + '" tabindex="-1" aria-hidden="true">' +
     '<div class="tagedit" id="tagedit" aria-labelledby="taglbl">' + tagEditHtml(v.tags, v) + '</div></div>' +
@@ -5780,12 +6189,13 @@ function parseDur(s) {
   return t || '';
 }
 
+function dropPlaceholders(v) { return String(v).split('\n').filter(function (l) { return l.trim() !== '[' + SEC_PLACEHOLDER + ']'; }).join('\n').replace(/\s+$/, ''); }
 function readForm() {
   var g = function (id) { var e = $('#' + id); return e ? e.value : ''; };
   return {
     id: FORM.id, title: g('f-title').trim(), servings: numOr(g('f-serv')), unit: /^(people|persons?|servings?|serves)$/i.test(g('f-unit').trim()) ? '' : g('f-unit').trim(), prep: numOr(parseDur(g('f-prep'))), cook: numOr(parseDur(g('f-cook'))),
     tags: g('f-tags').split(',').map(function (t) { return t.trim(); }).filter(Boolean),
-    ingredients: g('f-ing').replace(/\s+$/, ''), steps: g('f-steps').replace(/\s+$/, ''), notes: g('f-notes').replace(/\s+$/, ''),
+    ingredients: dropPlaceholders(g('f-ing')), steps: dropPlaceholders(g('f-steps')), notes: g('f-notes').replace(/\s+$/, ''),
     source: g('f-source').trim(), photo: FORM.photoData ? '' : (g('f-photourl').trim() || ''), _photoData: FORM.photoData,
     freq: g('f-freq'), keeps: numOr(g('f-keeps')), freezes: !!($('#f-freezes') && $('#f-freezes').checked), color: FORM.color || ''
   };
@@ -5943,11 +6353,52 @@ function showField(inp, how) {
 /* ---------- sections in the ingredients and steps boxes (2.22) ----------
    The boxes stay plain text (the same text that goes to your sheet). A title line is one that ends in ":"
    (the same test the recipe page uses), and it shows as a highlighted band behind the text while you write. */
-var SEC_PLACEHOLDER = 'Section name';
+var SEC_PLACEHOLDER = 'Add title here';
 function secLabel(id, text) {
-  return '<div class="flabrow"><label for="' + id + '">' + text + '</label><button type="button" class="addsec" data-act="addsec" data-for="' + id + '">' + icon('plus') + 'Add a section</button></div>';
+  return '<div class="flabrow"><label for="' + id + '">' + text + '</label><span class="secbtns">' +
+    '<button type="button" class="addsec linesec" data-act="linesec" data-for="' + id + '" hidden></button>' +
+    '<button type="button" class="addsec" data-act="addsec" data-for="' + id + '">' + icon('plus') + 'Add a section</button></span></div>';
 }
-function hlBox(ta) { return '<div class="hlbox"><div class="hl" aria-hidden="true"><div class="hlin"></div></div>' + ta + '</div>'; }
+function hlBox(ta) {
+  var id = (ta.match(/id="([^"]+)"/) || [])[1] || '';
+  return '<div class="hlbox"><div class="hl" aria-hidden="true"><div class="hlin"></div></div>' + ta + '</div><p class="secsum" id="secsum-' + id + '" aria-live="polite"></p>';
+}
+/** Under the box: the sections it will show, so you can see they took. */
+function secSummary(t) {
+  var el = document.getElementById('secsum-' + t.id); if (!el) return;
+  var isSteps = t.id === 'f-steps', secs = [], cur = null, loose = 0;
+  t.value.split('\n').forEach(function (l) {
+    var s = l.trim(); if (!s) return;
+    if (isHeaderLine(s)) { cur = { n: headerText(s), c: 0 }; secs.push(cur); return; }
+    if (isSteps && /^[-•*]/.test(s)) return;                  // tips aren't steps
+    if (cur) cur.c++; else loose++;
+  });
+  if (!secs.length) { el.innerHTML = ''; return; }
+  var word = isSteps ? ['step', 'steps'] : ['item', 'items'];
+  el.innerHTML = '<b>' + secs.length + ' section' + (secs.length > 1 ? 's' : '') + ':</b> ' + secs.map(function (x) {
+    var ph = x.n === SEC_PLACEHOLDER;
+    return '<span class="' + (ph ? 'ph' : '') + '">' + esc(x.n) + ' <i>(' + x.c + ' ' + word[x.c === 1 ? 0 : 1] + ')</i></span>';
+  }).join(' · ') + (loose ? ' <span class="muted">· ' + loose + ' ' + word[loose === 1 ? 0 : 1] + ' before the first section</span>' : '');
+}
+/** The second button follows the caret: turn the line you're on into a title, or back into a normal line. */
+function updateSecBtns(t) {
+  var b = t && document.querySelector('.linesec[data-for="' + t.id + '"]'); if (!b) return;
+  if (document.activeElement !== t) { b.hidden = true; return; }
+  var v = t.value, ln = lineAt(v, t.selectionStart), line = v.slice(ln[0], ln[1]).trim();
+  if (!line) { b.hidden = true; return; }
+  var head = isHeaderLine(line);
+  b.hidden = false;
+  b.setAttribute('data-mode', head ? 'off' : 'on');
+  b.innerHTML = head ? 'Make it a normal line' : 'Make this line a title';
+}
+function toggleLineTitle(t) {
+  if (!t) return;
+  var v = t.value, ln = lineAt(v, t.selectionStart), raw = v.slice(ln[0], ln[1]), line = raw.trim().replace(/^[-•*]\s*/, '');
+  if (!line) return;
+  var out = isHeaderLine(raw) ? headerText(raw) : '[' + headerText(line.replace(/[.!]+$/, '')) + ']';
+  typeInto(t, ln[0], ln[1], out, out.length, out.length);
+  updateSecBtns(t);
+}
 /** Redraw the bands behind a box: one row per line, title lines tinted. Copies the box's own type and size so the rows line up. */
 function syncHl(t) {
   var box = t && t.parentNode; if (!box || !box.classList || !box.classList.contains('hlbox')) return;
@@ -5966,7 +6417,7 @@ function syncHl(t) {
     }).join('');
   }
   inner.style.transform = 'translateY(' + (-t.scrollTop) + 'px)';
-  box.classList.toggle('hasd', /\S:\s*$/m.test(t.value));
+  secSummary(t); updateSecBtns(t);
 }
 function syncAllHl() { $$('.hlbox > textarea').forEach(syncHl); }
 /** The line the caret is on: [start, end] of that line in the text. */
@@ -5994,28 +6445,30 @@ function addSection(t) {
   var v = t.value, focused = document.activeElement === t;
   var pos = focused ? t.selectionStart : v.length;
   var ln = lineAt(v, pos), line = v.slice(ln[0], ln[1]);
-  var title = SEC_PLACEHOLDER + ':';
+  var title = '[' + SEC_PLACEHOLDER + ']', A = 1, B = 1 + SEC_PLACEHOLDER.length;
   if (!line.trim()) {
     // an empty line: the title goes right here
-    typeInto(t, ln[0], ln[1], title, 0, SEC_PLACEHOLDER.length);
+    typeInto(t, ln[0], ln[1], title, A, B);
   } else if (isHeaderLine(line) && focused) {
     // already a title: just select its name to rename it
-    var lead = line.match(/^\s*/)[0].length, nm = line.trim().replace(/:$/, '');
+    var lead = line.match(/^\s*/)[0].length + (/^\s*\[/.test(line) ? 1 : 0), nm = headerText(line);
     t.setSelectionRange(ln[0] + lead, ln[0] + lead + nm.length); t.focus({ preventScroll: true });
   } else if (!focused) {
     // the box isn't open yet: a new section at the end
     var end = v.replace(/\s+$/, '').length, gap = end ? '\n' : '';
-    typeInto(t, end, v.length, gap + title, gap.length, gap.length + SEC_PLACEHOLDER.length);
+    typeInto(t, end, v.length, gap + title, gap.length + A, gap.length + B);
   } else if (pos >= ln[1]) {
     // at the end of a line: a new section on the next line
-    typeInto(t, ln[1], ln[1], '\n' + title, 1, 1 + SEC_PLACEHOLDER.length);
+    typeInto(t, ln[1], ln[1], '\n' + title, 1 + A, 1 + B);
   } else {
     // the caret is in the middle of a line: the section starts with this line
-    typeInto(t, ln[0], ln[0], title + '\n', 0, SEC_PLACEHOLDER.length);
+    typeInto(t, ln[0], ln[0], title + '\n', A, B);
   }
 }
 document.addEventListener('scroll', function (e) { var t = e.target; if (t && t.tagName === 'TEXTAREA' && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) syncHl(t); }, true);
 window.addEventListener('resize', function () { if ($('.hlbox')) syncAllHl(); });
+document.addEventListener('selectionchange', function () { var t = document.activeElement; if (t && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) updateSecBtns(t); });
+document.addEventListener('focusout', function (e) { var t = e.target; if (t && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) setTimeout(function () { updateSecBtns(t); }, 150); });
 // keep the box focused (and the keyboard up) when the button is pressed
 document.addEventListener('pointerdown', function (e) { var b = e.target.closest && e.target.closest('.addsec'); if (b && document.activeElement && document.activeElement.id === b.getAttribute('data-for')) e.preventDefault(); }, true);
 document.addEventListener('mousedown', function (e) { var b = e.target.closest && e.target.closest('.addsec'); if (b && document.activeElement && document.activeElement.id === b.getAttribute('data-for')) e.preventDefault(); }, true);
@@ -6618,7 +7071,7 @@ function readFiles(files) {
     if (recipe && !images.length && !parts.length) return done(null, recipe);
     if (!images.length) return parts.length ? done(parts.join('\n\n')) : fail(errs[0] || 'Nothing to read in that file.');
     var pics = images.length === 1 ? 'the picture' : images.length + ' pictures';
-    var server = connected() && (S.scriptV || 0) >= 5 && !S.ocrDevice;
+    var server = false;                  // 2.24: photos are read on the device (Google Drive did it before)
     if (!server) return onDevice();
     say('Reading ' + what + '…', 'Reading ' + pics + ' with Google Drive…');
     request({ action: 'ocr', images: images }, true).then(function (res) {
@@ -6871,28 +7324,44 @@ function toggleRow(setting, label, hint) {
   return '<button class="toggle" role="switch" aria-checked="' + on + '" data-act="set" data-k="' + setting + '" data-v="' + (!on) + '"><span><b>' + label + '</b>' + (hint ? '<br><span class="muted small">' + hint + '</span>' : '') + '</span><span class="sw"></span></button>';
 }
 
+/** When Supabase stops answering: the usual reason, and what to do. */
+function sheetFixHtml() {
+  var ref = supaRef(), dash = 'https://supabase.com/dashboard' + (ref ? '/project/' + ref : '');
+  return '<div class="sheetfix"><p><b>To fix it:</b></p><ol>' +
+    '<li><b>Check your project isn\'t paused.</b> Free Supabase projects pause after a week with no use. <a class="btn sm" href="' + esc(dash) + '" target="_blank" rel="noopener">' + icon('ext') + 'Open Supabase</a><br><span class="muted small">If it says <b>Paused</b>, tap <b>Restore project</b> and wait a couple of minutes.</span></li>' +
+    '<li>Then tap <b>Sync now</b>. Your recipes and the ' + S.outbox.length + ' waiting change' + (S.outbox.length === 1 ? '' : 's') + ' stay on this device until it answers.</li></ol></div>';
+}
+
+function signInHtml() {
+  var f = UI.connForm || {}, email = f.email !== undefined ? f.email : (S.conn.email || ''), url = f.supa || S.conn.supa || SUPA_DEFAULT.url, key = f.key || S.conn.key || SUPA_DEFAULT.key;
+  var own = url !== SUPA_DEFAULT.url || key !== SUPA_DEFAULT.key;
+  return '<div class="field"><label for="set-email">Email</label><input class="inp" id="set-email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" value="' + esc(email) + '"></div>' +
+    '<div class="field"><label for="set-pass">Password</label><input class="inp" id="set-pass" type="password" autocomplete="current-password" value="' + esc(f.pass || '') + '"></div>' +
+    '<div class="btnrow"><button class="btn primary" data-act="connect" data-mode="in">Sign in</button><button class="btn" data-act="connect" data-mode="new">Create account</button></div>' +
+    '<details class="help"' + (own ? ' open' : '') + '><summary>A different Supabase project</summary>' +
+    '<div class="field"><label for="set-supa">Project URL</label><input class="inp" id="set-supa" type="url" inputmode="url" autocomplete="off" value="' + esc(url) + '"></div>' +
+    '<div class="field"><label for="set-key">Publishable key</label><input class="inp" id="set-key" autocomplete="off" value="' + esc(key) + '"><p class="hint">Supabase → Project Settings → API Keys. Already filled in with your "sunday table" project.</p></div></details>';
+}
+
 function settingsHtml() {
   var st = S.settings, pal = PALETTES[st.palette] || PALETTES.espresso;
   var h = '';
-  h += section('sheet', 'Google Sheet', connected() ? (S.sheetName ? 'Connected to ' + S.sheetName : 'Connected') : 'Not connected', function () {
+  h += section('sheet', 'Cloud backup', connected() ? 'Signed in' + (S.conn.email ? ' as ' + S.conn.email : '') : (S.conn.signedOut ? 'Signed out' : 'Not signed in'), function () {
     var b = '';
     if (connected()) {
       var s = statusInfo();
-      b += '<p class="infobox"><b>' + esc(s.text) + '.</b> ' + esc(s.title || '') + (S.outbox.length ? ' ' + S.outbox.length + ' change' + (S.outbox.length > 1 ? 's' : '') + ' waiting to go up.' : '') + '</p>';
+      b += '<p class="infobox"><b>' + esc(s.text) + '.</b> ' + esc(s.title || '') + (S.outbox.length && !UI.syncReach ? ' ' + S.outbox.length + ' change' + (S.outbox.length > 1 ? 's' : '') + ' waiting to go up.' : '') + '</p>';
+      if ((UI.syncState === 'off' && UI.syncReach) || UI.syncState === 'err') b += sheetFixHtml();
       if (S.awaitSeed) {
-        b += '<div class="banner" style="display:block"><b>Your sheet is empty.</b> Copy the ' + S.recipes.length + ' recipes on this device into it? They\'ll be added to a "recipes" tab. Nothing else in the sheet changes.' +
-          '<div class="btnrow"><button class="btn primary" data-act="copyseed">Copy ' + S.recipes.length + ' recipes to the sheet</button><button class="btn" data-act="startempty" data-confirm="1">Start with an empty book</button></div></div>';
+        b += '<div class="banner" style="display:block"><b>Your Supabase is empty.</b> Copy the ' + S.recipes.length + ' recipes on this device into it, with your plan, lists and settings?' +
+          '<div class="btnrow"><button class="btn primary" data-act="copyseed">Copy ' + S.recipes.length + ' recipes to Supabase</button><button class="btn" data-act="startempty" data-confirm="1">Start with an empty book</button></div></div>';
       }
       b += '<div class="btnrow"><button class="btn sm" data-act="syncnow">' + icon('sync') + 'Sync now</button>' +
-        '<button class="btn sm" data-act="backup">' + icon('up') + 'Save a backup copy to Drive</button>' +
-        '<button class="btn sm danger" data-act="disconnect" data-confirm="1">Disconnect</button></div>' +
-        '<p class="muted small">Script version ' + (S.scriptV || '?') + '. Changes save to the sheet automatically and wait here when you\'re offline.</p>';
+        '<button class="btn sm danger" data-act="disconnect" data-confirm="1">Sign out</button></div>' +
+        '<p class="muted small">Saved in Supabase, private to your account. Changes save automatically and wait here when you\'re offline. Sign in with the same email on your iPad or computer to have everything there too.</p>';
     } else {
-      b += '<p>Your recipes are saved in a Google Sheet in your Drive, one row per recipe, so you can read or edit them there too. Photos go in a "Recipe photos" folder next to it.</p>' +
-        '<div class="field"><label for="set-url">Script link</label><input class="inp" id="set-url" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(S.conn.url) + '"></div>' +
-        '<div class="field"><label for="set-pass">Passphrase</label><input class="inp" id="set-pass" type="password" autocomplete="off" value="' + esc(S.conn.pass) + '"><p class="hint">The same phrase you typed into the script.</p></div>' +
-        '<button class="btn primary" data-act="connect">Connect</button>' +
-        '<details class="help"><summary>Where do I get these?</summary><p class="muted">Follow the setup guide that came with the app: make a new Google Sheet, paste in Code.gs, and deploy it as a web app. The link ends in /exec.</p></details>';
+      b += (S.conn.signedOut ? '<p class="infobox"><b>You\'re signed out.</b> Sign in again and anything waiting on this device goes up.</p>'
+        : '<p>Sign in to keep your recipes, plan and lists backed up in Supabase and the same on your phone, iPad and computer.</p>') + signInHtml();
     }
     if (UI.conn.msg) b += '<p class="' + (UI.conn.ok ? 'okmsg' : 'errmsg') + '" aria-live="polite">' + esc(UI.conn.msg) + '</p>';
     return b;
@@ -6939,9 +7408,9 @@ function settingsHtml() {
 
   h += section('mealprep', 'Planning & meal prep', 'Week starts ' + (st.weekStart === 'mon' ? 'Monday' : 'Sunday') + ', prep on ' + DAY_NAMES[+st.prepDay || 0] + 's', function () {
     var unset = S.recipes.filter(function (r) { return !r.freq && suggestFreq(r); }).length;
-    var em = '<div style="margin-top:12px">' + toggleRow('weeklyEmail', 'Email me the week on Sundays', 'At 8 am: the next 7 days of meals plus your shopping list, sent to the Google account that owns the sheet.') + '</div>';
-    if (st.weeklyEmail && connected() && !S.emailReady) em += '<p class="infobox">One more step: in the sheet\'s script editor, choose <b>setupWeeklyEmail</b> and click <b>Run</b> once. The setup guide shows where.</p>';
-    if (st.weeklyEmail && !connected()) em += '<p class="infobox">The email is sent by your Google Sheet, so connect it first.</p>';
+    var em = '<div style="margin-top:12px">' + toggleRow('weeklyEmail', 'Email me the week on Sundays', 'At 8 am: the next 7 days of meals plus your shopping list, sent to the email you sign in with.') + '</div>';
+    if (st.weeklyEmail && connected() && !S.emailReady) em += '<p class="infobox">One more step: the email needs a free Resend key added to Supabase. The setup guide shows how (about 5 minutes).</p>';
+    if (st.weeklyEmail && !connected()) em += '<p class="infobox">The email is sent from Supabase, so sign in first.</p>';
     if (connected()) em += '<div class="btnrow"><button class="btn sm" data-act="testemail">Send a test email now</button></div>';
     return '<p class="flabel">Week starts on</p>' + seg('weekStart', [['sun', 'Sunday'], ['mon', 'Monday']]) + em +
       '<p class="flabel" style="margin-top:14px">Prep day</p>' + seg('prepDay', [['0', 'Sun'], ['1', 'Mon'], ['2', 'Tue'], ['3', 'Wed'], ['4', 'Thu'], ['5', 'Fri'], ['6', 'Sat']]) +
@@ -6974,16 +7443,16 @@ function settingsHtml() {
   });
 
   h += section('backup', 'Backup', S.recipes.length + ' recipes', function () {
-    return '<p>Your Google Sheet is the main backup. You can also save everything to a file, for example in the Files app.</p>' +
+    return '<p>Supabase is the main backup. You can also save everything to a file, for example in the Files app.</p>' +
       '<div class="btnrow"><button class="btn sm" data-act="export">' + icon('dl') + 'Save a backup file</button>' +
       '<button class="btn sm" data-act="importfile">' + icon('up') + 'Restore from a file</button></div>' +
       '<input type="file" id="importfile" accept="application/json,.json" class="sr" tabindex="-1">' +
-      '<p class="muted small">Restoring replaces the recipes on this device with the ones in the file' + (connected() ? ' and updates your sheet to match' : '') + '. You\'ll get an Undo.</p>';
+      '<p class="muted small">Restoring replaces the recipes on this device with the ones in the file' + (connected() ? ' and updates Supabase to match' : '') + '. You\'ll get an Undo.</p>';
   });
 
   if (isWide()) h += section('computer', 'On a computer', isInstalled() && isDesk() ? 'Installed' : (INSTALL_EVT ? 'Ready to install' : ''), computerHtml);
   h += '<p class="ver offline" id="offline-line">' + offlineLineHtml() + '</p>';
-  h += '<p class="ver">' + esc(st.appName) + ' ' + APP_VERSION + (S.scriptV ? ', sheet script ' + S.scriptV : '') + '</p>';
+  h += '<p class="ver">' + esc(st.appName) + ' ' + APP_VERSION + (connected() ? ', Supabase' : '') + '</p>';
   return h;
 }
 
@@ -7022,7 +7491,27 @@ function restoreBackup(file) {
     cookedIn.forEach(function (c) { cIds[c.id] = 1; });
     S.cooked.forEach(function (c) { if (!cIds[c.id]) ops.push({ op: 'uncook', id: c.id }); });
     cookedIn.forEach(function (c) { ops.push({ op: 'cook', entry: c }); });
+    // 2.24: the plan, shopping list, pantry, fridge, prices and settings come back too
+    if (Array.isArray(data.plan)) {
+      var pIn = data.plan.filter(function (e) { return e && e.id && e.rid && e.date; }), pIds = {};
+      pIn.forEach(function (e) { pIds[e.id] = 1; e.meals = Math.max(1, +e.meals || 1); });
+      S.plan.forEach(function (e) { if (!pIds[e.id]) ops.push({ op: 'unplan', id: e.id }); });
+      pIn.forEach(function (e) { ops.push({ op: 'plan', entry: e }); });
+    }
+    if (Array.isArray(data.shop)) {
+      var sIn = data.shop.filter(function (x) { return x && x.id && x.name; }), sIds = {};
+      sIn.forEach(function (x) { sIds[x.id] = 1; });
+      ops.push({ op: 'shop', items: sIn, del: S.shop.filter(function (x) { return !sIds[x.id]; }).map(function (x) { return x.id; }) });
+    }
+    ['pantry', 'fridge', 'prices'].forEach(function (t) {
+      if (!Array.isArray(data[t])) return;
+      var tIn = data[t].filter(function (x) { return x && x.id && x.name; }), tIds = {};
+      tIn.forEach(function (x) { tIds[x.id] = 1; });
+      ops.push({ op: 'table', t: t, items: tIn, del: S[t].filter(function (x) { return !tIds[x.id]; }).map(function (x) { return x.id; }) });
+    });
+    if (data.settings && typeof data.settings === 'object') ops.push({ op: 'settings', settings: Object.assign(clone(DEFAULT_SETTINGS), data.settings) });
     queueMany(ops);
+    if (data.settings) applyAppearance();
     render(); refreshSettings();
     toast('Restored ' + incoming.length + ' recipes', function () {
       var undo = [], nowIds = {};
@@ -7749,9 +8238,9 @@ function browserName() {
 }
 function computerHtml() {
   var h = '', b = browserName();
-  if (isInstalled() && isDesk()) h += '<p class="infobox"><b>Installed on this computer.</b> It has its own window and icon, works offline, and syncs with your sheet like your phone does.</p>';
+  if (isInstalled() && isDesk()) h += '<p class="infobox"><b>Installed on this computer.</b> It has its own window and icon, works offline, and syncs through Supabase like your phone does.</p>';
   else {
-    h += '<p>Sunday Table works on a computer too, with the same recipes, plan and shopping list (they sync through your Google Sheet). Install it to give it its own window and icon.</p>';
+    h += '<p>Sunday Table works on a computer too, with the same recipes, plan and shopping list (they sync through Supabase). Install it to give it its own window and icon.</p>';
     if (INSTALL_EVT) h += '<button class="btn primary" data-act="install">' + icon('dl') + 'Install on this computer</button>';
     else if (b === 'safari') h += '<p class="infobox">In Safari on a Mac: <b>File → Add to Dock</b>.</p>';
     else if (b === 'chrome') h += '<p class="infobox">In Chrome: click the install icon at the right end of the address bar, or <b>⋮ → Cast, save and share → Install page as app</b>.</p>';
@@ -7841,11 +8330,12 @@ document.addEventListener('touchstart', function () { }, { passive: true });   /
 var ACTIONS = {
   add: function () { if (once('add')) openEditor(null); },
   addsec: function (t) { addSection($('#' + t.getAttribute('data-for'))); },
+  linesec: function (t) { toggleLineTitle($('#' + t.getAttribute('data-for'))); },
   install: function () { installApp(); },
   followopen: function () { UI.followOpen = true; var el = $('#followsec'); if (el) { el.innerHTML = followSectionHtml(); var u = $('#followurl'); if (u && isWide()) u.focus(); } },
   keys: function () { if (SHEET && SHEET.id === 'settings') closeSheet(true); openKeys(); },
   settings: function (t) { openSettings(t.getAttribute('data-open')); },
-  status: function () { if (connected() && !S.awaitSeed && UI.syncState !== 'err') { sync(); toast(S.outbox.length ? 'Sending ' + S.outbox.length + ' change' + (S.outbox.length > 1 ? 's' : '') + '…' : 'Syncing with your sheet…'); } else openSettings('sheet'); },
+  status: function () { if (connected() && !S.awaitSeed && UI.syncState !== 'err') { sync(); toast(S.outbox.length ? 'Sending ' + S.outbox.length + ' change' + (S.outbox.length > 1 ? 's' : '') + '…' : 'Syncing…'); } else openSettings('sheet'); },
   open: function (t, id) {
     if (SHEET) closeSheet();
     if (isWide() && (UI.tab === 'plan' || UI.tab === 'shop')) switchTab('recipes', true);
@@ -8051,21 +8541,24 @@ var ACTIONS = {
     setSettings(Object.assign({ mode: 'auto' }, l.s)); render(); refreshSettings();
     toast('Look changed to ' + l.name);
   },
-  connect: function () {
+  connect: function (t) {
     if (!once('connect', 1500)) return;
-    UI.conn = { msg: 'Connecting…', ok: true }; refreshSettings();
-    connect($('#set-url').value, $('#set-pass').value).then(function (res) {
-      UI.conn = res.ok ? { msg: 'Connected to ' + (res.name || 'your sheet') + '.', ok: true } : { msg: res.error || 'That didn\'t work.', ok: false };
+    var v = function (id) { var e = $('#' + id); return e ? e.value : ''; };
+    var mode = t.getAttribute('data-mode') || 'in';
+    UI.connForm = { email: v('set-email').trim(), pass: v('set-pass'), supa: v('set-supa').trim(), key: v('set-key').trim() };
+    UI.conn = { msg: mode === 'new' ? 'Making your account…' : 'Signing in…', ok: true }; refreshSettings();
+    var f = UI.connForm;
+    connect(f.email, f.pass, mode, f.supa, f.key).then(function (res) {
+      if (res.ok) {
+        UI.connForm = null;
+        UI.conn = { msg: res.claimed ? 'Signed in. Your ' + res.claimed + ' recipes from the Google Sheet are here.' : 'Signed in as ' + res.name + '.', ok: true };
+      } else UI.conn = { msg: res.error || 'That didn\'t work.', ok: !!res.confirm };
+      if (res.confirm && UI.connForm) UI.connForm.pass = '';
       refreshSettings(); render();
     });
   },
-  disconnect: function () { disconnect(); UI.conn = { msg: 'Disconnected. Your recipes stay on this device.', ok: true }; refreshSettings(); },
+  disconnect: function () { disconnect(); UI.conn = { msg: 'Signed out. Your recipes stay on this device.', ok: true }; refreshSettings(); },
   syncnow: function () { sync().then(function () { refreshSettings(); }); toast('Syncing…'); },
-  backup: function () {
-    if (!once('backup', 5000)) return;
-    toast('Making a backup copy…');
-    backupToDrive().then(function (res) { toast(res.ok ? 'Backup saved to Drive: ' + res.name : (res.error || 'Backup didn\'t work')); });
-  },
   copyseed: function () { if (once('copyseed', 3000)) copyToSheet().then(function () { refreshSettings(); render(); }); refreshSettings(); render(); },
   startempty: function () { startEmpty(); refreshSettings(); },
   iconlink: function () { iconLink(); },
@@ -8320,12 +8813,20 @@ var ACTIONS = {
   remhelp: function () { openRemindersHelp(); },
   bgremhelp: function () { openBgRemindersHelp(); },
   copygrocerylink: function () { copyText(groceriesLink(), 'Link copied. Paste it into Get Contents of URL'); },
+  newgrocerylink: function () {
+    rpc('new_shortcut_token').then(function (r) {
+      if (r.ok && r.data) { S.shortcutToken = String(r.data).replace(/"/g, ''); save(); refreshSettings(); toast('New link made. The old one stops working; paste the new one into your Shortcut.'); }
+      else toast(r.error || 'Couldn\'t make a new link');
+    });
+  },
 
   /* sharing */
   share: function (t, id) { openShare(id); },
   sharetext: function (t, id) { var r = id === 'shared' ? SHARED : byId(id); if (r) shareText(r); },
   sharelink: function (t, id, r) { if (r) shareLink(r); },
-  print: function (t, id) { var r = id === 'shared' ? SHARED : byId(id); if (r) printRecipe(r); },
+  print: function (t, id) { var r = id === 'shared' ? SHARED : byId(id); if (r) openPdf(r); },
+  pdfsend: function () { sendPdf(); },
+  pdfprint: function (t, id) { var r = id === 'shared' || !id ? SHARED : byId(id); if (r) printRecipe(r); },
   saveshared: function () {
     load().then(function () {
       var r = normRecipe(Object.assign(clone(SHARED), { id: newId('r_'), added: today() }));
@@ -8339,7 +8840,7 @@ var ACTIONS = {
   testemail: function () {
     if (!once('testemail', 5000)) return;
     toast('Sending a test email…');
-    testEmail().then(function (res) { toast(res.ok ? 'Sent to ' + res.to : (res.code === 'unknown' ? 'Update the sheet script first (see the guide)' : res.error || 'That didn\'t send')); });
+    testEmail().then(function (res) { toast(res.ok ? 'Sent to ' + res.to : res.error || 'That didn\'t send'); });
   }
 };
 
@@ -8507,7 +9008,7 @@ document.addEventListener('keydown', function (e) {
     if (y0 === null) return;
     var p = $('#ptr');
     if (p) { p.style.transition = ''; p.style.height = '0'; }
-    if (dy > 110) { if (connected()) { sync(); toast('Syncing with your sheet…'); } else toast('Connect your sheet in Settings to sync'); }
+    if (dy > 110) { if (connected()) { sync(); toast('Syncing…'); } else toast('Sign in to Supabase in Settings to sync'); }
     y0 = null; dy = 0;
   });
 })();
