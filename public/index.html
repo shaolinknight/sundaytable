@@ -1223,6 +1223,14 @@ details.more .mb{padding:0 14px 4px}
 .secsum i{font-style:normal;color:var(--t3)}
 .secsum .ph{color:var(--bad)}
 a.btn{text-decoration:none}
+
+/* 2.25: section buttons above Save while typing in Ingredients or Steps */
+.sheet .sh-f .secbar{flex:1 0 100%;display:flex;gap:18px;align-items:center;justify-content:flex-start;margin:-4px 0 2px;min-height:34px}
+.sheet .sh-f .secbar[hidden]{display:none}
+.sheet .sh-f .secbar .addsec{padding:4px 2px}
+.sheet .sh-f .secbar .linesec{color:var(--t2)}
+.sheet .sh-f .secbar .linesec[hidden]{display:none}
+textarea.grow{overflow-y:hidden;transition:none}
 </style>
 </head>
 <body>
@@ -2525,7 +2533,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.24';
+var APP_VERSION = '2.25';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -6083,7 +6091,9 @@ function openEditor(id, draft, focusField) {
     '<div class="field"><span class="flabel">Freezer</span><label class="checkrow"><input type="checkbox" id="f-freezes"' + (v.freezes ? ' checked' : '') + '><span>Freezes well</span></label></div></div>' +
     '<div class="field"><span class="flabel">Color</span><div class="colorpick" id="colorpick" role="group" aria-label="Recipe color">' + colorPickHtml(v) + '</div></div></div></details>';
   if (!isNew) body += '<div class="btnrow" style="margin-top:20px"><button class="btn danger" data-act="delrecipe" data-id="' + esc(v.id) + '" data-confirm="1">Delete recipe</button></div>';
-  var foot = (isNew ? '<button class="btn" data-act="saveform" data-more="1">Save &amp; new</button>' : '') +
+  var foot = '<div class="secbar" id="secbar" hidden><button type="button" class="addsec" data-act="addsec" data-for="">' + icon('plus') + 'Add a section</button>' +
+    '<button type="button" class="addsec linesec" data-act="linesec" data-for="" hidden></button></div>' +
+    (isNew ? '<button class="btn" data-act="saveform" data-more="1">Save &amp; new</button>' : '') +
     '<button class="btn primary" data-act="saveform">Save</button>';
   var el = openSheet('edit', isNew ? 'New recipe' : 'Edit recipe', body, foot, { dirty: formDirty, autosave: isNew ? formAutosave : null, full: true });
   FORM.start = JSON.stringify(readForm());
@@ -6095,7 +6105,7 @@ function openEditor(id, draft, focusField) {
     var md = first.closest('details'); if (md) md.open = true;
     if (focusField) showField(first, 'top');                         // in place before the sheet arrives
     try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
-    if (focusField && first.tagName === 'TEXTAREA') { var n = first.value.length; try { first.setSelectionRange(n, n); } catch (e) { } first.scrollTop = first.scrollHeight; }
+    if (focusField && first.tagName === 'TEXTAREA') { var n = first.value.length; try { first.setSelectionRange(n, n); } catch (e) { } }
     first._shown = true; setTimeout(function () { first._shown = false; }, 600);
   }
   return el;
@@ -6295,25 +6305,40 @@ function changedSection(startJson, now, focus) {
     (above the keyboard and the Save bar), so the line you're typing on can't end up hidden. */
 function sizeBox(t) {
   if (!t || !t.classList.contains('grow')) return;
+  // 2.25: a box is always as tall as its text (plus a spare line). Nothing scrolls inside it, so the text under your
+  // finger never moves when you tap, and the editor itself scrolls to keep the line you're typing on screen.
   var sb = t.closest('.sh-b'), st = sb ? sb.scrollTop : 0;
-  var vh = window.visualViewport ? visualViewport.height : window.innerHeight;
-  var fld = t.closest('.field'), extra = fld ? Math.max(0, fld.getBoundingClientRect().height - t.getBoundingClientRect().height) : 30;
-  var room = sb && sb.clientHeight > 120 ? sb.clientHeight - Math.min(extra, 120) - 20 : Math.round(vh * 0.6);   // the label and anything under the box fit too
-  var max = Math.max(160, room);
   var cs = getComputedStyle(t), lh = parseFloat(cs.lineHeight) || 23, minH = parseFloat(cs.minHeight) || 0;
+  var bw = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
   var was = t.style.height;
   t.style.height = 'auto';
-  var want = Math.round(Math.min(max, Math.max(t.scrollHeight + lh * 2, minH))) + 'px';
+  var want = Math.round(Math.max(t.scrollHeight + bw + lh, minH)) + 'px';
   t.style.height = want === was ? was : want;
-  if (sb) sb.scrollTop = st;          // measuring must never move the page
+  if (t.scrollTop) t.scrollTop = 0;
+  if (sb && sb.scrollTop !== st) sb.scrollTop = st;          // measuring must never move the page
   syncHl(t);
 }
-/** Keep the box you're typing in on screen: nudge the editor just enough, never a jump. */
+/** Where the caret is inside a box, in pixels from the box's top edge (the box's own text, laid out the same way). */
+var CARET_M = null;
+function caretY(t) {
+  if (!CARET_M) { CARET_M = document.createElement('div'); CARET_M.setAttribute('aria-hidden', 'true'); CARET_M.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre-wrap;overflow-wrap:break-word;word-wrap:break-word;box-sizing:border-box'; document.body.appendChild(CARET_M); }
+  var cs = getComputedStyle(t), m = CARET_M.style;
+  m.font = cs.font; m.letterSpacing = cs.letterSpacing; m.lineHeight = cs.lineHeight; m.tabSize = cs.tabSize;
+  m.padding = cs.padding; m.border = cs.border; m.borderColor = 'transparent'; m.width = t.offsetWidth + 'px';
+  var pos = t.selectionEnd == null ? t.value.length : t.selectionEnd;
+  CARET_M.textContent = t.value.slice(0, pos);
+  var mark = document.createElement('span'); mark.textContent = '​'; CARET_M.appendChild(mark);
+  return { top: mark.offsetTop, h: parseFloat(cs.lineHeight) || mark.offsetHeight || 23 };
+}
+/** Keep the line you're typing on in view: scroll the editor just enough, never a jump. */
 function keepTyping(t) {
-  var sb = t && t.closest('.sh-b'); if (!sb) return;
+  var sb = t && t.closest('.sh-b'); if (!sb || document.activeElement !== t) return;
   var box = sb.getBoundingClientRect(), r = t.getBoundingClientRect();
-  if (r.bottom > box.bottom - 6) sb.scrollTop += Math.min(r.bottom - box.bottom + 6, Math.max(0, r.top - box.top - 4));
-  else if (r.top < box.top && r.bottom < box.top + 60) sb.scrollTop -= box.top - r.top + 4;
+  var c = t.tagName === 'TEXTAREA' ? caretY(t) : { top: 0, h: r.height };
+  var top = r.top + c.top, bottom = top + c.h;
+  var low = box.bottom - Math.max(16, c.h * 0.8), high = box.top + 12;
+  if (bottom > low) sb.scrollTop += Math.ceil(bottom - low);
+  else if (top < high) sb.scrollTop -= Math.ceil(high - top);
 }
 /** Bring a box into view.
     how = 'top': from an Edit button. The box and its label go to the top of the editor straight away
@@ -6322,22 +6347,20 @@ function keepTyping(t) {
 function showField(inp, how) {
   var sb = inp && inp.closest('.sh-b'); if (!sb) return;
   var fieldEl = inp.closest('.field') || inp;
-  var toTop = function () {
-    var top = fieldEl.getBoundingClientRect().top - sb.getBoundingClientRect().top + sb.scrollTop - 8;
-    sb.scrollTop = Math.max(0, top);
-  };
   sizeBox(inp);
   if (how === 'top') {
-    toTop();
-    if (inp.tagName === 'TEXTAREA') inp.scrollTop = inp.scrollHeight;    // show the end, where the caret is
+    // from an Edit button: the label and box start at the top of the editor before the sheet arrives
+    var top = fieldEl.getBoundingClientRect().top - sb.getBoundingClientRect().top + sb.scrollTop - 8;
+    sb.scrollTop = Math.max(0, top);
   }
-  // once the keyboard has finished opening: fit the box to the space left, then the smallest nudge
+  // once the keyboard has opened: bring the caret's line into view (a tap already put it where you looked)
   var done = false, timer = 0;
   var settle = function () {
     if (done) return; done = true;
     if (window.visualViewport) visualViewport.removeEventListener('resize', onR);
     if (document.activeElement !== inp) return;
     sizeBox(inp);
+    if (inp.tagName === 'TEXTAREA') { keepTyping(inp); return; }
     var box = sb.getBoundingClientRect(), r = fieldEl.getBoundingClientRect();
     if (r.top < box.top || r.bottom > box.bottom) {
       var d = r.bottom > box.bottom ? Math.min(r.bottom - box.bottom + 8, r.top - box.top - 8) : r.top - box.top - 8;
@@ -6382,14 +6405,20 @@ function secSummary(t) {
 }
 /** The second button follows the caret: turn the line you're on into a title, or back into a normal line. */
 function updateSecBtns(t) {
-  var b = t && document.querySelector('.linesec[data-for="' + t.id + '"]'); if (!b) return;
-  if (document.activeElement !== t) { b.hidden = true; return; }
-  var v = t.value, ln = lineAt(v, t.selectionStart), line = v.slice(ln[0], ln[1]).trim();
-  if (!line) { b.hidden = true; return; }
-  var head = isHeaderLine(line);
-  b.hidden = false;
-  b.setAttribute('data-mode', head ? 'off' : 'on');
-  b.innerHTML = head ? 'Make it a normal line' : 'Make this line a title';
+  if (!t) return;
+  var on = document.activeElement === t;
+  var bar = document.getElementById('secbar');
+  if (bar) {
+    if (on) $$('[data-for]', bar).forEach(function (b) { b.setAttribute('data-for', t.id); });
+    if (on || bar.querySelector('[data-for="' + t.id + '"]')) bar.hidden = !on;
+  }
+  var v = t.value, ln = lineAt(v, t.selectionStart), line = v.slice(ln[0], ln[1]).trim(), head = !!line && isHeaderLine(line);
+  $$('.linesec[data-for="' + t.id + '"]').forEach(function (b) {
+    if (!on || !line) { b.hidden = true; return; }
+    b.hidden = false;
+    b.setAttribute('data-mode', head ? 'off' : 'on');
+    b.innerHTML = head ? 'Make it a normal line' : 'Make this line a title';
+  });
 }
 function toggleLineTitle(t) {
   if (!t) return;
@@ -6468,6 +6497,7 @@ function addSection(t) {
 document.addEventListener('scroll', function (e) { var t = e.target; if (t && t.tagName === 'TEXTAREA' && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) syncHl(t); }, true);
 window.addEventListener('resize', function () { if ($('.hlbox')) syncAllHl(); });
 document.addEventListener('selectionchange', function () { var t = document.activeElement; if (t && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) updateSecBtns(t); });
+document.addEventListener('focusin', function (e) { var t = e.target; if (t && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) updateSecBtns(t); });
 document.addEventListener('focusout', function (e) { var t = e.target; if (t && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('hlbox')) setTimeout(function () { updateSecBtns(t); }, 150); });
 // keep the box focused (and the keyboard up) when the button is pressed
 document.addEventListener('pointerdown', function (e) { var b = e.target.closest && e.target.closest('.addsec'); if (b && document.activeElement && document.activeElement.id === b.getAttribute('data-for')) e.preventDefault(); }, true);
@@ -7400,7 +7430,7 @@ function settingsHtml() {
         '<p class="flabel">Icon</p><div class="iconpick">' + Object.keys(ICONS).map(function (k) {
           return '<button data-act="set" data-k="icon" data-v="' + k + '" aria-pressed="' + (st.icon === k) + '" aria-label="' + ICONS[k] + '"><img src="' + iconData(k) + '" alt=""></button>';
         }).join('') + '</div>' +
-        '<p class="infobox">iPhone only picks up a new icon or name when you add the app to your home screen. To change it: tap "Copy link with this icon", remove the app from your home screen, open the copied link in Safari, then Share → Add to Home Screen. Your recipes come back from your sheet.</p>' +
+        '<p class="infobox">iPhone only picks up a new icon or name when you add the app to your home screen. To change it: tap "Copy link with this icon", remove the app from your home screen, open the copied link in Safari, then Share → Add to Home Screen. Then sign in again in Settings → Cloud backup and your recipes come back.</p>' +
         '<button class="btn sm" data-act="iconlink">' + icon('link') + 'Copy link with this icon</button>';
     });
     return b;
