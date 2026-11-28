@@ -1231,6 +1231,33 @@ a.btn{text-decoration:none}
 .sheet .sh-f .secbar .linesec{color:var(--t2)}
 .sheet .sh-f .secbar .linesec[hidden]{display:none}
 textarea.grow{overflow-y:hidden;transition:none}
+
+/* 2.26 design pass */
+.incart{align-items:center;flex-wrap:wrap;row-gap:6px}
+.incart h3{white-space:nowrap;margin:0}
+.sec-h{flex-wrap:nowrap}
+.sec-h h2{white-space:nowrap}
+.sec-h .stepper{margin-left:auto;flex:none}
+@media (max-width:420px){.stepper button{width:34px;height:36px}.stepper .v{min-width:62px}.sec-h{gap:6px}.sec-h .secedit{margin-left:2px}}
+.swapbtn{opacity:.7}
+.incart>span{margin-left:auto}
+.swapbtn svg.i{width:1rem;height:1rem}
+
+/* 2.26 editor: numbers in the margin, one set of section buttons, no drag handle */
+#f-steps,#f-ing{padding-left:40px}
+.hlbox .hlin > div{position:relative}
+.hlbox .hlin .gn{position:absolute;left:calc(-1 * var(--pl) + 8px);width:22px;text-align:right;color:var(--t3);font-weight:700;font-size:.8125em;font-variant-numeric:tabular-nums}
+.hlbox .hlin .gn.dot{font-size:1em;font-weight:400;text-align:center}
+.hlbox .hlin .gn.tip{font-weight:400}
+.hlbox .hlin > .hd{margin-left:calc(-1 * var(--pl));padding-left:var(--pl);margin-right:-12px;padding-right:12px}
+textarea.grow{resize:none}
+body.secbar-on .flabrow .secbtns{visibility:hidden}
+/* 2.26 touch: every control at least 44 points to tap */
+@media (max-width:420px){.stepper button{width:40px;height:44px}.stepper .v{min-width:56px}}
+.stepper button{min-height:44px}
+.swapbtn{width:44px;height:44px;margin:-3px -4px -3px 0}
+.chip{position:relative}
+.chip::after{content:"";position:absolute;left:0;right:0;top:-4px;bottom:-4px}
 </style>
 </head>
 <body>
@@ -2533,7 +2560,7 @@ var SEASON = {
 if (false) module.exports = { foodFor: foodFor, nutritionFor: nutritionFor, subFor: subFor, swapLines: swapLines, IDEAS: IDEAS };
 
 /* ===================== constants ===================== */
-var APP_VERSION = '2.25';
+var APP_VERSION = '2.27';
 var SCRIPT_MIN = 4;          // oldest Code.gs version this app works with
 var KEY = 'sundaytable.v1';
 var REQ_TIMEOUT = 25000, SLOW_TIMEOUT = 120000;
@@ -6077,9 +6104,9 @@ function openEditor(id, draft, focusField) {
     '<div class="field"><label for="f-cook">Cook time</label><input class="inp" id="f-cook" value="' + esc(minutes(v.cook)) + '" autocomplete="off" placeholder="1 hr 30 min" data-dur="1"></div></div>' +
     '<p class="hint" style="margin:-8px 0 12px">Times: type minutes (45), hours and minutes (1:30), or words (2 hr 15 min).</p>' +
     '<div class="field">' + secLabel('f-ing', 'Ingredients') + hlBox('<textarea class="inp grow" id="f-ing" rows="10" placeholder="One per line, like:\n2 cups flour\n1 tsp salt\n\nSauce:\n2 tbsp soy sauce">' + esc(v.ingredients) + '</textarea>') +
-    '<p class="hint">One per line, amount first. To split it into parts (like the sauce and the chicken), tap <b>Add a section</b> and type over <b>Add title here</b>. Titles show highlighted.</p></div>' +
+    '<p class="hint">One ingredient per line, amount first. <b>Add a section</b> splits it into parts, like Sauce and Chicken.</p></div>' +
     '<div class="field">' + secLabel('f-steps', 'Steps') + hlBox('<textarea class="inp grow" id="f-steps" rows="10" placeholder="One step per line\n\nMake the sauce:\nWhisk everything together.">' + esc(v.steps) + '</textarea>') +
-    '<p class="hint">One step per line. Put your cursor on the step where a new part starts, tap <b>Add a section</b>, and type over <b>Add title here</b>. Or tap a line and choose <b>Make this line a title</b>. Start a line with a dash (-) for a tip under the step above.</p></div>' +
+    '<p class="hint">One step per line; each gets a number. <b>Add a section</b> starts a new part. A line starting with a dash (-) is a tip under the step above.</p></div>' +
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp grow" id="f-notes" rows="4" style="min-height:110px" placeholder="Less salt next time…">' + esc(v.notes) + '</textarea></div>' +
     '<div class="field"><span class="flabel" id="taglbl">Tags</span><input class="sr" id="f-tags" value="' + esc(v.tags.join(', ')) + '" tabindex="-1" aria-hidden="true">' +
     '<div class="tagedit" id="tagedit" aria-labelledby="taglbl">' + tagEditHtml(v.tags, v) + '</div></div>' +
@@ -6411,6 +6438,7 @@ function updateSecBtns(t) {
   if (bar) {
     if (on) $$('[data-for]', bar).forEach(function (b) { b.setAttribute('data-for', t.id); });
     if (on || bar.querySelector('[data-for="' + t.id + '"]')) bar.hidden = !on;
+    document.body.classList.toggle('secbar-on', !bar.hidden);
   }
   var v = t.value, ln = lineAt(v, t.selectionStart), line = v.slice(ln[0], ln[1]).trim(), head = !!line && isHeaderLine(line);
   $$('.linesec[data-for="' + t.id + '"]').forEach(function (b) {
@@ -6437,12 +6465,20 @@ function syncHl(t) {
   st.font = cs.font; st.letterSpacing = cs.letterSpacing; st.lineHeight = cs.lineHeight; st.tabSize = cs.tabSize;
   st.paddingTop = cs.paddingTop; st.paddingBottom = cs.paddingBottom; st.paddingLeft = cs.paddingLeft; st.paddingRight = cs.paddingRight;
   st.width = t.clientWidth + 'px';                      // the space the text wraps in (no scrollbar)
-  var lines = t.value.split('\n'), key = lines.map(function (l) { return isHeaderLine(l) ? 1 : 0; }).join('') + '|' + t.value;
+  st.setProperty('--pl', cs.paddingLeft);
+  var lines = t.value.split('\n'), key = t.id + '|' + t.value;
   if (inner._key !== key) {
     inner._key = key;
+    // 2.26: a number beside each step (and a dot beside each ingredient) in the margin, so a long step that wraps
+    // onto a second line still reads as one step. Same counting as the recipe page: titles and tips aren't numbered.
+    var steps = t.id === 'f-steps', n = 0;
     inner.innerHTML = lines.map(function (l) {
-      var h = l.trim() && isHeaderLine(l);
-      return '<div' + (h ? ' class="hd"' : '') + '>' + (l ? esc(l) : '<br>') + '</div>';
+      var tr = l.trim(), h = tr && isHeaderLine(l), mark = '';
+      if (tr && !h) {
+        if (steps) mark = /^[-•*]/.test(tr) ? '<span class="gn tip" aria-hidden="true">↳</span>' : '<span class="gn" aria-hidden="true">' + (++n) + '</span>';
+        else mark = '<span class="gn dot" aria-hidden="true">•</span>';
+      }
+      return '<div' + (h ? ' class="hd"' : '') + '>' + mark + (l ? esc(l) : '<br>') + '</div>';
     }).join('');
   }
   inner.style.transform = 'translateY(' + (-t.scrollTop) + 'px)';
